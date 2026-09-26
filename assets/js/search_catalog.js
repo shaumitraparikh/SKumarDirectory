@@ -15,8 +15,7 @@ const catalogSearchIndex = rawCatalog.map(item => ({
     item,
     searchableText: normalizeSearchText([
         item.item_name, item.category, item.hsn_code, item.sr_number,
-        item.group_number + '.' + item.item_number, item.size,
-        item.id_size, item.od_size, item.lf_size
+        item.size, item.id_size, item.od_size, item.lf_size
     ].join(' '))
 }));
 
@@ -239,8 +238,6 @@ function toggleCart(forceOpen) {
         const card = document.createElement('div');
         card.className = 'card';
         card.dataset.srNumber = item.sr_number;
-        card.dataset.groupNumber = item.group_number;
-        card.dataset.itemNumber = item.item_number;
         
         const imgContainer = document.createElement('div');
         imgContainer.className = 'card-img-container';
@@ -269,7 +266,7 @@ function toggleCart(forceOpen) {
         
         const meta1 = document.createElement('p');
         meta1.className = 'card-meta';
-        meta1.innerHTML = `Sr: ${item.sr_number} | Group item: ${item.group_number}.${item.item_number} | HSN: <span class="hsn-val">${item.hsn_code || ''}</span>`;
+        meta1.innerHTML = `ID: ${item.sr_number} | HSN: <span class="hsn-val">${item.hsn_code || ''}</span>`;
         content.appendChild(meta1);
         
         if (item.size && !item.item_name.toLowerCase().includes(item.size.toLowerCase())) {
@@ -365,8 +362,6 @@ function toggleCart(forceOpen) {
         
         return {
             sr_number: String(row.sr_number),
-            group_number: String(row.group_number),
-            item_number: String(row.item_number),
             name: row.item_name || '',
             price: parsedPrice,
             qty,

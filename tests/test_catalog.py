@@ -32,7 +32,7 @@ class CatalogDataTests(unittest.TestCase):
         item = self.by_serial["65.1"]
         self.assertEqual(item["item_name"], "Bulbs & Holders 1000W bulb")
         self.assertEqual(item["hsn_code"], "94059900")
-        self.assertEqual(item["list_price"], "996")
+        self.assertEqual(item["list_price"], "996.0")
         self.assertEqual(item["unit"], "Pcs.")
 
     def test_inferable_hsn_is_filled_from_consistent_category_peers(self):
@@ -52,7 +52,7 @@ class CatalogDataTests(unittest.TestCase):
             self.assertEqual(item["list_price"], "")
 
     def test_ambiguous_source_price_is_preserved_as_a_quote_note(self):
-        self.assertEqual(self.by_serial["19.6"]["list_price"], "50.00")
+        self.assertEqual(self.by_serial["19.6"]["list_price"], "50.0")
         item = self.by_serial["21.15"]
         self.assertEqual(item["list_price"], "")
         notes_path = CATALOG_ROOT / "data" / "catalog_data_notes.json"

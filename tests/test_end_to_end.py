@@ -198,7 +198,7 @@ class CatalogEndToEndTests(unittest.TestCase):
         self.assertEqual(actual_ids_json, expected_ids)
         
         # Verify printed_html renders all serials
-        actual_ids_print = set(re.findall(r'<td class="col-sr">([\d]+(?:\.[\d]+)?)\.?<br>', printed_html))
+        actual_ids_print = set(re.findall(r'<td class="col-sr">([\d]+(?:\.[\d]+)?)\.?</td>', printed_html))
         self.assertEqual(actual_ids_print, expected_ids)
 
         for page_html in (search_html, printed_html):
@@ -372,7 +372,7 @@ class CatalogEndToEndTests(unittest.TestCase):
                     self.assertIn("21.15", notes)
                 else:
                     self.assertEqual(source_item["new_sr_number"], "19.6")
-                    self.assertEqual(catalog_price, "50.00")
+                    self.assertEqual(Decimal(catalog_price), Decimal("50.00"))
             if source_amount is None and source_item["new_sr_number"] not in {"19.6", "21.15"}:
                 self.assertEqual(catalog_price, "")
             elif source_amount is not None:

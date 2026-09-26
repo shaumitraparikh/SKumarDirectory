@@ -89,12 +89,10 @@
             var card = document.createElement('div');
             card.className = 'card' + (row.hidden ? ' seller-hidden-item' : '');
             card.dataset.srNumber = row.sr_number;
-            card.dataset.groupNumber = row.group_number;
-            card.dataset.itemNumber = row.item_number;
             card.dataset.category = row.category;
             card.dataset.search = [
                 row.item_name, row.category, row.hsn_code, row.sr_number,
-                row.group_number + '.' + row.item_number, row.size,
+                row.size,
                 row.id_size, row.od_size, row.lf_size
             ].join(' ').toLocaleLowerCase();
 
@@ -117,8 +115,7 @@
                 content,
                 'p',
                 'card-meta',
-                'Sr: ' + row.sr_number + ' | Group item: '
-                    + row.group_number + '.' + row.item_number + ' | HSN: '
+                'ID: ' + row.sr_number + ' | HSN: '
                     + (row.hsn_code || '')
             );
             [
@@ -177,8 +174,8 @@
             input.id = 'seller-field-' + field;
             input.name = field;
             input.value = row[field] || '';
-            input.required = ['sr_number', 'group_number', 'item_number', 'category', 'item_name'].includes(field);
-            if (field === 'sr_number' || field === 'group_number' || field === 'item_number') {
+            input.required = ['sr_number', 'category', 'item_name'].includes(field);
+            if (field === 'sr_number') {
                 input.inputMode = 'numeric';
             }
             if (field === 'list_price') input.inputMode = 'decimal';
@@ -198,22 +195,27 @@
     function draftNewRow() {
         var row = {};
         fields.forEach(function (field) { row[field] = ''; });
-        var serials = rows.map(function (item) { return Number(item.sr_number); })
-            .filter(Number.isFinite);
-        row.sr_number = String(Math.max.apply(null, [0].concat(serials)) + 1);
+        
         var category = 'New category';
         var sameCategory = rows.filter(function (item) { return item.category === category; });
+        var nextGroup, nextItem;
+        
         if (sameCategory.length) {
-            row.group_number = sameCategory[0].group_number;
-            row.item_number = String(Math.max.apply(null, sameCategory.map(function (item) {
-                return Number(item.item_number) || 0;
+            var parts = String(sameCategory[0].sr_number).split('.');
+            nextGroup = parts[0] || '1';
+            nextItem = String(Math.max.apply(null, sameCategory.map(function (item) {
+                var p = String(item.sr_number).split('.');
+                return Number(p[1]) || 0;
             })) + 1);
         } else {
-            row.group_number = String(Math.max.apply(null, [0].concat(rows.map(function (item) {
-                return Number(item.group_number) || 0;
+            nextGroup = String(Math.max.apply(null, [0].concat(rows.map(function (item) {
+                var p = String(item.sr_number).split('.');
+                return Number(p[0]) || 0;
             }))) + 1);
-            row.item_number = '1';
+            nextItem = '1';
         }
+        
+        row.sr_number = nextGroup + '.' + nextItem;
         row.category = category;
         row.hidden = '';
         return row;
