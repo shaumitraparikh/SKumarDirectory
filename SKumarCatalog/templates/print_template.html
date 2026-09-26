@@ -86,6 +86,7 @@
         max-width: 30px;
         object-fit: contain;
     }
+    .item-img.representative-image { opacity: .75; }
 
     .col-sr { width: 5%; text-align: center; font-weight: bold; }
     .col-img { width: 8%; text-align: center; }
@@ -146,8 +147,8 @@
             <tr>
                 <td class="col-sr">{{ item.sr_no }}.</td>
                 <td class="col-img">
-                    {% if item.image_path %}
-                        <img src="../{{ item.image_path }}" class="item-img" alt="">
+                    {% if item.display_image_path %}
+                        <img src="../{{ item.display_image_path }}" class="item-img{% if item.image_is_representative %} representative-image{% endif %}" alt="{% if item.image_is_representative %}Representative image for {{ cat.name }}{% else %}{{ item.item_name }}{% endif %}">
                     {% endif %}
                 </td>
                 <td class="col-desc">
@@ -169,7 +170,7 @@
                     {% endif %}
                 </td>
                 <td class="col-hsn">{{ item.hsn_code }}</td>
-                <td class="col-price">{{ item.list_price }}</td>
+                <td class="col-price">{% if item.list_price %}{{ item.list_price }}{% else %}Price on request{% endif %}</td>
                 <td class="col-per">{{ item.unit }}</td>
             </tr>
             {% endfor %}

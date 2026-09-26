@@ -28,11 +28,22 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Set up Node.js for commerce tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: Install catalog build dependency
         run: python -m pip install jinja2
 
       - name: Build catalogs
         run: python SKumarCatalog/build_catalog.py
+
+      - name: Test catalog data and generated pages
+        run: python -m unittest discover -s SKumarCatalog/tests -p "test_*.py"
+
+      - name: Test commerce calculations and order payloads
+        run: node SKumarCatalog/tests/order_core.test.js
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -43,6 +54,7 @@ jobs:
           cp index.html _site/index.html
           cp SKumarCatalog/output/print_catalog.html _site/SKumarCatalog/output/print_catalog.html
           cp SKumarCatalog/output/search_catalog.html _site/SKumarCatalog/output/search_catalog.html
+          cp -R SKumarCatalog/assets _site/SKumarCatalog/assets
           cp -R SKumarCatalog/images _site/SKumarCatalog/images
 
       - name: Upload Pages artifact

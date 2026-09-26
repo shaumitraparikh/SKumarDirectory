@@ -41,5 +41,10 @@
     "address": "3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.",
     "gst": "",
     "tagline": "INSULATING - ELECTRICALS - ELECTRONIC - HARDWARE - MATERIALS",
-    "email": "sales@skumarbros.com"
+    "email": "sales@skumarbros.com",
+    "checkout": {
+        "provider": "whatsapp",
+        "whatsapp_number": "919869905779",
+        "api_base_url": ""
+    }
 }

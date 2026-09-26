@@ -27,18 +27,28 @@ cd /d "%~dp0" || goto :error
 python build_catalog.py
 if errorlevel 1 goto :error
 
-cd /d "%REPO_DIR%" || goto :error
-git add -A -- .gitignore SKumarCatalog/__pycache__ SKumarCatalog/1_Click_Update.bat SKumarCatalog/README.md SKumarCatalog/build_catalog.py SKumarCatalog/config.json SKumarCatalog/data/catalog_data.csv SKumarCatalog/images SKumarCatalog/templates SKumarCatalog/output/print_catalog.html SKumarCatalog/output/search_catalog.html
+python -m unittest discover -s tests -p "test_*.py"
 if errorlevel 1 goto :error
 
-git diff --cached --quiet -- .gitignore SKumarCatalog/__pycache__ SKumarCatalog/1_Click_Update.bat SKumarCatalog/README.md SKumarCatalog/build_catalog.py SKumarCatalog/config.json SKumarCatalog/data/catalog_data.csv SKumarCatalog/images SKumarCatalog/templates SKumarCatalog/output/print_catalog.html SKumarCatalog/output/search_catalog.html
+node tests/order_core.test.js
+if errorlevel 1 goto :error
+
+cd /d "%REPO_DIR%" || goto :error
+echo.
+set /p "PUBLISH_CHANGES=Commit and push these catalog changes to origin/main? (Y/N): "
+if /I not "%PUBLISH_CHANGES%"=="Y" goto :declined
+
+git add -A -- .gitignore .github/workflows/deploy-pages.yml index.html SKumarCatalog
+if errorlevel 1 goto :error
+
+git diff --cached --quiet -- .gitignore .github/workflows/deploy-pages.yml index.html SKumarCatalog
 if errorlevel 2 goto :error
 if errorlevel 1 goto :commit_changes
-echo No catalog changes to publish. GitHub Pages is already up to date.
+echo No catalog changes to commit. GitHub Pages is already up to date.
 goto :finish
 
 :commit_changes
-git commit -m "Update generated catalogs" -m "Rebuild GitHub Pages output from catalog sources." -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" --only -- .gitignore SKumarCatalog/__pycache__ SKumarCatalog/1_Click_Update.bat SKumarCatalog/README.md SKumarCatalog/build_catalog.py SKumarCatalog/config.json SKumarCatalog/data/catalog_data.csv SKumarCatalog/images SKumarCatalog/templates SKumarCatalog/output/print_catalog.html SKumarCatalog/output/search_catalog.html
+git commit -m "Update generated catalogs" -m "Rebuild GitHub Pages output from tested catalog sources." -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" --only -- .gitignore .github/workflows/deploy-pages.yml index.html SKumarCatalog
 if errorlevel 1 goto :error
 
 echo.
@@ -63,6 +73,10 @@ echo ERROR: Local main is not exactly synchronized with origin/main.
 echo Sync or resolve the branch first, then rerun this updater.
 echo No catalog changes were built, committed, or pushed.
 set "EXIT_CODE=1"
+goto :finish
+
+:declined
+echo Catalogs were rebuilt and tested, but not committed or pushed.
 goto :finish
 
 :error
