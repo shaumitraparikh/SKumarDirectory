@@ -21,10 +21,10 @@ python build_catalog.py
 if errorlevel 1 goto :error
 
 cd /d "%REPO_DIR%" || goto :error
-git add -- SKumarCatalog/output/print_catalog.html SKumarCatalog/output/search_catalog.html
+git add -A -- SKumarCatalog/config.json SKumarCatalog/data/catalog_data.csv SKumarCatalog/images SKumarCatalog/output/print_catalog.html SKumarCatalog/output/search_catalog.html
 if errorlevel 1 goto :error
 
-git commit --allow-empty -m "Update generated catalogs" --only -- SKumarCatalog/output/print_catalog.html SKumarCatalog/output/search_catalog.html
+git commit --allow-empty -m "Update generated catalogs" --only -- SKumarCatalog/config.json SKumarCatalog/data/catalog_data.csv SKumarCatalog/images SKumarCatalog/output/print_catalog.html SKumarCatalog/output/search_catalog.html
 if errorlevel 1 goto :error
 
 git push origin main
