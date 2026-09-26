@@ -14,7 +14,9 @@ const validBuyer = {
 };
 
 const pricedItem = {
-    sr_no: '1412',
+    sr_number: '1412',
+    group_number: '65',
+    item_number: '1',
     name: 'Test lamp',
     hsn: '94059900',
     price: 996,
@@ -41,7 +43,7 @@ assert.deepStrictEqual(commerce.calculateLineAmounts({
 
 const totals = commerce.calculateTotals([
     pricedItem,
-    { sr_no: '781', name: 'Custom part', price: null, qty: 2, discountPct: 0 }
+    { sr_number: '781', name: 'Custom part', price: null, qty: 2, discountPct: 0 }
 ], { cgstRate: 9, sgstRate: 9 });
 assert.strictEqual(totals.taxableSubtotal, 896.4);
 assert.strictEqual(totals.discountTotal, 99.6);
@@ -64,17 +66,30 @@ const order = commerce.createOrder({
     id: 'SK-20260926-000001',
     createdAt: '2026-09-26T12:00:00.000Z',
     buyer: validBuyer,
-    items: [pricedItem, { sr_no: '781', name: 'Custom part', price: null, qty: 2, unit: 'Pcs.' }],
+    items: [pricedItem, { sr_number: '781', name: 'Custom part', price: null, qty: 2, unit: 'Pcs.' }],
     rates: { cgstRate: 9, sgstRate: 9 }
 });
 assert.strictEqual(order.currency, 'INR');
 assert.strictEqual(order.status, 'awaiting_merchant_confirmation');
 assert.strictEqual(order.payment.status, 'not_started');
 assert.strictEqual(order.customer.phone, '919869905779');
+assert.strictEqual(order.items[0].sku, '1412');
+assert.strictEqual(order.items[0].group_number, '65');
+assert.strictEqual(order.items[0].item_number, '1');
 assert.strictEqual(order.items[1].unit_price, null);
 assert.strictEqual(order.amounts.estimate_excludes_unpriced_items, true);
 assert.ok(/No payment has been taken/.test(commerce.formatOrderMessage(order)));
 assert.ok(/price to be confirmed/.test(commerce.formatOrderMessage(order)));
+assert.ok(/Sr 1412 \(65\.1\)/.test(commerce.formatOrderMessage(order)));
+
+const legacyOrder = commerce.createOrder({
+    id: 'SK-20260926-000002',
+    createdAt: '2026-09-26T12:01:00.000Z',
+    buyer: validBuyer,
+    items: [{ sr_no: '99', name: 'Legacy cart item', price: 1, qty: 1 }],
+    rates: { cgstRate: 0, sgstRate: 0 }
+});
+assert.strictEqual(legacyOrder.items[0].sku, '99');
 
 const restored = commerce.sanitizeCartSnapshot({
     version: 1,

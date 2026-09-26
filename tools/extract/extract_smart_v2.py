@@ -149,8 +149,18 @@ class TableParser:
                 img_bytes = part.blob
                 ext = part.content_type.split('/')[-1]
                 if ext in ['x-emf', 'x-wmf']: ext = 'png'
+                if ext == 'unknown':
+                    try:
+                        with Image.open(io.BytesIO(img_bytes)) as image:
+                            ext = image.format.lower()
+                    except (OSError, ValueError) as error:
+                        raise ValueError(
+                            f"Cannot identify the embedded image for sr_number {item_sr}."
+                        ) from error
                 
-                clean_name = f"item_{item_sr}"
+                if not item_sr or not item_sr.isdigit():
+                    return None
+                clean_name = f"sr_{int(item_sr):04d}"
                 out_path = self.images_dir / f"{clean_name}.{ext}"
                 with open(out_path, 'wb') as f:
                     f.write(img_bytes)
@@ -197,6 +207,12 @@ class TableParser:
     def add_item(self, ti, sr, cat, part, size, hsn, list_price, per, packing, inline_img):
         if not sr or not sr.replace('.', '').isdigit(): return
         sr = sr.replace('.', '')
+        source_values = (part, size, list_price, per, packing, inline_img)
+        if not any(
+            value and value.strip() not in (',,', 'ÆÆ')
+            for value in source_values
+        ):
+            return
         
         hsn_found, part = extract_hsn(part)
         if hsn_found: hsn = hsn_found
@@ -227,7 +243,7 @@ class TableParser:
         image_ref = inline_img if inline_img else get_image_ref(cat, part)
 
         self.items.append({
-            'sr_no': sr,
+            'sr_number': sr,
             'category': cat.strip(),
             'item_name': item_name.strip(),
             'size': size.strip(),
@@ -496,13 +512,36 @@ if __name__ == "__main__":
     parser = TableParser(doc_path)
     parser.process()
     
-    out_path = repo_dir / "data" / "catalog_data.csv"
-    fieldnames = ['sr_no', 'category', 'item_name', 'size', 'hsn_code', 'list_price', 'unit', 'packing', 'image_ref', 'page']
+    out_path = repo_dir / "data" / "catalog_extraction_draft_v2.csv"
+    sorted_items = sorted(
+        parser.items,
+        key=lambda item: int(item['sr_number']) if item['sr_number'].isdigit() else 9999,
+    )
+    group_number = 0
+    item_number = 0
+    previous_category = None
+    for item in sorted_items:
+        if item['category'] != previous_category:
+            group_number += 1
+            item_number = 0
+            previous_category = item['category']
+        item_number += 1
+        item['group_number'] = str(group_number)
+        item['item_number'] = str(item_number)
+    fieldnames = [
+        'sr_number', 'group_number', 'item_number', 'category', 'item_name', 'size', 'id_size', 'od_size',
+        'lf_size', 'hsn_code', 'list_price', 'unit', 'packing', 'image_ref',
+        'page'
+    ]
+    for item in parser.items:
+        for field in item:
+            if field not in fieldnames:
+                fieldnames.append(field)
     
     with open(out_path, 'w', newline='', encoding='utf-8-sig') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        for item in sorted(parser.items, key=lambda x: int(x['sr_no']) if x['sr_no'].isdigit() else 9999):
+        for item in sorted_items:
             writer.writerow(item)
     
     print(f"Extraction complete! Extracted {len(parser.items)} items.")

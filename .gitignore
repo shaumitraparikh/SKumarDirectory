@@ -1,2 +1,9 @@
 __pycache__/
 *.py[cod]
+.venv/
+venv/
+.pytest_cache/
+data/client_data.csv
+/generated_bills/*
+!/generated_bills/.gitkeep
+/data/.seller_history.json

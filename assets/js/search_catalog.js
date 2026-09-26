@@ -1,8 +1,211 @@
 const CommerceCore = window.CatalogCommerce;
 const CART_STORAGE_KEY = 'skumar-catalog-cart-v1';
 const checkoutConfig = document.getElementById('checkoutConfig');
+const billArchive = new CatalogBillArchive.BillArchive({
+    window,
+    indexedDB: window.indexedDB
+});
 let cart = Object.create(null);
 let lastOrder = null;
+let clientRecords = [];
+let visibleBills = new Map();
+const catalogDataElement = document.getElementById('catalogData');
+const rawCatalog = catalogDataElement ? JSON.parse(catalogDataElement.textContent) : [];
+const catalogSearchIndex = rawCatalog.map(item => ({
+    item,
+    searchableText: normalizeSearchText([
+        item.item_name, item.category, item.hsn_code, item.sr_number,
+        item.group_number + '.' + item.item_number, item.size,
+        item.id_size, item.od_size, item.lf_size
+    ].join(' '))
+}));
+
+function normalizeSearchText(value) {
+    return String(value)
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLocaleLowerCase()
+        .trim();
+}
+
+billArchive.restoreDirectory().catch(error => {
+    console.error('Unable to restore the generated-bills folder.', error);
+});
+
+function renderSavedBills(entries) {
+    const list = document.getElementById('billArchiveList');
+    list.replaceChildren();
+    visibleBills = new Map(entries.map(entry => [entry.id, entry]));
+    if (!entries.length) {
+        const empty = document.createElement('p');
+        empty.className = 'bill-empty';
+        empty.textContent = 'No saved bills yet. Print a proforma invoice to archive it.';
+        list.appendChild(empty);
+        return;
+    }
+
+    const byMonth = new Map();
+    entries.forEach(entry => {
+        if (!byMonth.has(entry.month)) byMonth.set(entry.month, []);
+        byMonth.get(entry.month).push(entry);
+    });
+    byMonth.forEach((monthEntries, month) => {
+        const section = document.createElement('details');
+        section.className = 'bill-month';
+        const summary = document.createElement('summary');
+        const monthDate = new Date(`${month}-01T00:00:00Z`);
+        summary.textContent = `${monthDate.toLocaleDateString('en-IN', {
+            month: 'long',
+            year: 'numeric',
+            timeZone: 'UTC'
+        })} (${monthEntries.length})`;
+        section.appendChild(summary);
+
+        const monthList = document.createElement('div');
+        monthList.className = 'bill-month-list';
+        monthEntries.forEach(entry => {
+            const row = document.createElement('div');
+            row.className = 'bill-entry';
+            const label = document.createElement('div');
+            label.className = 'bill-entry-name';
+            label.textContent = entry.reference;
+            const meta = document.createElement('div');
+            meta.className = 'bill-entry-meta';
+            meta.textContent = entry.storage === 'folder'
+                ? `generated_bills/${entry.month}/${entry.fileName}`
+                : 'Saved in this browser archive';
+            label.appendChild(meta);
+            const open = document.createElement('button');
+            open.className = 'bill-open-btn';
+            open.type = 'button';
+            open.textContent = 'Open';
+            open.dataset.billId = entry.id;
+            row.append(label, open);
+            monthList.appendChild(row);
+        });
+        section.appendChild(monthList);
+        list.appendChild(section);
+    });
+}
+
+async function refreshSavedBills() {
+    const status = document.getElementById('billArchiveStatus');
+    status.textContent = 'Loading saved bills…';
+    try {
+        const entries = await billArchive.listBills();
+        renderSavedBills(entries);
+        status.textContent = billArchive.directoryHandle
+            ? 'Showing bills from the selected folder and this browser archive.'
+            : typeof window.showDirectoryPicker === 'function'
+                ? 'Select your generated_bills folder to save and browse its monthly folders.'
+                : 'Folder access is unavailable here; bills are kept in this browser and downloaded.';
+    } catch (error) {
+        console.error('Unable to read saved bills.', error);
+        status.textContent = error.message || 'Could not read saved bills.';
+    }
+}
+
+document.getElementById('openBillsButton').addEventListener('click', () => {
+    const dialog = document.getElementById('billArchiveDialog');
+    if (typeof dialog.showModal === 'function') dialog.showModal();
+    else dialog.setAttribute('open', '');
+    refreshSavedBills();
+});
+document.getElementById('closeBillArchiveButton').addEventListener('click', () => {
+    const dialog = document.getElementById('billArchiveDialog');
+    if (typeof dialog.close === 'function') dialog.close();
+    else dialog.removeAttribute('open');
+});
+document.getElementById('chooseBillsFolderButton').addEventListener('click', () => {
+    const status = document.getElementById('billArchiveStatus');
+    status.textContent = 'Choose the generated_bills folder. Monthly folders will be created automatically.';
+    try {
+        billArchive.selectDirectory().then(() => {
+            status.textContent = 'Folder selected. Bills will be saved into monthly subfolders.';
+            refreshSavedBills();
+        }).catch(error => {
+            console.error('Unable to select the generated-bills folder.', error);
+            status.textContent = error.message || 'Could not select the generated_bills folder.';
+        });
+    } catch (error) {
+        console.error('Unable to select the generated-bills folder.', error);
+        status.textContent = error.message || 'This browser cannot select a local folder.';
+    }
+});
+document.getElementById('billArchiveList').addEventListener('click', event => {
+    const button = event.target.closest('button[data-bill-id]');
+    if (!button) return;
+    const entry = visibleBills.get(button.dataset.billId);
+    if (entry) billArchive.openBill(entry);
+});
+
+function updateCustomerSuggestions(query) {
+    const suggestions = document.getElementById('clientSuggestions');
+    suggestions.replaceChildren();
+    if (!query || !window.ClientDirectory) return;
+    const normalizedQuery = query.trim().toLocaleLowerCase();
+    clientRecords
+        .filter(customer => Object.values(customer).some(value =>
+            String(value).toLocaleLowerCase().includes(normalizedQuery)
+        ))
+        .slice(0, 50)
+        .forEach(customer => {
+            const option = document.createElement('option');
+            option.value = ClientDirectory.displayLabel(customer);
+            suggestions.appendChild(option);
+        });
+}
+
+function applySelectedCustomer(customer) {
+    document.getElementById('buyerName').value = customer.business_name || customer.name || '';
+    document.getElementById('buyerPhone').value = customer.phone || '';
+    document.getElementById('buyerEmail').value = customer.email || '';
+    document.getElementById('buyerAddress').value = customer.address || '';
+    const stateInput = document.getElementById('buyerState');
+    const matchingState = Array.from(stateInput.options).find(option =>
+        option.value.toLocaleLowerCase() === (customer.state || '').toLocaleLowerCase()
+    );
+    stateInput.value = matchingState ? matchingState.value : '';
+    document.getElementById('buyerPincode').value = customer.pincode || '';
+    document.getElementById('buyerGstin').value = customer.gstin || '';
+    document.getElementById('buyerDetails').open = true;
+    document.getElementById('clientDirectoryStatus').textContent =
+        'Customer details filled in. Review and edit them before submitting the order.';
+}
+
+function loadCustomerCsv(file) {
+    const status = document.getElementById('clientDirectoryStatus');
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+        status.textContent = 'Customer CSV is larger than 5 MB. Please choose a smaller file.';
+        return;
+    }
+    file.text().then(contents => {
+        const records = ClientDirectory.parseCsv(contents);
+        clientRecords = records;
+        document.getElementById('clientSuggestions').replaceChildren();
+        document.getElementById('customerLookup').value = '';
+        status.textContent = records.length
+            ? `${records.length} customer record${records.length === 1 ? '' : 's'} loaded for this browser session.`
+            : 'No customer records found. You can still enter customer details manually.';
+    }).catch(error => {
+        console.error('Unable to load the customer CSV.', error);
+        status.textContent = error.message || 'Could not read this CSV. Check its format and try again.';
+    });
+}
+
+document.getElementById('loadClientsButton').addEventListener('click', () => {
+    document.getElementById('clientCsvFile').click();
+});
+document.getElementById('clientCsvFile').addEventListener('change', event => {
+    loadCustomerCsv(event.target.files[0]);
+    event.target.value = '';
+});
+document.getElementById('customerLookup').addEventListener('input', event => {
+    updateCustomerSuggestions(event.target.value);
+    const selectedCustomer = ClientDirectory.findCustomer(clientRecords, event.target.value);
+    if (selectedCustomer) applySelectedCustomer(selectedCustomer);
+});
 
 function toggleCart(forceOpen) {
         const drawer = document.getElementById('cartDropdown');
@@ -32,71 +235,172 @@ function toggleCart(forceOpen) {
         setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000);
     }
 
-    function filterCatalog() {
-        const input = document.getElementById('searchInput').value.toLowerCase();
-        const cards = document.getElementsByClassName('card');
-        for (let i = 0; i < cards.length; i++) {
-            const searchData = cards[i].getAttribute('data-search');
-            cards[i].style.display = searchData.includes(input) ? 'flex' : 'none';
+    function createCard(item) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.srNumber = item.sr_number;
+        card.dataset.groupNumber = item.group_number;
+        card.dataset.itemNumber = item.item_number;
+        
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'card-img-container';
+        if (item.display_image_path) {
+            const img = document.createElement('img');
+            img.src = item.display_image_path;
+            img.className = 'card-img' + (item.image_is_representative ? ' representative-image' : '');
+            img.alt = item.image_is_representative ? 'Representative image for ' + item.category : item.item_name;
+            img.loading = 'lazy';
+            imgContainer.appendChild(img);
+        } else {
+            const noImg = document.createElement('div');
+            noImg.style.cssText = 'color:#aaa; font-size:10px; font-style:italic;';
+            noImg.textContent = 'No Image';
+            imgContainer.appendChild(noImg);
         }
+        card.appendChild(imgContainer);
+        
+        const content = document.createElement('div');
+        content.className = 'card-content';
+        const title = document.createElement('p');
+        title.className = 'card-title';
+        title.id = 'name-' + item.sr_number;
+        title.textContent = item.item_name;
+        content.appendChild(title);
+        
+        const meta1 = document.createElement('p');
+        meta1.className = 'card-meta';
+        meta1.innerHTML = `Sr: ${item.sr_number} | Group item: ${item.group_number}.${item.item_number} | HSN: <span class="hsn-val">${item.hsn_code || ''}</span>`;
+        content.appendChild(meta1);
+        
+        if (item.size && !item.item_name.toLowerCase().includes(item.size.toLowerCase())) {
+            const metaSize = document.createElement('p');
+            metaSize.className = 'card-meta';
+            metaSize.innerHTML = `Size: <span class="size-val">${item.size}</span>`;
+            content.appendChild(metaSize);
+        }
+        
+        if (item.id_size || item.od_size || item.lf_size) {
+            const metaSizes = document.createElement('p');
+            metaSizes.className = 'card-meta';
+            const parts = [];
+            if (item.id_size) parts.push(`ID Size: <span class="id-size-val">${item.id_size}</span>`);
+            if (item.od_size) parts.push(`OD Size: <span class="od-size-val">${item.od_size}</span>`);
+            if (item.lf_size) parts.push(`L/F Size: <span class="lf-size-val">${item.lf_size}</span>`);
+            metaSizes.innerHTML = parts.join(' · ');
+            content.appendChild(metaSizes);
+        }
+        
+        const metaUnit = document.createElement('p');
+        metaUnit.className = 'card-meta';
+        const unitParts = [];
+        if (item.unit) unitParts.push(`Unit: <span class="unit-val">${item.unit}</span>`);
+        if (item.packing) unitParts.push(`Pack: <span class="packing-val">${item.packing}</span>`);
+        if (unitParts.length) {
+            metaUnit.innerHTML = unitParts.join(' · ');
+            content.appendChild(metaUnit);
+        }
+        
+        const price = document.createElement('p');
+        if (item.list_price) {
+            price.className = 'card-price';
+            price.innerHTML = `₹<span id="price-${item.sr_number}">${item.list_price}</span>`;
+        } else {
+            price.className = 'card-price quote-price';
+            price.innerHTML = `Price on request<span id="price-${item.sr_number}" hidden></span>`;
+        }
+        content.appendChild(price);
+        card.appendChild(content);
+        
+        const controls = document.createElement('div');
+        controls.className = 'add-controls';
+        const qtyInput = document.createElement('input');
+        qtyInput.type = 'number';
+        qtyInput.id = 'qty-' + item.sr_number;
+        qtyInput.className = 'qty-input';
+        qtyInput.value = '1';
+        qtyInput.min = '1';
+        qtyInput.max = '9999';
+        qtyInput.step = '1';
+        qtyInput.setAttribute('aria-label', `Quantity for ${item.item_name}`);
+        
+        const addBtn = document.createElement('button');
+        addBtn.className = 'add-btn';
+        addBtn.textContent = item.list_price ? 'Add' : 'Add to quote';
+        addBtn.onclick = () => addToCart(String(item.sr_number));
+        
+        controls.appendChild(qtyInput);
+        controls.appendChild(addBtn);
+        card.appendChild(controls);
+        
+        return card;
     }
 
-    function getHsn(sr_no) {
-        const card = document.getElementById('name-'+sr_no).closest('.card');
-        const hsnSpan = card.querySelector('.hsn-val');
-        return hsnSpan ? hsnSpan.innerText.trim() : "";
+    function filterCatalog() {
+        if (!catalogSearchIndex[0]?.card) {
+            const grid = document.getElementById('catalogGrid');
+            const fragment = document.createDocumentFragment();
+            catalogSearchIndex.forEach(entry => {
+                entry.card = createCard(entry.item);
+                fragment.appendChild(entry.card);
+            });
+            grid.appendChild(fragment);
+        }
+        const input = normalizeSearchText(document.getElementById('searchInput').value);
+        catalogSearchIndex.forEach(entry => {
+            entry.card.style.display = entry.searchableText.includes(input) ? 'flex' : 'none';
+        });
     }
 
-    function readProduct(sr_no, qty, discountPct) {
-        const nameElement = document.getElementById('name-' + sr_no);
-        const card = nameElement.closest('.card');
-        const priceText = document.getElementById('price-' + sr_no).innerText.trim().replace(/,/g, '');
+    function readProduct(sr_number, qty, discountPct) {
+        const row = rawCatalog.find(item => String(item.sr_number) === String(sr_number));
+        if (!row) throw new Error('Product not found: ' + sr_number);
+        
+        const priceText = row.list_price ? String(row.list_price).trim().replace(/,/g, '') : '';
         const parsedPrice = priceText ? Number(priceText) : null;
-        const text = selector => {
-            const element = card.querySelector(selector);
-            return element && !element.hidden ? element.innerText.trim() : '';
-        };
+        
         return {
-            sr_no,
-            name: nameElement.innerText.trim(),
+            sr_number: String(row.sr_number),
+            group_number: String(row.group_number),
+            item_number: String(row.item_number),
+            name: row.item_name || '',
             price: parsedPrice,
             qty,
-            hsn: getHsn(sr_no),
-            size: text('.size-val'),
-            idSize: text('.id-size-val'),
-            odSize: text('.od-size-val'),
-            lfSize: text('.lf-size-val'),
-            unit: text('.unit-val'),
-            packing: text('.packing-val'),
+            hsn: row.hsn_code || '',
+            size: row.size || '',
+            idSize: row.id_size || '',
+            odSize: row.od_size || '',
+            lfSize: row.lf_size || '',
+            unit: row.unit || '',
+            packing: row.packing || '',
             discountPct: parsedPrice === null ? 0 : discountPct,
             discountOpen: false
         };
     }
 
-    function addToCart(sr_no) {
-        const qtyInput = document.getElementById('qty-' + sr_no);
+    function addToCart(sr_number) {
+        const qtyInput = document.getElementById('qty-' + sr_number);
         const qty = Number(qtyInput.value);
-        const existingQty = cart[sr_no] ? cart[sr_no].qty : 0;
+        const existingQty = cart[sr_number] ? cart[sr_number].qty : 0;
 
         if (!Number.isInteger(qty) || qty <= 0 || existingQty + qty > CommerceCore.MAX_QUANTITY) {
             showToast('Enter a whole-number quantity from 1 to 9,999.');
             return;
         }
 
-        if (cart[sr_no]) {
-            cart[sr_no].qty += qty;
+        if (cart[sr_number]) {
+            cart[sr_number].qty += qty;
         } else {
-            const item = readProduct(sr_no, qty, 0);
+            const item = readProduct(sr_number, qty, 0);
             if (item.price !== null && (!Number.isFinite(item.price) || item.price < 0)) {
                 showToast('This catalog item has an invalid price. Please contact sales.');
                 return;
             }
-            cart[sr_no] = item;
+            cart[sr_number] = item;
         }
 
         qtyInput.value = 1; // reset
         renderCart();
-        showToast((cart[sr_no].price === null ? 'Added quote request for ' : 'Added ' + qty + ' × ') + cart[sr_no].name);
+        showToast((cart[sr_number].price === null ? 'Added quote request for ' : 'Added ' + qty + ' × ') + cart[sr_number].name);
 
         // Auto open cart briefly if it's the first item
         if (Object.keys(cart).length === 1 && !document.getElementById('cartDropdown').classList.contains('open')) {
@@ -104,31 +408,31 @@ function toggleCart(forceOpen) {
         }
     }
 
-    function updateItemQty(sr_no, change) {
-        if (!cart[sr_no]) return;
-        cart[sr_no].qty += change;
-        if (cart[sr_no].qty <= 0) {
-            delete cart[sr_no];
-        } else if (cart[sr_no].qty > CommerceCore.MAX_QUANTITY) {
-            cart[sr_no].qty = CommerceCore.MAX_QUANTITY;
+    function updateItemQty(sr_number, change) {
+        if (!cart[sr_number]) return;
+        cart[sr_number].qty += change;
+        if (cart[sr_number].qty <= 0) {
+            delete cart[sr_number];
+        } else if (cart[sr_number].qty > CommerceCore.MAX_QUANTITY) {
+            cart[sr_number].qty = CommerceCore.MAX_QUANTITY;
             showToast('Maximum quantity is 9,999 per item.');
         }
         renderCart();
     }
 
-    function updateItemDiscount(sr_no, value) {
+    function updateItemDiscount(sr_number, value) {
         const discountPct = Number(value);
         if (!Number.isFinite(discountPct) || discountPct < 0 || discountPct > 100) {
             showToast('Item discount must be between 0% and 100%.');
             renderCart();
             return;
         }
-        if (!cart[sr_no]) return;
-        if (cart[sr_no].price === null) {
+        if (!cart[sr_number]) return;
+        if (cart[sr_number].price === null) {
             showToast('Discounts can be set after sales confirms the price.');
             return;
         }
-        cart[sr_no].discountPct = discountPct;
+        cart[sr_number].discountPct = discountPct;
         renderCart();
     }
 
@@ -205,8 +509,8 @@ function toggleCart(forceOpen) {
 
         try {
             const validSkus = Object.create(null);
-            document.querySelectorAll('.card-title[id^="name-"]').forEach(element => {
-                validSkus[element.id.slice(5)] = true;
+            rawCatalog.forEach(item => {
+                validSkus[String(item.sr_number)] = true;
             });
             const restored = CommerceCore.sanitizeCartSnapshot(JSON.parse(raw), validSkus);
             Object.keys(restored.items).forEach(sku => {
@@ -237,6 +541,8 @@ function toggleCart(forceOpen) {
         let totalItems = 0;
 
         const keys = Object.keys(cart);
+        document.getElementById('orderSummaryCount').textContent =
+            `${keys.length} item${keys.length === 1 ? '' : 's'}`;
         if (keys.length === 0) {
             const emptyState = document.createElement('div');
             emptyState.className = 'cart-empty';
@@ -496,7 +802,86 @@ function toggleCart(forceOpen) {
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    function generateBill() {
+    function standaloneBillHtml() {
+        const stylesheet = Array.from(document.styleSheets).find(sheet =>
+            sheet.href && sheet.href.includes('search_catalog.css')
+        );
+        if (!stylesheet) throw new Error('The invoice stylesheet is unavailable; the bill was not archived.');
+
+        let css;
+        try {
+            css = Array.from(stylesheet.cssRules, rule => rule.cssText).join('\n');
+        } catch (error) {
+            throw new Error('The invoice styling could not be embedded for the saved bill.');
+        }
+        const reference = document.getElementById('pInvNo').innerText.trim();
+        const safeTitle = reference.replace(/[<>&"']/g, character => ({
+            '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;'
+        }[character]));
+        const screenStyles = `
+            @media screen {
+                body { min-height: 100vh; margin: 0; padding: 18px; box-sizing: border-box; background: #f5f7fa; }
+                #printBill { display: block !important; position: static; inset: auto; width: min(100%, 1000px); margin: 18px auto; padding: 24px; box-sizing: border-box; background: #fff; box-shadow: 0 8px 28px rgba(15,23,42,.12); }
+                #printBill * { box-sizing: border-box; }
+                .inv-topline { height: 5px; margin-bottom: 18px; background: #173b57; }
+                .inv-header { display: flex; justify-content: space-between; gap: 20px; padding-bottom: 16px; margin-bottom: 18px; border-bottom: 1px solid #cbd5e1; }
+                .inv-brand { min-width: 0; }
+                .inv-brand h1 { margin: 0 0 5px; color: #173b57; font-size: 24px; }
+                .inv-brand p { margin: 3px 0; color: #486581; font-size: 12px; line-height: 1.45; }
+                .inv-brand .legal-name { font-size: 11px; font-weight: 700; letter-spacing: .08em; }
+                .inv-brand .inv-contact { font-size: 10px; }
+                .inv-title { flex: 0 0 auto; min-width: 150px; text-align: right; }
+                .inv-title h2 { margin: 0 0 7px; color: #173b57; font-size: 21px; }
+                .inv-title span, .inv-fact span:first-child { color: #627d98; }
+                .inv-meta { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; margin-bottom: 20px; }
+                .inv-card { padding: 12px; background: #f4f7fa; border: 1px solid #d9e2ec; border-radius: 4px; }
+                .inv-card-label { margin-bottom: 8px; color: #627d98; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+                .inv-buyer { margin-bottom: 4px; color: #172b4d; font-weight: 700; }
+                .inv-buyer-detail { color: #486581; font-size: 12px; line-height: 1.5; white-space: pre-line; overflow-wrap: anywhere; }
+                .inv-facts { display: grid; gap: 9px; }
+                .inv-fact { display: flex; justify-content: space-between; gap: 14px; font-size: 12px; }
+                table.inv-table, .inv-summary table { width: 100%; border-collapse: collapse; }
+                .inv-table th, .inv-table td { padding: 7px 5px; border-bottom: 1px solid #d9e2ec; font-size: 11px; text-align: left; }
+                .inv-table th { background: #173b57; color: #fff; }
+                .inv-table td.num, .inv-table th.num, .inv-summary td.num { text-align: right; white-space: nowrap; }
+                .inv-summary { width: min(360px, 100%); margin: 18px 0 0 auto; }
+                .inv-summary td { padding: 7px 8px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
+                .inv-summary .total td { padding-top: 11px; border-top: 2px solid #173b57; color: #173b57; font-size: 15px; font-weight: 700; }
+                .inv-notes { margin-top: 24px; padding-top: 12px; border-top: 1px solid #d9e2ec; color: #627d98; font-size: 11px; line-height: 1.5; }
+                .inv-signoff { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-top: 28px; color: #627d98; font-size: 11px; }
+                .inv-signature { width: 190px; padding-top: 7px; border-top: 1px solid #829ab1; text-align: center; }
+                .inv-footer { margin-top: 16px; color: #829ab1; font-size: 10px; text-align: center; }
+            }
+            @media screen and (max-width: 600px) {
+                body { padding: 8px; }
+                #printBill { margin: 0 auto; padding: 12px; overflow-x: auto; }
+                .inv-header { flex-direction: column; gap: 12px; }
+                .inv-title { text-align: left; }
+                .inv-meta { grid-template-columns: 1fr; gap: 8px; }
+                .inv-table { min-width: 700px; }
+                .inv-signoff { align-items: flex-start; flex-direction: column; }
+            }
+        `;
+        return `<!doctype html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proforma invoice ${safeTitle}</title>
+    <style>${css.replace(/<\/style/gi, '<\\/style')}</style>
+    <style>${screenStyles}</style>
+    </head>
+    <body>${document.getElementById('printBill').outerHTML}</body>
+    </html>`;
+    }
+
+    function archiveCurrentBill(date) {
+        const reference = document.getElementById('pInvNo').innerText.trim();
+        const html = standaloneBillHtml();
+        return billArchive.saveBill({ date, reference, html });
+    }
+
+        function generateBill() {
         if (Object.keys(cart).length === 0) {
             alert("Cart is empty! Please add items before printing a bill.");
             return;
@@ -581,8 +966,34 @@ function toggleCart(forceOpen) {
         document.getElementById('pGrandTotal').innerText = formatAmount(totals.estimatedTotal);
         document.getElementById('pQuoteNote').hidden = !totals.includesUnpricedItems;
 
-        window.print();
+        const printBill = () => window.print();
+        try {
+            archiveCurrentBill(now).then(result => {
+                const message = result.storage === 'folder'
+                    ? `Saved ${result.entry.fileName} in generated_bills/${result.entry.month}/.`
+                    : result.storage === 'browser'
+                        ? `Saved ${result.entry.fileName} in this browser and downloaded a copy.`
+                        : `Downloaded ${result.entry.fileName}; browser storage is unavailable.`;
+                document.getElementById('billArchiveStatus').textContent = message;
+                showToast(message);
+                if (result.entry.archiveWarning) {
+                    document.getElementById('billArchiveStatus').textContent +=
+                        ` Archive detail: ${result.entry.archiveWarning}`;
+                }
+            }).catch(error => {
+                console.error('The proforma invoice could not be archived.', error);
+                const message = `Bill printed but not saved: ${error.message || 'archive error'}`;
+                document.getElementById('billArchiveStatus').textContent = message;
+                showToast(message);
+            }).finally(printBill);
+        } catch (error) {
+            console.error('The proforma invoice could not be prepared for archiving.', error);
+            document.getElementById('billArchiveStatus').textContent =
+                `Bill printed but not saved: ${error.message || 'archive error'}`;
+            printBill();
+        }
     }
 
     restoreCart();
     renderCart();
+    filterCatalog();

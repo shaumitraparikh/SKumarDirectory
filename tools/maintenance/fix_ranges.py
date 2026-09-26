@@ -9,8 +9,8 @@ with open('data/catalog_data.csv', 'r', encoding='utf-8-sig') as f:
     rows = list(csv.DictReader(f))
 
 for row in rows:
-    if not row['sr_no'].isdigit(): continue
-    sr = int(row['sr_no'])
+    if not row['sr_number'].isdigit(): continue
+    sr = int(row['sr_number'])
     
     cat = row['category'].strip()
     

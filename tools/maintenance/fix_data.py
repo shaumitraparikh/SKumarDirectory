@@ -97,8 +97,8 @@ def get_image(cat, item_name):
 with open('data/catalog_data.csv', 'r', encoding='utf-8-sig') as f:
     rows = list(csv.DictReader(f))
 
-# Sort by sr_no exactly
-rows.sort(key=lambda x: int(x['sr_no']) if x['sr_no'].isdigit() else 99999)
+# Sort by sr_number exactly
+rows.sort(key=lambda x: int(x['sr_number']) if x['sr_number'].isdigit() else 99999)
 
 current_cat = "General Items"
 

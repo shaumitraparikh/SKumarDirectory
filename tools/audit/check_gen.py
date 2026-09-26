@@ -10,4 +10,4 @@ with open('data/catalog_data.csv', 'r', encoding='utf-8-sig') as f:
 
 for row in rows:
     if row['category'] == 'General Items':
-        print(f"{row['sr_no']} | {row['item_name']} | {row['image_ref']}")
+        print(f"{row['sr_number']} | {row['item_name']} | {row['image_ref']}")

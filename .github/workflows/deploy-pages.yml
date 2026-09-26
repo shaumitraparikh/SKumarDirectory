@@ -34,16 +34,24 @@ jobs:
           node-version: "22"
 
       - name: Install catalog build dependency
-        run: python -m pip install jinja2
+        run: python -m pip install jinja2 python-docx Pillow
 
       - name: Build catalogs
         run: python build_catalog.py
+        env:
+          CATALOG_NO_BROWSER: "1"
 
       - name: Test catalog data and generated pages
         run: python -m unittest discover -s tests -p "test_*.py"
 
       - name: Test commerce calculations and order payloads
         run: node tests/order_core.test.js
+
+      - name: Test customer directory behavior
+        run: node tests/client_directory.test.js
+
+      - name: Test bill archive behavior
+        run: node tests/bill_archive.test.js
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -53,7 +61,8 @@ jobs:
           mkdir -p _site
           cp index.html _site/index.html
           cp print_catalog.html _site/print_catalog.html
-          cp search_catalog.html _site/search_catalog.html
+          cp customer_catalog.html _site/customer_catalog.html
+          cp customer_catalog.html _site/search_catalog.html
           cp -R assets _site/assets
           cp -R images _site/images
 
@@ -75,3 +84,32 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  one-click-smoke:
+    if: github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install catalog and source audit dependencies
+        run: python -m pip install jinja2 python-docx Pillow
+
+      - name: Run one-click update without publishing
+        shell: pwsh
+        run: |
+          git switch -C main $env:GITHUB_SHA
+          ./tests/run_one_click_smoke.ps1

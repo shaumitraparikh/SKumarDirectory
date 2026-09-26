@@ -14,11 +14,19 @@ class CatalogDataTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.items = build_catalog.load_csv_data(CATALOG_ROOT / "data" / "catalog_data.csv")
-        cls.by_serial = {int(item["sr_no"]): item for item in cls.items}
+        cls.by_serial = {int(item["sr_number"]): item for item in cls.items}
 
-    def test_serial_numbers_are_unique_and_sequential(self):
-        serials = [int(item["sr_no"]) for item in self.items]
-        self.assertEqual(serials, list(range(1, len(self.items) + 1)))
+    def test_serial_and_hierarchical_numbers_are_unique_and_positive(self):
+        serials = [int(item["sr_number"]) for item in self.items]
+        hierarchy = [(int(item["group_number"]), int(item["item_number"])) for item in self.items]
+        self.assertTrue(all(serial > 0 for serial in serials))
+        self.assertEqual(len(serials), len(set(serials)))
+        self.assertTrue(all(group > 0 and number > 0 for group, number in hierarchy))
+        self.assertEqual(len(hierarchy), len(set(hierarchy)))
+
+    def test_removing_a_catalog_item_does_not_require_renumbering(self):
+        remaining = self.items[:10] + self.items[11:]
+        build_catalog.validate_catalog_data(remaining)
 
     def test_manual_item_is_complete_and_has_expected_price(self):
         item = self.by_serial[1412]
@@ -53,14 +61,20 @@ class CatalogDataTests(unittest.TestCase):
         self.assertEqual(notes["393"]["status"], "requires_business_review")
 
     def test_invalid_price_and_serial_sequences_fail_fast(self):
-        valid = {"sr_no": "1", "category": "Test", "item_name": "Part", "list_price": ""}
+        valid = {
+            "sr_number": "1", "group_number": "1", "item_number": "1",
+            "category": "Test", "item_name": "Part", "list_price": ""
+        }
         build_catalog.validate_catalog_data([valid.copy()])
         invalid_price = dict(valid, list_price="-5")
         with self.assertRaisesRegex(ValueError, "non-negative"):
             build_catalog.validate_catalog_data([invalid_price])
-        invalid_sequence = [valid.copy(), dict(valid, sr_no="3")]
-        with self.assertRaisesRegex(ValueError, "unique and sequential"):
-            build_catalog.validate_catalog_data(invalid_sequence)
+        duplicate_serial = [valid.copy(), dict(valid, item_number="2")]
+        with self.assertRaisesRegex(ValueError, "unique"):
+            build_catalog.validate_catalog_data(duplicate_serial)
+        duplicate_group_item = [valid.copy(), dict(valid, sr_number="2")]
+        with self.assertRaisesRegex(ValueError, "Duplicate hierarchical"):
+            build_catalog.validate_catalog_data(duplicate_group_item)
 
     def test_category_images_are_marked_as_representative_fallbacks(self):
         categories = build_catalog.group_by_category(self.items, build_catalog.IMAGES_DIR)
@@ -73,23 +87,23 @@ class CatalogDataTests(unittest.TestCase):
         self.assertTrue(all(not item["image_path"] for item in fallback_items))
 
     def test_generated_pages_include_quote_ui_and_checkout_assets(self):
-        search = (CATALOG_ROOT / "search_catalog.html").read_text(encoding="utf-8")
+        search = (CATALOG_ROOT / "customer_catalog.html").read_text(encoding="utf-8")
         printed = (CATALOG_ROOT / "print_catalog.html").read_text(encoding="utf-8")
         landing = (CATALOG_ROOT / "index.html").read_text(encoding="utf-8")
         for page in (search, printed):
             self.assertTrue(all(line == line.rstrip() for line in page.splitlines()))
-        self.assertIn("Price on request", search)
-        self.assertIn("Add to quote", search)
+        search_js = (CATALOG_ROOT / "assets" / "js" / "search_catalog.js").read_text(encoding="utf-8")
+        self.assertIn("Price on request", search_js)
+        self.assertIn("Add to quote", search_js)
         self.assertIn("commerce_core.js", search)
         self.assertIn("search_catalog.css", search)
         self.assertIn('href="assets/css/search_catalog.css"', search)
         self.assertIn('src="assets/js/commerce_core.js"', search)
-        self.assertIn('href="search_catalog.html"', landing)
+        self.assertIn('href="customer_catalog.html"', landing)
         self.assertIn('href="print_catalog.html"', landing)
         self.assertNotIn("catalog-directory/", search)
         self.assertIn("Price on request", printed)
         self.assertNotIn("../images/", printed)
-        self.assertIn("id=\"name-1412\"", search)
         self.assertIn("Sales contact: Amit G. Parikh", search)
         self.assertIn("27ACJPP2955J1Z4", search)
         self.assertIn("Mobile: 9869905779", printed)

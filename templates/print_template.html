@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ company.name }} - Price List</title>
 <style>
     @page {
@@ -98,6 +99,28 @@
     .desc-text { font-weight: bold; }
     .size-text { color: #333; font-size: 8pt; margin-left: 4px; }
     .pack-text { color: #555; font-size: 7.5pt; font-style: italic; }
+
+    @media screen {
+        body { max-width: 1500px; margin: 0 auto; padding: 12px; box-sizing: border-box; }
+    }
+
+    @media screen and (max-width: 700px) {
+        body { padding: 8px; font-size: 10pt; }
+        .contact-grid { grid-template-columns: 1fr; }
+        .contact-details { flex-wrap: wrap; }
+        .page-content { column-count: 1; column-gap: 0; column-rule: none; }
+        table { page-break-inside: auto; break-inside: auto; table-layout: fixed; }
+        th, td { padding: 4px 3px; font-size: 8.5pt; overflow-wrap: anywhere; }
+        .cat-header { font-size: 10pt; }
+        .col-sr { width: 7%; }
+        .col-img { width: 8%; }
+        .col-desc { width: 42%; }
+        .col-hsn { width: 15%; font-size: 7pt; }
+        .col-price { width: 13%; }
+        .col-per { width: 15%; }
+        .item-img { max-height: 30px; max-width: 40px; }
+        .price-reference { line-height: 1.4; overflow-wrap: anywhere; }
+    }
 </style>
 </head>
 <body>
@@ -145,7 +168,7 @@
         <tbody>
             {% for item in cat.products %}
             <tr>
-                <td class="col-sr">{{ item.sr_no }}.</td>
+                <td class="col-sr">{{ item.sr_number }}.<br><small>{{ item.group_number }}.{{ item.item_number }}</small></td>
                 <td class="col-img">
                     {% if item.display_image_path %}
                         <img src="{{ item.display_image_path }}" class="item-img{% if item.image_is_representative %} representative-image{% endif %}" alt="{% if item.image_is_representative %}Representative image for {{ cat.name }}{% else %}{{ item.item_name }}{% endif %}">

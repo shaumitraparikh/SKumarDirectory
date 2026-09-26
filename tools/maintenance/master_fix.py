@@ -84,11 +84,11 @@ with open('data/catalog_data.csv', 'r', encoding='utf-8-sig') as f:
 
 new_rows = []
 for row in rows:
-    if not row['sr_no'].isdigit(): 
+    if not row['sr_number'].isdigit(): 
         new_rows.append(row)
         continue
         
-    sr = int(row['sr_no'])
+    sr = int(row['sr_number'])
     
     true_cat = get_true_category(sr)
     if true_cat == "DELETE":

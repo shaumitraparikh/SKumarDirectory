@@ -7,8 +7,37 @@
 <meta name="theme-color" content="#102a43">
 <title>{{ company.name }} - POS / Search Catalog</title>
 <link rel="stylesheet" href="assets/css/search_catalog.css">
+{% if seller_mode %}<link rel="stylesheet" href="tools/seller/seller_editor.css">{% endif %}
 </head>
 <body>
+
+{% if seller_mode %}
+<section class="seller-tools" aria-label="Seller catalog controls">
+    <div class="seller-tools-title">
+        <strong>Seller workspace</strong>
+        <span>This editor runs only from the local seller server.</span>
+    </div>
+    <div class="seller-tool-actions">
+        <button type="button" id="sellerAddButton">Add product</button>
+        <button type="button" id="sellerUndoButton" disabled>Undo last change</button>
+        <button type="button" id="sellerSaveButton">Save &amp; run updater</button>
+        <span id="sellerStatus" role="status" aria-live="polite">Connecting to local editor…</span>
+    </div>
+</section>
+<dialog class="seller-editor-dialog" id="sellerEditorDialog" aria-labelledby="sellerEditorTitle">
+    <form id="sellerEditorForm">
+        <div class="seller-editor-heading">
+            <h2 id="sellerEditorTitle">Edit catalog item</h2>
+            <button type="button" id="sellerEditorClose" aria-label="Close editor">×</button>
+        </div>
+        <div id="sellerEditorFields" class="seller-editor-fields"></div>
+        <div class="seller-editor-actions">
+            <button type="button" id="sellerEditorCancel">Cancel</button>
+            <button type="submit" id="sellerEditorApply">Apply locally</button>
+        </div>
+    </form>
+</dialog>
+{% endif %}
 
 <div class="header">
     <h1>{{ company.name }}</h1>
@@ -36,9 +65,15 @@
         <button class="close-cart" onclick="toggleCart(false)" aria-label="Close cart">×</button>
     </div>
     <div class="cart-scroll-area">
-    <div class="buyer-info">
-        <span class="section-label">Customer & delivery details</span>
+    <details class="buyer-info" id="buyerDetails" open>
+        <summary class="buyer-summary">Customer &amp; delivery details <span class="disclosure-hint">Choose an existing customer or enter details manually</span></summary>
         <div class="buyer-fields">
+            <label for="customerLookup">Find an existing customer (optional)</label>
+            <input type="search" id="customerLookup" list="clientSuggestions" autocomplete="off" placeholder="Search by name, business, phone, or customer ID">
+            <datalist id="clientSuggestions"></datalist>
+            <button type="button" class="load-clients-btn" id="loadClientsButton">Load customer list (CSV)</button>
+            <input type="file" id="clientCsvFile" accept=".csv,text/csv" hidden>
+            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Customer records stay in this browser session and are not saved or sent until you submit an order.</span>
             <label for="buyerName">Name / business <span aria-hidden="true">*</span></label>
             <input type="text" id="buyerName" autocomplete="name" maxlength="120" placeholder="Customer or company name" required>
             <label for="buyerPhone">Indian mobile / WhatsApp <span aria-hidden="true">*</span></label>
@@ -72,76 +107,63 @@
             <label for="buyerGstin">Customer GSTIN (optional)</label>
             <input type="text" id="buyerGstin" maxlength="15" autocapitalize="characters" placeholder="15-character GSTIN">
         </div>
-    </div>
-    <div class="cart-items" id="cartItems" aria-live="polite">
-        <div class="cart-empty"><strong>Your cart is empty</strong>Add products from the catalog to begin.</div>
-    </div>
+    </details>
+    <details class="cart-items-section" id="orderSummaryDetails" open>
+        <summary class="order-summary-toggle">Order summary <span id="orderSummaryCount">0 items</span></summary>
+        <div class="cart-items" id="cartItems" aria-live="polite">
+            <div class="cart-empty"><strong>Your cart is empty</strong>Add products from the catalog to begin.</div>
+        </div>
+    </details>
     </div>
     <div class="cart-summary">
-        <div class="summary-row"><span>Priced items subtotal</span><span>₹<span id="itemsSubtotal">0.00</span></span></div>
-        <div class="summary-row summary-discount"><span>Item discounts</span><span>−₹<span id="discountTotal">0.00</span></span></div>
-        <div class="summary-row summary-subtotal"><span>Taxable subtotal</span><span>₹<span id="subTotal">0.00</span></span></div>
-        <div class="tax-row summary-row">
-            <label for="cgstRate">CGST (<input type="number" id="cgstRate" class="tax-input" value="9" min="0" max="100" step="0.01" required onchange="renderCart()">%)</label>
-            <span>₹<span id="cgstAmount">0.00</span></span>
-        </div>
-        <div class="tax-row summary-row">
-            <label for="sgstRate">SGST (<input type="number" id="sgstRate" class="tax-input" value="9" min="0" max="100" step="0.01" required onchange="renderCart()">%)</label>
-            <span>₹<span id="sgstAmount">0.00</span></span>
-        </div>
-        <div class="tax-row summary-row"><span>Total tax (<span id="totalTaxRate">18</span>%)</span><span>₹<span id="taxAmount">0.00</span></span></div>
+        <details class="price-breakdown" id="priceBreakdown">
+            <summary class="price-breakdown-toggle">
+                <span>Priced items subtotal</span>
+                <strong>₹<span id="itemsSubtotal">0.00</span></strong>
+            </summary>
+            <div class="price-breakdown-content">
+                <div class="summary-row summary-discount"><span>Item discounts</span><span>−₹<span id="discountTotal">0.00</span></span></div>
+                <div class="summary-row summary-subtotal"><span>Taxable subtotal</span><span>₹<span id="subTotal">0.00</span></span></div>
+                <div class="tax-row summary-row">
+                    <label for="cgstRate">CGST (<input type="number" id="cgstRate" class="tax-input" value="9" min="0" max="100" step="0.01" required onchange="renderCart()">%)</label>
+                    <span>₹<span id="cgstAmount">0.00</span></span>
+                </div>
+                <div class="tax-row summary-row">
+                    <label for="sgstRate">SGST (<input type="number" id="sgstRate" class="tax-input" value="9" min="0" max="100" step="0.01" required onchange="renderCart()">%)</label>
+                    <span>₹<span id="sgstAmount">0.00</span></span>
+                </div>
+                <div class="tax-row summary-row"><span>Total tax (<span id="totalTaxRate">18</span>%)</span><span>₹<span id="taxAmount">0.00</span></span></div>
+            </div>
+        </details>
         <div class="summary-total"><span>Estimated total</span><strong>₹<span id="grandTotal">0.00</span></strong></div>
         <p class="estimate-note" id="quoteItemsNote" hidden>Price-on-request items, stock, delivery and final GST are confirmed by sales and may change this estimate.</p>
         <p class="estimate-note">This is an order request only. No payment is collected here; prices, tax and delivery are confirmed by sales.</p>
         <button class="order-btn" id="placeOrderButton" type="button" onclick="placeOrderRequest()" disabled>Request order on WhatsApp</button>
         <a class="order-fallback" id="whatsAppFallback" hidden target="_blank" rel="noopener noreferrer">Continue to WhatsApp</a>
         <button class="order-copy-btn" id="orderCopyButton" type="button" onclick="downloadOrderCopy()" hidden>Download structured order copy</button>
+        <button class="archive-btn" id="openBillsButton" type="button">View saved bills</button>
         <button class="print-btn" onclick="generateBill()">Print proforma invoice</button>
     </div>
 </aside>
 
+<dialog class="bill-archive-dialog" id="billArchiveDialog" aria-labelledby="billArchiveTitle">
+    <div class="bill-archive-header">
+        <div>
+            <h2 id="billArchiveTitle">Saved proforma bills</h2>
+            <p>Bills are organized in generated_bills/YYYY-MM folders.</p>
+        </div>
+        <button class="close-cart bill-archive-close" id="closeBillArchiveButton" type="button" aria-label="Close saved bills">×</button>
+    </div>
+    <div class="bill-archive-actions">
+        <button class="load-clients-btn" id="chooseBillsFolderButton" type="button">Choose generated_bills folder</button>
+        <span id="billArchiveStatus" role="status" aria-live="polite">Loading saved bills…</span>
+    </div>
+    <div class="bill-archive-list" id="billArchiveList"></div>
+</dialog>
+
 <div class="catalog-wrapper">
     <div class="grid" id="catalogGrid">
-        {% for cat in categories %}
-            {% for item in cat.products %}
-            <div class="card" data-search="{{ item.item_name | lower }} {{ cat.name | lower }} {{ item.hsn_code }} {{ item.sr_no }} {{ item.size }} {{ item.id_size }} {{ item.od_size }} {{ item.lf_size }}">
-                <div class="card-img-container">
-                    {% if item.display_image_path %}
-                        <img src="{{ item.display_image_path }}" class="card-img{% if item.image_is_representative %} representative-image{% endif %}" alt="{% if item.image_is_representative %}Representative image for {{ cat.name }}{% else %}{{ item.item_name }}{% endif %}" loading="lazy">
-                    {% else %}
-                        <div style="color:#aaa; font-size:10px; font-style:italic;">No Image</div>
-                    {% endif %}
-                </div>
-                <div class="card-content">
-                    <p class="card-title" id="name-{{ item.sr_no }}">{{ item.item_name }}</p>
-                    <p class="card-meta">Sr: {{ item.sr_no }} | HSN: <span class="hsn-val">{{ item.hsn_code }}</span></p>
-{% if item.size and item.size not in item.item_name %}<p class="card-meta">Size: <span class="size-val">{{ item.size }}</span></p>{% else %}<span class="size-val" hidden></span>{% endif %}
-{% if item.id_size or item.od_size or item.lf_size %}
-                    <p class="card-meta">
-{% if item.id_size %}ID Size: <span class="id-size-val">{{ item.id_size }}</span>{% else %}<span class="id-size-val" hidden></span>{% endif %}
-{% if item.od_size %} · OD Size: <span class="od-size-val">{{ item.od_size }}</span>{% else %}<span class="od-size-val" hidden></span>{% endif %}
-{% if item.lf_size %} · L/F Size: <span class="lf-size-val">{{ item.lf_size }}</span>{% else %}<span class="lf-size-val" hidden></span>{% endif %}
-                    </p>
-{% else %}
-                    <span class="id-size-val" hidden></span><span class="od-size-val" hidden></span><span class="lf-size-val" hidden></span>
-{% endif %}
-                    <p class="card-meta">
-                        {% if item.unit %}Unit: <span class="unit-val">{{ item.unit }}</span>{% else %}<span class="unit-val" hidden></span>{% endif %}
-                        {% if item.packing %} · Pack: <span class="packing-val">{{ item.packing }}</span>{% else %}<span class="packing-val" hidden></span>{% endif %}
-                    </p>
-                    {% if item.list_price %}
-                    <p class="card-price">₹<span id="price-{{ item.sr_no }}">{{ item.list_price }}</span></p>
-                    {% else %}
-                    <p class="card-price quote-price">Price on request<span id="price-{{ item.sr_no }}" hidden></span></p>
-                    {% endif %}
-                </div>
-                <div class="add-controls">
-                    <input type="number" id="qty-{{ item.sr_no }}" class="qty-input" value="1" min="1" max="9999" step="1" aria-label="Quantity for {{ item.item_name }}">
-                    <button class="add-btn" onclick="addToCart('{{ item.sr_no }}')">{% if item.list_price %}Add{% else %}Add to quote{% endif %}</button>
-                </div>
-            </div>
-            {% endfor %}
-        {% endfor %}
+        <!-- Cards are dynamically rendered by JavaScript based on search/catalogData -->
     </div>
 </div>
 
@@ -218,7 +240,14 @@
     <div class="inv-footer">Thank you for your business.</div>
 </section>
 
+<script src="assets/js/client_directory_core.js"></script>
+<script id="catalogData" type="application/json">{{ catalog_data | tojson }}</script>
+{% if not seller_mode %}
 <script src="assets/js/commerce_core.js"></script>
+<script src="assets/js/bill_archive.js"></script>
 <script src="assets/js/search_catalog.js"></script>
+{% else %}
+<script src="tools/seller/seller_editor.js"></script>
+{% endif %}
 </body>
 </html>

@@ -6,14 +6,15 @@ Usage:
     python build_catalog.py
 
 Reads:
-    - config.json       : Company info and settings
+    - data/config.json  : Company info and settings
     - data/catalog_data.csv : Product data
     - images/           : Product images
     - templates/        : Jinja2 HTML templates
 
 Produces:
     - print_catalog.html  : Full print-ready catalog
-    - search_catalog.html : Searchable web catalog
+    - search_catalog.html : Local seller catalog
+    - customer_catalog.html : Customer-facing searchable catalog
 """
 
 import csv
@@ -39,7 +40,7 @@ except ImportError:
 # Paths
 # ============================================================
 SCRIPT_DIR = Path(__file__).parent
-CONFIG_FILE = SCRIPT_DIR / "config.json"
+CONFIG_FILE = SCRIPT_DIR / "data" / "config.json"
 DATA_FILE = SCRIPT_DIR / "data" / "catalog_data.csv"
 DATA_NOTES_FILE = SCRIPT_DIR / "data" / "catalog_data_notes.json"
 IMAGES_DIR = SCRIPT_DIR / "images"
@@ -59,7 +60,7 @@ def load_csv_data(csv_path):
     with open(csv_path, 'r', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f)
         required_fields = {
-            'sr_no', 'category', 'item_name', 'hsn_code', 'list_price',
+            'sr_number', 'group_number', 'item_number', 'category', 'item_name', 'hsn_code', 'list_price',
             'unit', 'packing', 'image_ref', 'page'
         }
         missing_fields = required_fields - set(reader.fieldnames or [])
@@ -72,9 +73,12 @@ def load_csv_data(csv_path):
             for key, val in row.items():
                 item[key] = val.strip() if val else ''
             
-            # Skip items with no sr_no or no useful data
-            if not item.get('sr_no') or not item.get('sr_no', '').strip():
+            if not item.get('sr_number') or not item.get('sr_number', '').strip():
                 continue
+
+            item['hidden'] = item.get('hidden', '').strip().lower() in {
+                '1', 'true', 'yes', 'hidden'
+            }
             
             # Clean up unit field
             unit = item.get('unit', '')
@@ -90,7 +94,7 @@ def load_csv_data(csv_path):
     validate_catalog_data(items)
     notes = load_catalog_data_notes(items)
     for item in items:
-        item['notes'] = notes.get(item['sr_no'], {})
+        item['notes'] = notes.get(item['sr_number'], {})
     return items
 
 
@@ -104,37 +108,60 @@ def load_catalog_data_notes(items):
     if not isinstance(notes, dict):
         raise ValueError("Catalog data notes must be a JSON object keyed by serial number.")
 
-    valid_serials = {item['sr_no'] for item in items}
+    valid_serials = {item['sr_number'] for item in items}
     unknown_serials = set(notes) - valid_serials
     if unknown_serials:
         raise ValueError(f"Catalog notes reference unknown serials: {', '.join(sorted(unknown_serials))}")
     return notes
 
 
+def visible_catalog_items(items):
+    return [item for item in items if not item.get('hidden', False)]
+
+
 def validate_catalog_data(items):
-    """Reject malformed serials and prices while allowing intentional quote-only items."""
+    """Reject duplicate identifiers and malformed prices while allowing quote-only items."""
     serials = []
+    hierarchy_ids = set()
     for item in items:
         try:
-            serials.append(int(item['sr_no']))
+            serial = int(item['sr_number'])
         except (KeyError, TypeError, ValueError) as error:
-            raise ValueError(f"Invalid catalog serial number: {item.get('sr_no', '')!r}") from error
+            raise ValueError(f"Invalid catalog serial number: {item.get('sr_number', '')!r}") from error
+        if serial < 1:
+            raise ValueError(f"Catalog serial number must be positive: {serial}.")
+        serials.append(serial)
+
+        try:
+            group_number = int(item['group_number'])
+            item_number = int(item['item_number'])
+        except (KeyError, TypeError, ValueError) as error:
+            raise ValueError(
+                f"Catalog item {serial} needs positive group_number and item_number values."
+            ) from error
+        if group_number < 1 or item_number < 1:
+            raise ValueError(f"Catalog item {serial} needs positive group/item numbers.")
+        hierarchy_id = (group_number, item_number)
+        if hierarchy_id in hierarchy_ids:
+            raise ValueError(
+                f"Duplicate hierarchical item number: {group_number}.{item_number}."
+            )
+        hierarchy_ids.add(hierarchy_id)
 
         if not item.get('category') or not item.get('item_name'):
-            raise ValueError(f"Catalog item {item['sr_no']} needs a category and item name.")
+            raise ValueError(f"Catalog item {serial} needs a category and item name.")
 
         price = item.get('list_price', '').strip()
         if price:
             try:
                 amount = Decimal(price)
             except InvalidOperation as error:
-                raise ValueError(f"Invalid price for catalog item {item['sr_no']}: {price!r}") from error
+                raise ValueError(f"Invalid price for catalog item {serial}: {price!r}") from error
             if not amount.is_finite() or amount < 0:
-                raise ValueError(f"Price for catalog item {item['sr_no']} must be finite and non-negative.")
+                raise ValueError(f"Price for catalog item {serial} must be finite and non-negative.")
 
-    expected_serials = list(range(1, len(items) + 1))
-    if serials != expected_serials:
-        raise ValueError("Catalog serial numbers must be unique and sequential, starting at 1.")
+    if len(serials) != len(set(serials)):
+        raise ValueError("Catalog serial numbers must be unique.")
 
 
 def find_image(image_ref, images_dir):
@@ -233,30 +260,18 @@ def build_print_catalog(config, categories, env):
     return output_path
 
 
-def build_search_catalog(config, categories, items, env):
-    """Generate the searchable HTML catalog."""
+def prepare_search_catalog_data(items):
+    """Retain CSV fields and public display paths in the machine-readable catalog payload, excluding private image_path."""
+    return [
+        {key: value for key, value in item.items() if key != 'image_path'}
+        for item in items
+    ]
+
+
+def build_search_catalog(config, categories, items, env, seller_mode=False):
+    """Generate a customer or local seller searchable catalog."""
     template = env.get_template('search_template.html')
-    
-    # Prepare all items as JSON for JavaScript search
-    items_for_json = []
-    for item in items:
-        items_for_json.append({
-            'sr_no': item.get('sr_no', ''),
-            'category': item.get('category', ''),
-            'item_name': item.get('item_name', ''),
-            'size': item.get('size', ''),
-            'hsn_code': item.get('hsn_code', ''),
-            'list_price': item.get('list_price', ''),
-            'unit': item.get('unit', ''),
-            'packing': item.get('packing', ''),
-            'id_size': item.get('id_size', ''),
-            'od_size': item.get('od_size', ''),
-            'lf_size': item.get('lf_size', ''),
-            'image_ref': item.get('image_ref', ''),
-            'notes': item.get('notes', ''),
-        })
-    
-    all_items_json = json.dumps(items_for_json, ensure_ascii=False)
+    catalog_data = prepare_search_catalog_data(items)
     
     # Get unique category names
     category_names = list(OrderedDict.fromkeys(
@@ -267,13 +282,13 @@ def build_search_catalog(config, categories, items, env):
         company=config['company'],
         billing=config,
         categories=categories,
-        all_items_json=all_items_json,
+        catalog_data=catalog_data,
         category_names=sorted(category_names),
         generation_date=datetime.now().strftime('%Y-%m-%d %H:%M'),
-        images_base='images'
+        images_base='images',
+        seller_mode=seller_mode,
     )
-    output_path = OUTPUT_DIR / 'search_catalog.html'
-    output_path = OUTPUT_DIR / 'search_catalog.html'
+    output_path = OUTPUT_DIR / ('search_catalog.html' if seller_mode else 'customer_catalog.html')
     write_html_output(output_path, html)
     
     print(f"  [OK] Search catalog: {output_path}")
@@ -297,11 +312,12 @@ def main():
     # Load data
     print("\n2. Loading product data...")
     items = load_csv_data(DATA_FILE)
-    print(f"   Loaded {len(items)} items")
+    active_items = visible_catalog_items(items)
+    print(f"   Loaded {len(items)} items ({len(active_items)} visible; {len(items) - len(active_items)} hidden)")
     
     # Group by category
     print("\n3. Grouping by category...")
-    categories = group_by_category(items, IMAGES_DIR)
+    categories = group_by_category(active_items, IMAGES_DIR)
     print(f"   {len(categories)} categories found")
     for cat in categories:
         print(f"     - {cat['name']}: {len(cat['products'])} items" + 
@@ -317,7 +333,9 @@ def main():
     print("\n4. Generating catalogs...")
     
     print_path = build_print_catalog(config, categories, env)
-    search_path = build_search_catalog(config, categories, items, env)
+    customer_path = build_search_catalog(config, categories, active_items, env)
+    seller_categories = group_by_category(items, IMAGES_DIR)
+    seller_path = build_search_catalog(config, seller_categories, items, env, seller_mode=True)
     
     # Summary
     print("\n" + "=" * 60)
@@ -327,17 +345,18 @@ def main():
     print(f"  Categories: {len(categories)}")
     print(f"\n  Output files:")
     print(f"    Print catalog:  {print_path}")
-    print(f"    Search catalog: {search_path}")
+    print(f"    Customer catalog: {customer_path}")
+    print(f"    Local seller catalog: {seller_path}")
     print(f"\n  Open the HTML files in a browser to view!")
     print(f"  Print catalog -> Ctrl+P -> Save as PDF for sharing")
     
-    # Try to open in browser
-    try:
-        import webbrowser
-        webbrowser.open(str(search_path))
-        print(f"\n  [OK] Opened search catalog in browser")
-    except Exception:
-        pass
+    if os.environ.get('CATALOG_NO_BROWSER') != '1':
+        try:
+            import webbrowser
+            webbrowser.open("http://127.0.0.1:8766/search_catalog.html")
+            print("\n  [OK] Opened seller catalog (start tools/seller/start_seller.bat first)")
+        except Exception:
+            pass
     
     return 0
 

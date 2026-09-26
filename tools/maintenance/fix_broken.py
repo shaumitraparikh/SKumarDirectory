@@ -19,7 +19,7 @@ def sanitize_filename(name):
 categories = {}
 for row in rows:
     cat = row['category']
-    sr = int(row['sr_no'])
+    sr = int(row['sr_number'])
     if cat not in categories:
         categories[cat] = {'min_sr': sr, 'max_sr': sr}
     else:

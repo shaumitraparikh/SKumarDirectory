@@ -135,7 +135,9 @@
         const items = options.items.map(item => {
             const line = calculateLineAmounts(item);
             return {
-                sku: String(item.sr_no),
+                sku: String(item.sr_number !== undefined ? item.sr_number : item.sr_no),
+                group_number: item.group_number == null ? '' : String(item.group_number),
+                item_number: item.item_number == null ? '' : String(item.item_number),
                 name: String(item.name),
                 hsn: String(item.hsn || ''),
                 specification: {
@@ -227,7 +229,10 @@
                 item.specification.od_size && 'OD ' + item.specification.od_size,
                 item.specification.lf_size && 'L/F ' + item.specification.lf_size].filter(Boolean).join(', ');
             const price = item.unit_price === null ? 'price to be confirmed' : '₹' + item.unit_price.toFixed(2);
-            lines.push((index + 1) + '. Sr ' + item.sku + ' — ' + item.name +
+            const groupLabel = item.group_number && item.item_number
+                ? ' (' + item.group_number + '.' + item.item_number + ')'
+                : '';
+            lines.push((index + 1) + '. Sr ' + item.sku + groupLabel + ' — ' + item.name +
                 (details ? ' (' + details + ')' : '') + ' | Qty ' + item.quantity + ' ' +
                 item.specification.unit + ' | ' + price);
         });
