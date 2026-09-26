@@ -14,6 +14,23 @@ This creates two files in `output/`:
 - **print_catalog.html** - Print-ready catalog (Ctrl+P in browser -> Save as PDF)
 - **search_catalog.html** - Searchable web catalog with filters
 
+The search catalog's proforma bill calculates CGST and SGST separately at 9%
+each by default (18% total). Both rates can be adjusted in the cart; tax is
+calculated on the taxable subtotal after item discounts.
+The print catalog starts with the source price-list business and sales-contact
+header. Product dimensions such as base-bar L/F size and Teflon ID/OD sizes are
+stored and shown as distinct specifications.
+
+## GitHub Pages
+
+Pushing to `main` automatically builds and deploys both catalogs to GitHub Pages.
+The repository landing page links to the searchable and print-ready catalogs.
+On Windows, `1_Click_Update.bat` rebuilds both HTML files and commits the catalog
+data, configuration, image-folder changes, and generated HTML files locally.
+It asks before pushing to `origin/main`; choose **Y** to publish the updates and
+start the Pages deployment, or **N** to keep the commit local. Run it from a
+checkout on the `main` branch with Git credentials configured for pushing.
+
 ## Folder Structure
 
 ```

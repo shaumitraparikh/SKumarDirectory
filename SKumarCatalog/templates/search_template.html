@@ -83,72 +83,95 @@
     /* Modern Off-Canvas Cart Drawer */
     .cart-backdrop {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background: rgba(0,0,0,0.4); z-index: 999;
+        background: rgba(15, 23, 42, 0.52); z-index: 999;
         opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
-        backdrop-filter: blur(2px);
+        backdrop-filter: blur(3px);
     }
     .cart-backdrop.open { opacity: 1; visibility: visible; }
     
     .cart-drawer {
-        position: fixed; top: 0; right: -420px; width: 400px; height: 100vh;
-        background: white; z-index: 1000;
-        box-shadow: -5px 0 25px rgba(0,0,0,0.15);
-        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex; flex-direction: column;
+        position: fixed; top: 0; right: 0; width: min(460px, 100vw); height: 100vh;
+        height: 100dvh; background: #fff; z-index: 1000;
+        box-shadow: -16px 0 48px rgba(15, 23, 42, 0.2);
+        transform: translateX(105%); transition: transform 0.28s ease;
+        display: flex; flex-direction: column; visibility: hidden;
     }
-    .cart-drawer.open { right: 0; }
+    .cart-drawer.open { transform: translateX(0); visibility: visible; }
     
     .cart-header {
-        background: var(--primary); color: white; padding: 20px;
-        font-weight: bold; font-size: 18px;
+        background: #102a43; color: #fff; padding: 22px 24px;
         display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 3px solid #2b6cb0;
     }
-    .close-cart { 
-        background: none; border: none; color: white; 
-        font-size: 28px; cursor: pointer; line-height: 1; padding: 0;
-        transition: transform 0.2s;
+    .cart-heading { margin: 0; font-size: 20px; letter-spacing: 0.01em; }
+    .cart-subtitle { color: #cbd5e1; font-size: 12px; margin-top: 5px; }
+    .close-cart {
+        width: 38px; height: 38px; border: 1px solid rgba(255,255,255,.35);
+        border-radius: 8px; background: transparent; color: #fff;
+        font-size: 23px; cursor: pointer; line-height: 1;
     }
-    .close-cart:hover { transform: scale(1.1); }
+    .close-cart:hover { background: rgba(255,255,255,.12); }
     
-    .buyer-info { padding: 15px 20px; background: #f9f9f9; border-bottom: 1px solid #ddd; }
-    .buyer-info input {
-        width: 100%; padding: 10px; margin-bottom: 10px;
-        border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
-        font-size: 14px;
+    .buyer-info { padding: 18px 24px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+    .section-label { display: block; color: #334e68; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 12px; }
+    .buyer-fields { display: grid; gap: 10px; }
+    .buyer-fields input {
+        width: 100%; padding: 11px 12px; border: 1px solid #cbd5e1;
+        border-radius: 7px; box-sizing: border-box; background: #fff;
+        color: #243b53; font: inherit; font-size: 13px;
     }
+    .buyer-fields input:focus { outline: 3px solid rgba(43,108,176,.16); border-color: #2b6cb0; }
+    .buyer-fields input::placeholder { color: #829ab1; }
     
-    .cart-items { flex-grow: 1; overflow-y: auto; padding: 15px 20px; }
+    .cart-items { flex: 1 1 auto; min-height: 100px; overflow-y: auto; padding: 8px 24px; }
+    .cart-empty { padding: 42px 16px; text-align: center; color: #627d98; font-size: 14px; }
+    .cart-empty strong { display: block; color: #334e68; font-size: 15px; margin-bottom: 5px; }
     .cart-item {
-        border-bottom: 1px solid #eee; padding: 15px 0;
-        display: flex; justify-content: space-between; align-items: center;
+        display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px;
+        padding: 16px 0; border-bottom: 1px solid #e9eef4;
     }
-    .cart-item-details { width: 65%; }
-    .cart-item-title { font-size: 13px; font-weight: bold; line-height: 1.3; margin-bottom: 8px; color: #333;}
-    
-    .cart-qty-controls { display: flex; align-items: center; gap: 8px; }
+    .cart-item-title { color: #243b53; font-size: 13px; font-weight: 650; line-height: 1.45; margin-bottom: 8px; }
+    .cart-item-meta { color: #627d98; font-size: 11px; line-height: 1.45; }
+    .cart-item-rate { color: #486581; font-size: 11px; margin-top: 7px; }
+    .cart-qty-controls { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; }
     .qty-btn {
-        background: #f1f1f1; border: 1px solid #ddd; width: 26px; height: 26px;
-        border-radius: 50%; cursor: pointer; font-weight: bold; color: #555;
+        background: #fff; border: 1px solid #cbd5e1; width: 30px; height: 30px;
+        border-radius: 6px; cursor: pointer; font-weight: 700; color: #334e68;
         display: flex; align-items: center; justify-content: center;
     }
-    .qty-btn:hover { background: #e2e2e2; color: #000; }
-    .cart-item-total { font-size: 15px; font-weight: bold; text-align: right; width: 30%; color: var(--primary);}
+    .qty-btn:hover { background: #edf2f7; border-color: #829ab1; }
+    .qty-value { min-width: 22px; text-align: center; font-size: 13px; font-weight: 650; color: #243b53; }
+    .cart-item-total { padding-top: 2px; text-align: right; color: #102a43; font-size: 14px; font-weight: 700; white-space: nowrap; }
+    .cart-item-discount { margin-top: 9px; color: #486581; font-size: 11px; }
+    .cart-item-discount summary { cursor: pointer; color: #2b6cb0; font-weight: 600; }
+    .cart-item-discount summary:hover { color: #1a4f7a; }
+    .discount-controls { display: flex; align-items: center; gap: 6px; margin: 8px 0 2px 17px; }
+    .discount-input { width: 54px; padding: 5px 6px; border: 1px solid #cbd5e1; border-radius: 5px; color: #243b53; font: inherit; text-align: right; }
+    .discount-input:focus { outline: 2px solid rgba(43,108,176,.18); border-color: #2b6cb0; }
+    .cart-item-discount-value { display: block; margin-top: 6px; color: #1f5c45; font-size: 11px; }
     
-    .cart-summary { 
-        background: #fff; padding: 20px; border-top: 1px solid #ddd;
-        box-shadow: 0 -4px 10px rgba(0,0,0,0.03);
+    .cart-summary {
+        background: #fff; padding: 18px 24px 22px; border-top: 1px solid #d9e2ec;
+        box-shadow: 0 -8px 24px rgba(15,23,42,.05);
     }
-    .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px; color: #555;}
-    .summary-total { font-size: 20px; font-weight: bold; color: var(--primary); border-top: 2px dashed #ccc; padding-top: 12px; margin-top: 5px; }
-    .tax-input { width: 45px; padding: 4px; margin-right: 5px; text-align: right; border: 1px solid #ccc; border-radius: 4px;}
+    .summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 11px; font-size: 13px; color: #486581; }
+    .summary-discount { color: #1f5c45; }
+    .summary-subtotal { padding-top: 9px; border-top: 1px solid #e2e8f0; }
+    .summary-total { display: flex; justify-content: space-between; align-items: center; color: #102a43; border-top: 1px solid #d9e2ec; padding-top: 14px; margin-top: 4px; font-size: 14px; font-weight: 700; }
+    .summary-total strong { font-size: 21px; letter-spacing: -.02em; }
+    .tax-input { width: 54px; padding: 5px 7px; text-align: right; border: 1px solid #cbd5e1; border-radius: 5px; color: #243b53; font: inherit; }
+    .tax-input:focus { outline: 2px solid rgba(43,108,176,.18); border-color: #2b6cb0; }
     
     .print-btn {
-        width: 100%; background: var(--accent); color: white; border: none;
-        padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; 
-        cursor: pointer; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px;
-        transition: background 0.2s;
+        width: 100%; background: #1f5c45; color: #fff; border: 0;
+        padding: 14px 16px; border-radius: 7px; font-size: 14px; font-weight: 700;
+        cursor: pointer; margin-top: 17px; letter-spacing: .02em;
+        transition: background .18s, transform .18s, box-shadow .18s;
+        box-shadow: 0 3px 8px rgba(31,92,69,.18);
     }
-    .print-btn:hover { background: #218838; }
+    .print-btn:hover { background: #174b38; box-shadow: 0 5px 12px rgba(31,92,69,.24); }
+    .print-btn:active { transform: translateY(1px); }
+    .print-btn:focus-visible, .qty-btn:focus-visible, .close-cart:focus-visible, .cart-toggle-btn:focus-visible { outline: 3px solid #f6ad55; outline-offset: 2px; }
 
     /* Catalog Grid */
     .catalog-wrapper { padding: 20px; max-width: 1400px; margin: 0 auto; }
@@ -189,30 +212,60 @@
     }
     #toast.show { visibility: visible; opacity: 1; }
 
-    /* Print Invoice Styles */
+    /* Print invoice */
     #printBill { display: none; }
     
     @media print {
-        @page { size: A4 portrait; margin: 15mm; }
-        body { background: white; }
-        .header, .sticky-bar, .catalog-wrapper, .cart-dropdown, #toast { display: none !important; }
-        #printBill { display: block !important; font-family: Arial, sans-serif; color: #000; }
-        .inv-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-        .inv-header h1 { margin: 0; font-size: 24px; text-transform: uppercase;}
-        .inv-header p { margin: 2px 0; font-size: 12px; }
-        .inv-meta { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14px; }
-        .inv-buyer { font-weight: bold; font-size: 16px; }
-        table.inv-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .inv-table th, .inv-table td { border: 1px solid #000; padding: 6px; font-size: 12px; }
-        .inv-table th { background: #f0f0f0; }
-        .inv-table td.num { text-align: right; }
-        .inv-summary { width: 300px; float: right; }
+        @page { size: A4 portrait; margin: 13mm; }
+        body { background: #fff; color: #172b4d; }
+        body > * { display: none !important; }
+        #printBill {
+            display: block !important; position: absolute; inset: 0; width: 100%;
+            font-family: Arial, Helvetica, sans-serif; color: #172b4d; font-size: 10pt;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        .inv-topline { height: 5px; background: #173b57; margin-bottom: 20px; }
+        .inv-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; border-bottom: 1px solid #cbd5e1; padding-bottom: 16px; margin-bottom: 18px; }
+        .inv-brand .legal-name { margin: 0 0 4px; color: #486581; font-size: 8pt; font-weight: 700; letter-spacing: .08em; }
+        .inv-brand h1 { margin: 0 0 5px; color: #173b57; font-size: 22pt; letter-spacing: .01em; }
+        .inv-brand .tagline { color: #486581; font-size: 9pt; margin: 0 0 8px; }
+        .inv-brand p { margin: 3px 0; color: #486581; font-size: 8.5pt; }
+        .inv-title { min-width: 165px; text-align: right; }
+        .inv-title h2 { margin: 0 0 7px; color: #173b57; font-size: 17pt; letter-spacing: .06em; }
+        .inv-title span { color: #627d98; font-size: 8pt; text-transform: uppercase; letter-spacing: .08em; }
+        .inv-meta { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; margin-bottom: 20px; }
+        .inv-card { padding: 12px 14px; background: #f4f7fa !important; border: 1px solid #d9e2ec; border-radius: 4px; }
+        .inv-card-label { margin-bottom: 8px; color: #627d98; font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+        .inv-buyer { color: #172b4d; font-weight: 700; font-size: 11pt; margin-bottom: 4px; }
+        .inv-buyer-detail { color: #486581; font-size: 9pt; line-height: 1.5; white-space: pre-line; }
+        .inv-facts { display: grid; gap: 9px; }
+        .inv-fact { display: flex; justify-content: space-between; gap: 14px; font-size: 9pt; }
+        .inv-fact span:first-child { color: #627d98; }
+        .inv-fact strong { color: #172b4d; text-align: right; }
+        table.inv-table { width: 100%; border-collapse: collapse; margin: 0 0 18px; }
+        .inv-table thead { display: table-header-group; }
+        .inv-table tr { break-inside: avoid; page-break-inside: avoid; }
+        .inv-table th, .inv-table td { border-bottom: 1px solid #d9e2ec; padding: 7px 5px; font-size: 8pt; }
+        .inv-table th { background: #173b57 !important; color: #fff !important; font-weight: 700; text-align: left; }
+        .inv-table tbody tr:nth-child(even) { background: #f7f9fb !important; }
+        .inv-table td.num, .inv-table th.num { text-align: right; white-space: nowrap; }
+        .inv-table .item-size { margin-top: 3px; color: #486581; font-size: 7.5pt; }
+        .inv-summary { width: 320px; margin: 0 0 0 auto; }
         .inv-summary table { width: 100%; border-collapse: collapse; }
-        .inv-summary td { padding: 5px; font-size: 14px; border: 1px solid #000; }
-        .inv-summary td.num { text-align: right; }
-        .inv-summary .total { font-weight: bold; font-size: 16px; }
-        .clear { clear: both; }
-        .footer { text-align: center; margin-top: 40px; font-size: 12px; font-style: italic; }
+        .inv-summary td { padding: 7px 8px; border-bottom: 1px solid #e2e8f0; font-size: 9pt; }
+        .inv-summary td.num { text-align: right; white-space: nowrap; }
+        .inv-summary .total td { padding-top: 11px; border-top: 2px solid #173b57; border-bottom: 0; color: #173b57; font-size: 12pt; font-weight: 700; }
+        .inv-notes { margin-top: 28px; padding-top: 12px; border-top: 1px solid #d9e2ec; color: #627d98; font-size: 8pt; line-height: 1.5; }
+        .inv-signoff { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 35px; color: #627d98; font-size: 8pt; }
+        .inv-signature { width: 190px; padding-top: 7px; border-top: 1px solid #829ab1; text-align: center; }
+        .inv-footer { margin-top: 16px; color: #829ab1; font-size: 7.5pt; text-align: center; }
+    }
+
+    @media (max-width: 520px) {
+        .cart-drawer { width: 100vw; }
+        .cart-header, .buyer-info { padding-left: 18px; padding-right: 18px; }
+        .cart-items { padding-left: 18px; padding-right: 18px; }
+        .cart-summary { padding-left: 18px; padding-right: 18px; }
     }
 </style>
 </head>
@@ -225,41 +278,54 @@
 
 <div class="sticky-bar">
     <input type="text" id="searchInput" placeholder="Search by Part Name, Size, Category, HSN, or Sr.No..." onkeyup="filterCatalog()">
-    <button class="cart-toggle-btn" onclick="toggleCart()">
-        🛒 Cart <span class="cart-badge" id="cartCountBadge">0</span>
+    <button class="cart-toggle-btn" onclick="toggleCart()" aria-controls="cartDropdown" aria-expanded="false">
+        Cart <span class="cart-badge" id="cartCountBadge">0</span>
     </button>
 </div>
 
-<div class="cart-backdrop" id="cartBackdrop" onclick="toggleCart()"></div>
-<div class="cart-drawer" id="cartDropdown">
+<div class="cart-backdrop" id="cartBackdrop" onclick="toggleCart(false)" aria-hidden="true"></div>
+<aside class="cart-drawer" id="cartDropdown" role="dialog" aria-modal="true" aria-labelledby="cartTitle" aria-hidden="true">
     <div class="cart-header">
-        <span>🛒 Your Cart</span>
-        <button class="close-cart" onclick="toggleCart()">×</button>
+        <div>
+            <h2 class="cart-heading" id="cartTitle">Order summary</h2>
+            <div class="cart-subtitle">Review items and customer details</div>
+        </div>
+        <button class="close-cart" onclick="toggleCart(false)" aria-label="Close cart">×</button>
     </div>
     <div class="buyer-info">
-        <input type="text" id="buyerName" placeholder="Buyer Name (e.g. Acme Corp)">
-        <input type="text" id="buyerContact" placeholder="Phone / Email">
-        <input type="text" id="buyerAddress" placeholder="Address">
+        <span class="section-label">Customer details <span style="font-weight:400; text-transform:none; letter-spacing:0;">(optional)</span></span>
+        <div class="buyer-fields">
+            <input type="text" id="buyerName" placeholder="Customer or company name" aria-label="Customer or company name">
+            <input type="text" id="buyerContact" placeholder="Phone or email" aria-label="Customer phone or email">
+            <input type="text" id="buyerAddress" placeholder="Billing address" aria-label="Customer billing address">
+        </div>
     </div>
-    <div class="cart-items" id="cartItems">
-        <div style="text-align:center; color:#888; margin-top:20px;">Cart is empty</div>
+    <div class="cart-items" id="cartItems" aria-live="polite">
+        <div class="cart-empty"><strong>Your cart is empty</strong>Add products from the catalog to begin.</div>
     </div>
     <div class="cart-summary">
-        <div class="summary-row"><span>Subtotal:</span><span>₹<span id="subTotal">0.00</span></span></div>
+        <div class="summary-row"><span>Items subtotal</span><span>₹<span id="itemsSubtotal">0.00</span></span></div>
+        <div class="summary-row summary-discount"><span>Item discounts</span><span>−₹<span id="discountTotal">0.00</span></span></div>
+        <div class="summary-row summary-subtotal"><span>Taxable subtotal</span><span>₹<span id="subTotal">0.00</span></span></div>
         <div class="tax-row summary-row">
-            <span>Tax (<input type="number" id="taxRate" class="tax-input" value="18" onchange="renderCart()">%):</span>
-            <span>₹<span id="taxAmount">0.00</span></span>
+            <label for="cgstRate">CGST (<input type="number" id="cgstRate" class="tax-input" value="9" min="0" max="100" step="0.01" required onchange="renderCart()">%)</label>
+            <span>₹<span id="cgstAmount">0.00</span></span>
         </div>
-        <div class="summary-row summary-total"><span>Grand Total:</span><span>₹<span id="grandTotal">0.00</span></span></div>
-        <button class="print-btn" onclick="generateBill()">🖨️ Print Bill</button>
+        <div class="tax-row summary-row">
+            <label for="sgstRate">SGST (<input type="number" id="sgstRate" class="tax-input" value="9" min="0" max="100" step="0.01" required onchange="renderCart()">%)</label>
+            <span>₹<span id="sgstAmount">0.00</span></span>
+        </div>
+        <div class="tax-row summary-row"><span>Total tax (<span id="totalTaxRate">18</span>%)</span><span>₹<span id="taxAmount">0.00</span></span></div>
+        <div class="summary-total"><span>Grand total</span><strong>₹<span id="grandTotal">0.00</span></strong></div>
+        <button class="print-btn" onclick="generateBill()">Print proforma invoice</button>
     </div>
-</div>
+</aside>
 
 <div class="catalog-wrapper">
     <div class="grid" id="catalogGrid">
         {% for cat in categories %}
             {% for item in cat.products %}
-            <div class="card" data-search="{{ item.item_name | lower }} {{ cat.name | lower }} {{ item.hsn_code }} {{ item.sr_no }}">
+            <div class="card" data-search="{{ item.item_name | lower }} {{ cat.name | lower }} {{ item.hsn_code }} {{ item.sr_no }} {{ item.size }} {{ item.id_size }} {{ item.od_size }} {{ item.lf_size }}">
                 <div class="card-img-container">
                     {% if item.image_path %}
                         <img src="../{{ item.image_path }}" class="card-img" alt="" loading="lazy">
@@ -270,7 +336,20 @@
                 <div class="card-content">
                     <p class="card-title" id="name-{{ item.sr_no }}">{{ item.item_name }}</p>
                     <p class="card-meta">Sr: {{ item.sr_no }} | HSN: <span class="hsn-val">{{ item.hsn_code }}</span></p>
-                    <p class="card-meta">Unit: {{ item.unit }}</p>
+{% if item.size and item.size not in item.item_name %}<p class="card-meta">Size: <span class="size-val">{{ item.size }}</span></p>{% else %}<span class="size-val" hidden></span>{% endif %}
+{% if item.id_size or item.od_size or item.lf_size %}
+                    <p class="card-meta">
+{% if item.id_size %}ID Size: <span class="id-size-val">{{ item.id_size }}</span>{% else %}<span class="id-size-val" hidden></span>{% endif %}
+{% if item.od_size %} · OD Size: <span class="od-size-val">{{ item.od_size }}</span>{% else %}<span class="od-size-val" hidden></span>{% endif %}
+{% if item.lf_size %} · L/F Size: <span class="lf-size-val">{{ item.lf_size }}</span>{% else %}<span class="lf-size-val" hidden></span>{% endif %}
+                    </p>
+{% else %}
+                    <span class="id-size-val" hidden></span><span class="od-size-val" hidden></span><span class="lf-size-val" hidden></span>
+{% endif %}
+                    <p class="card-meta">
+                        {% if item.unit %}Unit: <span class="unit-val">{{ item.unit }}</span>{% else %}<span class="unit-val" hidden></span>{% endif %}
+                        {% if item.packing %} · Pack: <span class="packing-val">{{ item.packing }}</span>{% else %}<span class="packing-val" hidden></span>{% endif %}
+                    </p>
                     <p class="card-price">₹<span id="price-{{ item.sr_no }}">{{ item.list_price }}</span></p>
                 </div>
                 <div class="add-controls">
@@ -285,58 +364,92 @@
 
 <div id="toast">Item added to cart</div>
 
-<!-- Hidden Print Invoice View -->
-<div id="printBill">
+<section id="printBill" aria-label="Proforma invoice">
+    <div class="inv-topline"></div>
     <div class="inv-header">
-        <h1>{{ company.name }}</h1>
-        <p>11, Bomanji Master Road, Mumbai - 400 002</p>
-        <p>Email: example@example.com | Phone: 49233982</p>
-        <h2>PROFORMA INVOICE</h2>
+        <div class="inv-brand">
+            <p class="legal-name">{{ company.legal_name }}</p>
+            <h1>{{ company.name }}</h1>
+            <p class="tagline">{{ company.tagline }}</p>
+            <p>{{ billing.address }}</p>
+            <p>{% if billing.phone %}Office phone: {{ billing.phone }}{% endif %}</p>
+{% if billing.gst and billing.gst != '[Add GST Number Here]' %}<p>GSTIN: {{ billing.gst }}</p>{% endif %}</div>
+        <div class="inv-title">
+            <h2>PROFORMA<br>INVOICE</h2>
+            <span>Quotation / order summary</span>
+        </div>
     </div>
     <div class="inv-meta">
-        <div>
-            <div><strong>Bill To:</strong></div>
-            <div class="inv-buyer" id="pBuyerName">Cash</div>
-            <div id="pBuyerContact"></div>
-            <div id="pBuyerAddress"></div>
+        <div class="inv-card">
+            <div class="inv-card-label">Prepared for</div>
+            <div class="inv-buyer" id="pBuyerName">Cash customer</div>
+            <div class="inv-buyer-detail" id="pBuyerContact"></div>
+            <div class="inv-buyer-detail" id="pBuyerAddress"></div>
         </div>
-        <div>
-            <div><strong>Date:</strong> <span id="pDate"></span></div>
-            <div><strong>Invoice No:</strong> #<span id="pInvNo"></span></div>
+        <div class="inv-card inv-facts">
+            <div class="inv-fact"><span>Document</span><strong>Proforma invoice</strong></div>
+            <div class="inv-fact"><span>Reference</span><strong id="pInvNo"></strong></div>
+            <div class="inv-fact"><span>Date</span><strong id="pDate"></strong></div>
         </div>
     </div>
     <table class="inv-table" id="pTable">
         <thead>
             <tr>
-                <th>Sr.No</th>
-                <th>Particulars</th>
+                <th>Sr. no.</th>
+                <th>Particulars / specification</th>
                 <th>HSN Code</th>
-                <th>Qty</th>
-                <th>Rate (₹)</th>
-                <th>Amount (₹)</th>
+                <th class="num">Qty</th>
+                <th>Unit</th>
+                <th class="num">Rate (₹)</th>
+                <th class="num">Discount</th>
+                <th class="num">Amount (₹)</th>
             </tr>
         </thead>
         <tbody id="pTableBody"></tbody>
     </table>
     <div class="inv-summary">
         <table>
-            <tr><td>Subtotal</td><td class="num">₹<span id="pSubTotal"></span></td></tr>
-            <tr><td>Tax (<span id="pTaxRate"></span>%)</td><td class="num">₹<span id="pTaxAmount"></span></td></tr>
-            <tr><td class="total">Grand Total</td><td class="num total">₹<span id="pGrandTotal"></span></td></tr>
+            <tr><td>Items subtotal</td><td class="num">₹<span id="pItemsSubtotal"></span></td></tr>
+            <tr><td>Item discounts</td><td class="num">−₹<span id="pDiscountTotal"></span></td></tr>
+            <tr><td>Taxable subtotal</td><td class="num">₹<span id="pSubTotal"></span></td></tr>
+            <tr><td>CGST (<span id="pCgstRate"></span>%)</td><td class="num">₹<span id="pCgstAmount"></span></td></tr>
+            <tr><td>SGST (<span id="pSgstRate"></span>%)</td><td class="num">₹<span id="pSgstAmount"></span></td></tr>
+            <tr><td>Total tax (<span id="pTaxRate"></span>%)</td><td class="num">₹<span id="pTaxAmount"></span></td></tr>
+            <tr class="total"><td>Grand total</td><td class="num">₹<span id="pGrandTotal"></span></td></tr>
         </table>
     </div>
-    <div class="clear"></div>
-    <div class="footer">
-        * This is a computer generated document. <br>
-        * Subject to Mumbai Jurisdiction.
+    <div class="inv-notes">
+        {% if billing.terms %}<strong>Terms:</strong> {{ billing.terms }}<br>{% endif %}
+        This is a computer-generated proforma invoice and is not a tax invoice.
     </div>
-</div>
+    <div class="inv-signoff">
+        <span>We look forward to your order.</span>
+        <div class="inv-signature">For {{ company.name }}<br>Authorised signatory</div>
+    </div>
+    <div class="inv-footer">Thank you for your business.</div>
+</section>
 
 <script>
-    function toggleCart() {
-        document.getElementById('cartDropdown').classList.toggle('open');
-        document.getElementById('cartBackdrop').classList.toggle('open');
+    function toggleCart(forceOpen) {
+        const drawer = document.getElementById('cartDropdown');
+        const isOpen = drawer.classList.contains('open');
+        const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !isOpen;
+        drawer.classList.toggle('open', shouldOpen);
+        document.getElementById('cartBackdrop').classList.toggle('open', shouldOpen);
+        drawer.setAttribute('aria-hidden', String(!shouldOpen));
+        document.querySelector('.cart-toggle-btn').setAttribute('aria-expanded', String(shouldOpen));
+        if (shouldOpen) {
+            document.querySelector('.close-cart').focus();
+        } else {
+            document.querySelector('.cart-toggle-btn').focus();
+        }
     }
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && document.getElementById('cartDropdown').classList.contains('open')) {
+            toggleCart(false);
+        }
+    });
 
     function showToast(msg) {
         const t = document.getElementById('toast');
@@ -366,8 +479,14 @@
         const name = document.getElementById('name-' + sr_no).innerText;
         const priceStr = document.getElementById('price-' + sr_no).innerText;
         const qtyInput = document.getElementById('qty-' + sr_no);
+        const card = document.getElementById('name-' + sr_no).closest('.card');
+        const sizeElement = card.querySelector('.size-val');
+        const idSizeElement = card.querySelector('.id-size-val');
+        const odSizeElement = card.querySelector('.od-size-val');
+        const lfSizeElement = card.querySelector('.lf-size-val');
+        const unitElement = card.querySelector('.unit-val');
+        const packingElement = card.querySelector('.packing-val');
         const qty = parseInt(qtyInput.value);
-        const hsn = getHsn(sr_no);
         const price = parseFloat(priceStr.replace(/,/g, ''));
         
         if (isNaN(price) || isNaN(qty) || qty <= 0) {
@@ -378,7 +497,21 @@
         if (cart[sr_no]) {
             cart[sr_no].qty += qty;
         } else {
-            cart[sr_no] = { sr_no, name, price, qty, hsn };
+            cart[sr_no] = {
+                sr_no,
+                name,
+                price,
+                qty,
+                hsn: getHsn(sr_no),
+                size: sizeElement ? sizeElement.innerText.trim() : '',
+                idSize: idSizeElement ? idSizeElement.innerText.trim() : '',
+                odSize: odSizeElement ? odSizeElement.innerText.trim() : '',
+                lfSize: lfSizeElement ? lfSizeElement.innerText.trim() : '',
+                unit: unitElement ? unitElement.innerText.trim() : '',
+                packing: packingElement ? packingElement.innerText.trim() : '',
+                discountPct: 0,
+                discountOpen: false
+            };
         }
         
         qtyInput.value = 1; // reset
@@ -400,50 +533,179 @@
         renderCart();
     }
 
+    function updateItemDiscount(sr_no, value) {
+        const discountPct = Number(value);
+        if (!Number.isFinite(discountPct) || discountPct < 0 || discountPct > 100) {
+            showToast('Item discount must be between 0% and 100%.');
+            renderCart();
+            return;
+        }
+        if (!cart[sr_no]) return;
+        cart[sr_no].discountPct = discountPct;
+        renderCart();
+    }
+
+    function roundCurrency(amount) {
+        return Math.round((amount + Number.EPSILON) * 100) / 100;
+    }
+
+    function getLineAmounts(item) {
+        const gross = roundCurrency(item.price * item.qty);
+        const discount = roundCurrency(gross * item.discountPct / 100);
+        return { gross, discount, net: roundCurrency(gross - discount) };
+    }
+
+    function formatAmount(amount) {
+        return amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatRate(rate) {
+        return formatAmount(rate).replace(/\.?0+$/, '');
+    }
+
+    function getTaxRates() {
+        const cgstInput = document.getElementById('cgstRate');
+        const sgstInput = document.getElementById('sgstRate');
+        if (!cgstInput.checkValidity() || !sgstInput.checkValidity()) return null;
+
+        return {
+            cgstRate: cgstInput.valueAsNumber,
+            sgstRate: sgstInput.valueAsNumber
+        };
+    }
+
+    function getTaxBreakdown(subTotal, rates = getTaxRates()) {
+        if (!rates) return null;
+        const { cgstRate, sgstRate } = rates;
+        const cgstAmount = roundCurrency(subTotal * cgstRate / 100);
+        const sgstAmount = roundCurrency(subTotal * sgstRate / 100);
+        return {
+            cgstRate,
+            cgstAmount,
+            sgstRate,
+            sgstAmount,
+            totalRate: roundCurrency(cgstRate + sgstRate),
+            totalAmount: roundCurrency(cgstAmount + sgstAmount)
+        };
+    }
+
+    function displayTaxBreakdown(tax, subTotal) {
+        document.getElementById('cgstAmount').innerText = tax ? formatAmount(tax.cgstAmount) : '—';
+        document.getElementById('sgstAmount').innerText = tax ? formatAmount(tax.sgstAmount) : '—';
+        document.getElementById('totalTaxRate').innerText = tax ? formatRate(tax.totalRate) : '—';
+        document.getElementById('taxAmount').innerText = tax ? formatAmount(tax.totalAmount) : '—';
+        document.getElementById('grandTotal').innerText = tax ? formatAmount(roundCurrency(subTotal + tax.totalAmount)) : '—';
+    }
+
     function renderCart() {
         const cartItemsDiv = document.getElementById('cartItems');
-        cartItemsDiv.innerHTML = '';
+        cartItemsDiv.replaceChildren();
+        let itemsSubtotal = 0;
+        let discountTotal = 0;
         let subTotal = 0;
         let totalItems = 0;
         
         const keys = Object.keys(cart);
         if (keys.length === 0) {
-            cartItemsDiv.innerHTML = '<div style="text-align:center; color:#888; margin-top:20px;">Cart is empty</div>';
+            const emptyState = document.createElement('div');
+            emptyState.className = 'cart-empty';
+            const title = document.createElement('strong');
+            title.textContent = 'Your cart is empty';
+            emptyState.append(title, document.createTextNode('Add products from the catalog to begin.'));
+            cartItemsDiv.appendChild(emptyState);
         } else {
             keys.forEach(k => {
                 const item = cart[k];
-                const total = item.price * item.qty;
-                subTotal += total;
+                const amounts = getLineAmounts(item);
+                itemsSubtotal += amounts.gross;
+                discountTotal += amounts.discount;
+                subTotal += amounts.net;
                 totalItems += item.qty;
-                
-                cartItemsDiv.innerHTML += `
-                    <div class="cart-item">
-                        <div class="cart-item-details">
-                            <div class="cart-item-title">${item.name}</div>
-                            <div class="cart-qty-controls">
-                                <button class="qty-btn" onclick="updateItemQty('${k}', -1)">-</button>
-                                <span style="font-size:12px; width:20px; text-align:center;">${item.qty}</span>
-                                <button class="qty-btn" onclick="updateItemQty('${k}', 1)">+</button>
-                                <span style="font-size:11px; color:#555; margin-left:5px;">@ ₹${item.price.toFixed(2)}</span>
-                            </div>
-                        </div>
-                        <div class="cart-item-total">
-                            <div>₹${total.toFixed(2)}</div>
-                        </div>
-                    </div>
-                `;
+
+                const row = document.createElement('div');
+                row.className = 'cart-item';
+                const details = document.createElement('div');
+                const title = document.createElement('div');
+                title.className = 'cart-item-title';
+                title.textContent = item.name;
+                const meta = document.createElement('div');
+                meta.className = 'cart-item-meta';
+                meta.textContent = [
+                    item.size && `Size: ${item.size}`,
+                    item.idSize && `ID Size: ${item.idSize}`,
+                    item.odSize && `OD Size: ${item.odSize}`,
+                    item.lfSize && `L/F Size: ${item.lfSize}`,
+                    item.unit && `Unit: ${item.unit}`,
+                    item.packing && `Pack: ${item.packing}`
+                ].filter(Boolean).join(' · ');
+                const rate = document.createElement('div');
+                rate.className = 'cart-item-rate';
+                rate.textContent = `Unit price · ₹${formatAmount(item.price)}`;
+                const controls = document.createElement('div');
+                controls.className = 'cart-qty-controls';
+                const decrease = document.createElement('button');
+                decrease.className = 'qty-btn';
+                decrease.type = 'button';
+                decrease.setAttribute('aria-label', `Decrease quantity of ${item.name}`);
+                decrease.textContent = '−';
+                decrease.addEventListener('click', () => updateItemQty(k, -1));
+                const quantity = document.createElement('span');
+                quantity.className = 'qty-value';
+                quantity.textContent = item.qty;
+                const increase = document.createElement('button');
+                increase.className = 'qty-btn';
+                increase.type = 'button';
+                increase.setAttribute('aria-label', `Increase quantity of ${item.name}`);
+                increase.textContent = '+';
+                increase.addEventListener('click', () => updateItemQty(k, 1));
+                controls.append(decrease, quantity, increase);
+                const discountDetails = document.createElement('details');
+                discountDetails.className = 'cart-item-discount';
+                discountDetails.open = item.discountOpen;
+                discountDetails.addEventListener('toggle', () => { item.discountOpen = discountDetails.open; });
+                const discountSummary = document.createElement('summary');
+                discountSummary.textContent = item.discountPct > 0 ? `Item discount · ${item.discountPct}%` : 'Add item discount';
+                const discountControls = document.createElement('div');
+                discountControls.className = 'discount-controls';
+                const discountInput = document.createElement('input');
+                discountInput.className = 'discount-input';
+                discountInput.type = 'number';
+                discountInput.min = '0';
+                discountInput.max = '100';
+                discountInput.step = '0.01';
+                discountInput.value = item.discountPct;
+                discountInput.setAttribute('aria-label', `Discount percentage for ${item.name}`);
+                discountInput.addEventListener('change', () => updateItemDiscount(k, discountInput.value));
+                const percentLabel = document.createElement('span');
+                percentLabel.textContent = '% off';
+                discountControls.append(discountInput, percentLabel);
+                discountDetails.append(discountSummary, discountControls);
+                details.append(title);
+                if (meta.textContent) details.append(meta);
+                details.append(rate, controls, discountDetails);
+                const itemTotal = document.createElement('div');
+                itemTotal.className = 'cart-item-total';
+                itemTotal.textContent = `₹${formatAmount(amounts.net)}`;
+                if (amounts.discount > 0) {
+                    const discountNote = document.createElement('span');
+                    discountNote.className = 'cart-item-discount-value';
+                    discountNote.textContent = `−₹${formatAmount(amounts.discount)}`;
+                    itemTotal.appendChild(discountNote);
+                }
+                row.append(details, itemTotal);
+                cartItemsDiv.appendChild(row);
             });
         }
         
+        itemsSubtotal = roundCurrency(itemsSubtotal);
+        discountTotal = roundCurrency(discountTotal);
+        subTotal = roundCurrency(subTotal);
         document.getElementById('cartCountBadge').innerText = totalItems;
         
-        const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
-        const taxAmount = subTotal * (taxRate / 100);
-        const grandTotal = subTotal + taxAmount;
-        
-        document.getElementById('subTotal').innerText = subTotal.toFixed(2);
-        document.getElementById('taxAmount').innerText = taxAmount.toFixed(2);
-        document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
+        document.getElementById('itemsSubtotal').innerText = formatAmount(itemsSubtotal);
+        document.getElementById('discountTotal').innerText = formatAmount(discountTotal);
+        document.getElementById('subTotal').innerText = formatAmount(subTotal);
+        displayTaxBreakdown(getTaxBreakdown(subTotal), subTotal);
     }
 
     function generateBill() {
@@ -451,44 +713,86 @@
             alert("Cart is empty! Please add items before printing a bill.");
             return;
         }
+
+        const taxRates = getTaxRates();
+        if (!taxRates) {
+            const invalidInput = [document.getElementById('cgstRate'), document.getElementById('sgstRate')]
+                .find(input => !input.checkValidity());
+            invalidInput.reportValidity();
+            return;
+        }
         
-        const bName = document.getElementById('buyerName').value || "Cash";
+        const bName = document.getElementById('buyerName').value.trim() || "Cash customer";
         document.getElementById('pBuyerName').innerText = bName;
         document.getElementById('pBuyerContact').innerText = document.getElementById('buyerContact').value || "";
         document.getElementById('pBuyerAddress').innerText = document.getElementById('buyerAddress').value || "";
         
-        const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
         document.getElementById('pDate').innerText = dateStr;
-        document.getElementById('pInvNo').innerText = Math.floor(Math.random() * 1000000);
+        const dateCode = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('');
+        document.getElementById('pInvNo').innerText = `PI-${dateCode}-${String(Math.floor(Math.random() * 1000000)).padStart(6, '0')}`;
         
         const tbody = document.getElementById('pTableBody');
-        tbody.innerHTML = '';
+        tbody.replaceChildren();
         
+        let itemsSubtotal = 0;
+        let discountTotal = 0;
         let subTotal = 0;
-        Object.keys(cart).forEach(k => {
+        Object.keys(cart).forEach((k, index) => {
             const item = cart[k];
-            const total = item.price * item.qty;
-            subTotal += total;
-            
-            tbody.innerHTML += `
-                <tr>
-                    <td>${item.sr_no}</td>
-                    <td>${item.name}</td>
-                    <td>${item.hsn}</td>
-                    <td class="num">${item.qty}</td>
-                    <td class="num">${item.price.toFixed(2)}</td>
-                    <td class="num">${total.toFixed(2)}</td>
-                </tr>
-            `;
+            const amounts = getLineAmounts(item);
+            itemsSubtotal += amounts.gross;
+            discountTotal += amounts.discount;
+            subTotal += amounts.net;
+
+            const row = document.createElement('tr');
+            const serial = document.createElement('td');
+            serial.textContent = index + 1;
+            row.appendChild(serial);
+            const particulars = document.createElement('td');
+            particulars.textContent = item.name;
+            const itemName = item.name.toLowerCase();
+            const specifications = [];
+            if (item.size && !itemName.includes(item.size.toLowerCase())) specifications.push(`Size: ${item.size}`);
+            if (item.idSize) specifications.push(`ID Size: ${item.idSize}`);
+            if (item.odSize) specifications.push(`OD Size: ${item.odSize}`);
+            if (item.lfSize) specifications.push(`L/F Size: ${item.lfSize}`);
+            if (item.packing && !itemName.includes(item.packing.toLowerCase())) specifications.push(`Pack: ${item.packing}`);
+            if (specifications.length) {
+                const detail = document.createElement('div');
+                detail.className = 'item-size';
+                detail.textContent = specifications.join(' · ');
+                particulars.appendChild(detail);
+            }
+            row.appendChild(particulars);
+            const discountDisplay = item.discountPct > 0
+                ? `${formatAmount(item.discountPct)}% (₹${formatAmount(amounts.discount)})`
+                : '—';
+            [item.hsn || '—', item.qty, item.unit || '—', formatAmount(item.price), discountDisplay, formatAmount(amounts.net)].forEach((value, column) => {
+                const cell = document.createElement('td');
+                cell.textContent = value;
+                if ([1, 3, 4, 5].includes(column)) cell.className = 'num';
+                row.appendChild(cell);
+            });
+            tbody.appendChild(row);
         });
         
-        const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
-        const taxAmount = subTotal * (taxRate / 100);
+        itemsSubtotal = roundCurrency(itemsSubtotal);
+        discountTotal = roundCurrency(discountTotal);
+        subTotal = roundCurrency(subTotal);
+        const taxBreakdown = getTaxBreakdown(subTotal, taxRates);
         
-        document.getElementById('pSubTotal').innerText = subTotal.toFixed(2);
-        document.getElementById('pTaxRate').innerText = taxRate;
-        document.getElementById('pTaxAmount').innerText = taxAmount.toFixed(2);
-        document.getElementById('pGrandTotal').innerText = (subTotal + taxAmount).toFixed(2);
+        document.getElementById('pItemsSubtotal').innerText = formatAmount(itemsSubtotal);
+        document.getElementById('pDiscountTotal').innerText = formatAmount(discountTotal);
+        document.getElementById('pSubTotal').innerText = formatAmount(subTotal);
+        document.getElementById('pCgstRate').innerText = formatRate(taxBreakdown.cgstRate);
+        document.getElementById('pCgstAmount').innerText = formatAmount(taxBreakdown.cgstAmount);
+        document.getElementById('pSgstRate').innerText = formatRate(taxBreakdown.sgstRate);
+        document.getElementById('pSgstAmount').innerText = formatAmount(taxBreakdown.sgstAmount);
+        document.getElementById('pTaxRate').innerText = formatRate(taxBreakdown.totalRate);
+        document.getElementById('pTaxAmount').innerText = formatAmount(taxBreakdown.totalAmount);
+        document.getElementById('pGrandTotal').innerText = formatAmount(roundCurrency(subTotal + taxBreakdown.totalAmount));
         
         window.print();
     }

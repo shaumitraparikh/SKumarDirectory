@@ -68,10 +68,12 @@ def load_csv_data(csv_path):
             
             # Clean up unit field
             unit = item.get('unit', '')
-            if unit in (',,', ','):
+            if unit in (',,', ',') or '\ufffd' in unit:
                 item['unit'] = ''
+            if '\ufffd' in item.get('packing', ''):
+                item['packing'] = ''
                 
-            item['image_path'] = find_image(item.get('image_ref', ''), Path('images'))
+            item['image_path'] = find_image(item.get('image_ref', ''), IMAGES_DIR)
             
             items.append(item)
     
@@ -86,7 +88,7 @@ def find_image(image_ref, images_dir):
     for ext in ['.jpg', '.jpeg', '.png', '.gif', '.bmp']:
         img_path = images_dir / f"{image_ref}{ext}"
         if img_path.exists():
-            return str(img_path.relative_to(images_dir.parent))
+            return img_path.relative_to(images_dir.parent).as_posix()
     
     return None
 
@@ -195,6 +197,7 @@ def build_search_catalog(config, categories, items, env):
     
     html = template.render(
         company=config['company'],
+        billing=config,
         categories=categories,
         all_items_json=all_items_json,
         category_names=sorted(category_names),
