@@ -678,7 +678,9 @@ function toggleCart(forceOpen) {
             address: document.getElementById('buyerAddress').value,
             state: document.getElementById('buyerState').value,
             pincode: document.getElementById('buyerPincode').value,
-            gstin: document.getElementById('buyerGstin').value
+            gstin: document.getElementById('buyerGstin').value,
+            deliveryInstructions: (document.getElementById('deliveryInstructions') || {}).value || '',
+            transportPreference: (document.getElementById('transportPreference') || {}).value || ''
         };
     }
 
