@@ -14,9 +14,17 @@ python -m unittest discover -s tests -p "test_*.py"
 node tests/order_core.test.js
 ```
 
-This creates two files in `output/`:
+This creates two files directly in the repository root:
 - **print_catalog.html** - Print-ready catalog (Ctrl+P in browser -> Save as PDF)
 - **search_catalog.html** - Searchable web catalog with filters
+
+The public pages are:
+- [Search catalog](https://shaumitraparikh.github.io/SKumarDirectory/search_catalog.html)
+- [Print catalog](https://shaumitraparikh.github.io/SKumarDirectory/print_catalog.html)
+
+Catalog source, assets, templates, tests, and generated pages live at the
+repository root (with only supporting folders), removing the nested
+catalog-directory segment from both page URLs.
 
 The search catalog includes a browser-persisted cart, customer and delivery
 details, item discounts, a proforma estimate, and an order-request handoff.
@@ -32,45 +40,45 @@ stored and shown as distinct specifications.
 Pushing to `main` automatically builds and deploys both catalogs to GitHub Pages.
 The repository landing page links to the searchable and print-ready catalogs.
 On Windows, `1_Click_Update.bat` rebuilds both HTML files, runs the test suites,
-and asks before committing and pushing the catalog, workflow, and generated
-files. Enter `Y` to publish the update to `origin/main`; otherwise it leaves the
-rebuilt files unpublished. Run it from a cleanly synchronized checkout on the
-`main` branch with Git, Python, Node.js, and Git credentials configured. The
-updater stops before building or committing if local `main` is not exactly at
-`origin/main`; synchronize the branch first rather than risking unrelated
-commits. It uses a regular non-force push. GitHub Actions independently rebuilds
-and tests both pages before publishing the HTML, storefront assets, and images.
+and asks before committing and pushing the root-level catalog, workflow, and
+generated files. Enter `Y` to publish the update to `origin/main`; otherwise it
+leaves the rebuilt files unpublished. Run it from a cleanly synchronized
+checkout on the `main` branch with Git, Python, Node.js, and Git credentials
+configured. The updater stops before building or committing if local `main` is
+not exactly at `origin/main`; synchronize the branch first rather than risking
+unrelated commits. It uses a regular non-force push. GitHub Actions independently
+rebuilds and tests both pages before publishing the HTML, storefront assets, and
+images.
 
 ## Folder Structure
 
 ```
-SKumarCatalog/
+.
+├── index.html                   <- Pages landing page and catalog links
+├── search_catalog.html          <- GENERATED searchable catalog
+├── print_catalog.html           <- GENERATED print catalog
+├── 1_Click_Update.bat           <- Rebuild, test, ask before commit/push
+├── build_catalog.py             <- Catalog generator for local and Pages builds
+├── config.json                  <- Company and checkout configuration
 ├── data/
-│   ├── catalog_data.csv          <- EDIT this product list
-│   └── catalog_data_notes.json   <- Source ambiguity/review notes
-├── images/                       <- Product images
+│   ├── catalog_data.csv         <- EDIT this product list
+│   └── catalog_data_notes.json  <- Source ambiguity/review notes
+├── images/                      <- Product images
 │   ├── photo_image1.png
 │   ├── list_image1.png
 │   └── ...
 ├── templates/
-│   ├── print_template.html       <- Print catalog template
-│   └── search_template.html      <- Search catalog template
+│   ├── print_template.html      <- Print catalog template
+│   └── search_template.html     <- Search catalog template
 ├── assets/
-│   ├── css/search_catalog.css    <- Storefront and cart styling
+│   ├── css/search_catalog.css   <- Storefront and cart styling
 │   └── js/
-│       ├── commerce_core.js      <- Tested totals, validation, order schema
-│       └── search_catalog.js     <- Browser cart and checkout behavior
-├── output/
-│   ├── print_catalog.html       <- GENERATED print catalog
-│   └── search_catalog.html      <- GENERATED search catalog
+│       ├── commerce_core.js     <- Tested totals, validation, order schema
+│       └── search_catalog.js    <- Browser cart and checkout behavior
 ├── tests/
-│   ├── test_catalog.py           <- CSV, assets, and rendered page checks
-│   └── order_core.test.js        <- Checkout math and payload checks
-├── 1_Click_Update.bat            <- Rebuild, test, ask before commit/push
-├── build_catalog.py              <- Catalog generator used by local and Pages builds
-├── config.json                   <- Company info & settings
-├── maintenance scripts (*.py)    <- Data/image audit and repair utilities
-└── README.md                     <- This file
+│   ├── test_catalog.py          <- CSV, assets, and rendered page checks
+│   └── order_core.test.js       <- Checkout math and payload checks
+└── README.md                    <- This file
 ```
 
 ## How to Update Prices / Add Items
@@ -83,8 +91,8 @@ SKumarCatalog/
 5. Enter `Y` to commit and push the tested update; any other response leaves it
    rebuilt but unpublished
 6. Wait for the success message; GitHub Actions then deploys both pages
-7. Open the generated HTML files locally or wait for the Pages workflow to
-   finish before refreshing the live pages
+7. Open the generated HTML files locally, or visit the root-level URLs above
+   after the Pages workflow finishes
 
 The numbered product serials must remain unique and sequential. The builder
 rejects malformed or negative prices and gaps/duplicates in serial numbers.

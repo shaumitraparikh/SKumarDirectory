@@ -1,8 +1,11 @@
 import csv
 import re
+import os
 from docx import Document
 from collections import OrderedDict
 from pathlib import Path
+from PIL import Image
+import io
 
 CATEGORY_IMAGE_MAP = {
     "ART SILK TUBE / Sleeves": "art_silk_tube_sleeves",
@@ -43,7 +46,6 @@ CATEGORY_IMAGE_MAP = {
     "COTTON TAPE LOTUS": "cotton_tape_lotus",
     "SUPERFINE COTTON TAPE": "superfine_cotton_tape",
     "PVC SEALER AUTOMATIC MACHINE & PARTS": "pvc_sealer_automatic_machine_parts",
-    # Add some robust fallback matches
     "ART SILK": "art_silk_tube_sleeves",
     "YELLOW TUBE": "fibreglass_b_class_yellow_tube",
     "WHITE SPECIAL TUBE": "fibreglass_b_class_white_special_tube",
@@ -66,7 +68,7 @@ CATEGORY_IMAGE_MAP = {
     "COOLER FAN": "cooler_fan_grill_jalli",
     "TELEPHONE": "telephone_products_accessories",
     "SEALER": "pvc_sealer_automatic_machine_parts",
-    "BATTERY": "battery_accessories", # Custom mapping, might not exist as photo but ensures fallback
+    "BATTERY": "battery_accessories",
     "CUTTER": "taparia_tools",
     "PLIER": "taparia_tools",
     "SCREW DRIVER": "taparia_tools",
@@ -93,7 +95,6 @@ def get_image_ref(category, particulars):
     for k, v in CATEGORY_IMAGE_MAP.items():
         if k.upper() in text:
             best_match = v
-            # Keep looking for a longer match
     return best_match
 
 def clean_text(text):
@@ -120,6 +121,12 @@ def parse_price(text):
             pass
     return text.strip()
 
+def clean_name(name):
+    """Standardizes names by removing strange artifacts and extra spaces"""
+    name = re.sub(r'^\d{3,5}\s+', '', name) # Remove weird stray numbers at the start
+    name = re.sub(r'\s+', ' ', name).strip()
+    return name
+
 class TableParser:
     def __init__(self, doc_path):
         self.doc = Document(doc_path)
@@ -128,15 +135,48 @@ class TableParser:
         self.cat_right = ""
         self.hsn_left = ""
         self.hsn_right = ""
-        self.pack_left = ""
-        self.pack_right = ""
+        self.images_dir = Path(__file__).resolve().parent / "images"
+        self.images_dir.mkdir(exist_ok=True)
+
+    def extract_cell_image(self, cell_obj, item_sr):
+        blips = cell_obj._element.xpath('.//a:blip')
+        if not blips: return None
+        for blip in blips:
+            embed_id = blip.get('{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed')
+            if not embed_id: continue
+            try:
+                part = self.doc.part.related_parts[embed_id]
+                img_bytes = part.blob
+                ext = part.content_type.split('/')[-1]
+                if ext in ['x-emf', 'x-wmf']: ext = 'png'
+                
+                clean_name = f"item_{item_sr}"
+                out_path = self.images_dir / f"{clean_name}.{ext}"
+                with open(out_path, 'wb') as f:
+                    f.write(img_bytes)
+                
+                # Convert WDP to PNG
+                if ext in ['ms-photo', 'vnd.ms-photo', 'wdp']:
+                    try:
+                        img = Image.open(out_path)
+                        png_path = self.images_dir / f"{clean_name}.png"
+                        img.save(png_path, "PNG")
+                        os.remove(out_path)
+                        ext = 'png'
+                    except:
+                        pass
+                        
+                print(f"Extracted inline image for Sr {item_sr}")
+                return clean_name
+            except Exception as e:
+                pass
+        return None
 
     def process(self):
         for ti, table in enumerate(self.doc.tables):
             nc = len(table.columns)
             if nc < 5: continue
             
-            # Find data rows
             start_idx = -1
             for ri, row in enumerate(table.rows[:10]):
                 cells = [clean_text(c.text) for c in row.cells]
@@ -147,32 +187,30 @@ class TableParser:
             if start_idx == -1: continue
             
             for ri in range(start_idx, len(table.rows)):
-                cells = [clean_text(c.text) for c in table.rows[ri].cells]
-                if not any(c and c not in (',,', 'ÆÆ') for c in cells):
+                row_cells = table.rows[ri].cells
+                texts = [clean_text(c.text) for c in row_cells]
+                if not any(c and c not in (',,', 'ÆÆ') for c in texts):
                     continue
                 
-                self.parse_row(ti, nc, cells)
+                self.parse_row(ti, nc, row_cells, texts)
 
-    def add_item(self, ti, sr, cat, part, size, hsn, list_price, per, packing):
-        if not sr or not sr.replace('.', '').isdigit():
-            return
-            
+    def add_item(self, ti, sr, cat, part, size, hsn, list_price, per, packing, inline_img):
+        if not sr or not sr.replace('.', '').isdigit(): return
         sr = sr.replace('.', '')
+        
         hsn_found, part = extract_hsn(part)
         if hsn_found: hsn = hsn_found
         
         hsn_found_size, size = extract_hsn(size)
         if hsn_found_size: hsn = hsn_found_size
         
-        # Clean bad category strings
-        if cat in (',,', 'ÆÆ', '', '100Pcs.', '100pc Pkt', 'Pcs.'):
+        # Clean bad category strings and weird number-only categories
+        if cat in (',,', 'ÆÆ', '', '100Pcs.', '100pc Pkt', 'Pcs.', 'Pcs. 1245', 'Pcs. 1085', '100Pcs. 1059') or re.match(r'^\d+$', cat):
             cat = "General Items"
             
-        # Clean Per
         per = per.replace('ÆÆ', '').replace(',,', '').strip()
         if not per and cat in ('General Items', 'Uncategorized'): return
         
-        # deduplicate names
         item_name = part if part and len(part) > 1 and part not in (',,', 'ÆÆ') else cat
         if size and size not in item_name:
             if item_name != cat:
@@ -183,6 +221,11 @@ class TableParser:
         if not item_name.strip():
             item_name = f"{cat} {size}"
 
+        item_name = clean_name(item_name)
+        cat = clean_name(cat)
+        
+        image_ref = inline_img if inline_img else get_image_ref(cat, part)
+
         self.items.append({
             'sr_no': sr,
             'category': cat.strip(),
@@ -192,56 +235,61 @@ class TableParser:
             'list_price': parse_price(list_price),
             'unit': per,
             'packing': packing.strip(),
-            'image_ref': get_image_ref(cat, part),
+            'image_ref': image_ref,
             'page': str(ti+1)
         })
 
-    def parse_row(self, ti, nc, cells):
-        # Table specific parsers based on columns
+    def get_images_for_range(self, row_cells, start, end, sr):
+        for i in range(start, min(end, len(row_cells))):
+            img = self.extract_cell_image(row_cells[i], sr)
+            if img: return img
+        return None
+
+    def parse_row(self, ti, nc, row_cells, cells):
         if ti == 0 and nc == 12:
-            # Left: 0(Sr), 1(Part), 2(Size), 3(List), 4(Per)
             sr = cells[0]
             part = " ".join(list(dict.fromkeys([c for c in cells[1:3] if c and c not in (",,", "ÆÆ")])))
             size = cells[2]
             price = cells[3]
             per = cells[4]
+            inline = self.get_images_for_range(row_cells, 0, 5, sr.replace('.',''))
             
             if part and not price and not sr:
                 h, p = extract_hsn(part)
                 if h: self.hsn_left = h
-                if p and len(p) > 3 and p not in (',,', 'ÆÆ'): self.cat_left = p
+                if p and len(p)>3 and p not in (",,", "ÆÆ"): self.cat_left = p
             elif sr:
-                if part and not price and len(part) > 5 and part not in (',,', 'ÆÆ') and not __import__('re').match(r'^\d+(\.\d+)?\s*[a-zA-Z"]*$', part):
-                    if part and len(part)>3 and part not in (",,", "ÆÆ"): self.cat_left = part
+                if part and not price and len(part) > 5 and part not in (",,", "ÆÆ") and not re.match(r'^\d+(\.\d+)?\s*[a-zA-Z"]*$', part):
+                    self.cat_left = part
                 h, p = extract_hsn(part)
                 if h: self.hsn_left = h
-                self.add_item(ti, sr, self.cat_left, p, size, self.hsn_left, price, per, "")
+                self.add_item(ti, sr, self.cat_left, p, size, self.hsn_left, price, per, "", inline)
 
-            # Right: 5(Sr), 6(Part), 8(Size), 10(List), 11(Per)
             sr_r = cells[5]
             part_r = " ".join(list(dict.fromkeys([c for c in cells[6:8] if c and c not in (",,", "ÆÆ")])))
             size_r = cells[8]
             price_r = cells[10]
             per_r = cells[11]
+            inline_r = self.get_images_for_range(row_cells, 5, 12, sr_r.replace('.',''))
             
             if part_r and not price_r and not sr_r:
                 h, p = extract_hsn(part_r)
                 if h: self.hsn_right = h
-                if p and len(p) > 3 and p not in (',,', 'ÆÆ'): self.cat_right = p
+                if p and len(p)>3 and p not in (",,", "ÆÆ"): self.cat_right = p
             elif sr_r:
-                if part_r and not price_r and len(part_r) > 5 and part_r not in (',,', 'ÆÆ') and not __import__('re').match(r'^\d+(\.\d+)?\s*[a-zA-Z"]*$', part_r):
-                    if part_r and len(part_r)>3 and part_r not in (",,", "ÆÆ"): self.cat_right = part_r
+                if part_r and not price_r and len(part_r) > 5 and part_r not in (",,", "ÆÆ") and not re.match(r'^\d+(\.\d+)?\s*[a-zA-Z"]*$', part_r):
+                    self.cat_right = part_r
                 h, p = extract_hsn(part_r)
                 if h: self.hsn_right = h
-                self.add_item(ti, sr_r, self.cat_right, p, size_r, self.hsn_right, price_r, per_r, "")
+                self.add_item(ti, sr_r, self.cat_right, p, size_r, self.hsn_right, price_r, per_r, "", inline_r)
 
         elif ti == 1 and nc == 15:
-            # Left: 0,1,2(Pack),3,4
             sr = cells[0]
             part = " ".join(list(dict.fromkeys([c for c in cells[1:3] if c and c not in (",,", "ÆÆ")])))
             pack = cells[2]
             price = cells[3]
             per = cells[4]
+            inline = self.get_images_for_range(row_cells, 0, 5, sr.replace('.',''))
             if part and not sr:
                 h, p = extract_hsn(part)
                 if h: self.hsn_left = h
@@ -249,14 +297,14 @@ class TableParser:
             elif sr:
                 h, p = extract_hsn(part)
                 if h: self.hsn_left = h
-                self.add_item(ti, sr, self.cat_left, p, "", self.hsn_left, price, per, pack)
+                self.add_item(ti, sr, self.cat_left, p, "", self.hsn_left, price, per, pack, inline)
 
-            # Right: 5,6,11(Pack),13,14
             sr_r = cells[5]
-            part_r = " ".join(list(dict.fromkeys([c for c in cells[6:8] if c and c not in (",,", "ÆÆ")])))
+            part_r = " ".join(list(dict.fromkeys([c for c in cells[6:11] if c and c not in (",,", "ÆÆ")])))
             pack_r = cells[11]
             price_r = cells[13]
             per_r = cells[14]
+            inline_r = self.get_images_for_range(row_cells, 5, 15, sr_r.replace('.',''))
             if part_r and not sr_r:
                 h, p = extract_hsn(part_r)
                 if h: self.hsn_right = h
@@ -264,14 +312,14 @@ class TableParser:
             elif sr_r:
                 h, p = extract_hsn(part_r)
                 if h: self.hsn_right = h
-                self.add_item(ti, sr_r, self.cat_right, p, "", self.hsn_right, price_r, per_r, pack_r)
+                self.add_item(ti, sr_r, self.cat_right, p, "", self.hsn_right, price_r, per_r, pack_r, inline_r)
 
         elif ti == 2 and nc == 9:
-            # Left: 0,1,2,3
             sr = cells[0]
             part = " ".join(list(dict.fromkeys([c for c in cells[1:3] if c and c not in (",,", "ÆÆ")])))
             price = cells[2]
             per = cells[3]
+            inline = self.get_images_for_range(row_cells, 0, 4, sr.replace('.',''))
             if part and not sr:
                 h, p = extract_hsn(part)
                 if h: self.hsn_left = h
@@ -279,26 +327,26 @@ class TableParser:
             elif sr:
                 h, p = extract_hsn(part)
                 if h: self.hsn_left = h
-                self.add_item(ti, sr, self.cat_left, p, "", self.hsn_left, price, per, "")
+                self.add_item(ti, sr, self.cat_left, p, "", self.hsn_left, price, per, "", inline)
 
-            # Right: 4,5,6(HSN),7,8
             sr_r = cells[4]
-            part_r = cells[5]
+            part_r = " ".join(list(dict.fromkeys([c for c in cells[5:7] if c and c not in (",,", "ÆÆ")])))
             hsn_r = cells[6]
             price_r = cells[7]
             per_r = cells[8]
+            inline_r = self.get_images_for_range(row_cells, 4, 9, sr_r.replace('.',''))
             if part_r and not sr_r:
                 if part_r and len(part_r)>3 and part_r not in (",,", "ÆÆ"): self.cat_right = part_r
             elif sr_r:
                 if hsn_r: self.hsn_right = hsn_r
-                self.add_item(ti, sr_r, self.cat_right, part_r, "", self.hsn_right, price_r, per_r, "")
+                self.add_item(ti, sr_r, self.cat_right, part_r, "", self.hsn_right, price_r, per_r, "", inline_r)
 
         elif ti == 3 and nc == 11:
-            # Left: 0,1,4,5
             sr = cells[0]
-            part = " ".join(list(dict.fromkeys([c for c in cells[1:3] if c and c not in (",,", "ÆÆ")])))
+            part = " ".join(list(dict.fromkeys([c for c in cells[1:4] if c and c not in (",,", "ÆÆ")])))
             price = cells[4]
             per = cells[5]
+            inline = self.get_images_for_range(row_cells, 0, 6, sr.replace('.',''))
             if part and not sr:
                 h, p = extract_hsn(part)
                 if h: self.hsn_left = h
@@ -306,41 +354,41 @@ class TableParser:
             elif sr:
                 h, p = extract_hsn(part)
                 if h: self.hsn_left = h
-                self.add_item(ti, sr, self.cat_left, p, "", self.hsn_left, price, per, "")
+                self.add_item(ti, sr, self.cat_left, p, "", self.hsn_left, price, per, "", inline)
 
-            # Right: 6,7,8(HSN),9,10
             sr_r = cells[6]
-            part_r = cells[7]
+            part_r = " ".join(list(dict.fromkeys([c for c in cells[7:9] if c and c not in (",,", "ÆÆ")])))
             hsn_r = cells[8]
             price_r = cells[9]
             per_r = cells[10]
+            inline_r = self.get_images_for_range(row_cells, 6, 11, sr_r.replace('.',''))
             if part_r and not sr_r:
                 if part_r and len(part_r)>3 and part_r not in (",,", "ÆÆ"): self.cat_right = part_r
             elif sr_r:
                 if hsn_r: self.hsn_right = hsn_r
-                self.add_item(ti, sr_r, self.cat_right, part_r, "", self.hsn_right, price_r, per_r, "")
+                self.add_item(ti, sr_r, self.cat_right, part_r, "", self.hsn_right, price_r, per_r, "", inline_r)
 
         elif ti == 4 and nc == 7:
-            # Single: 0,2,3,4(HSN),5,6
             sr = cells[0]
             itemno = cells[2]
             part = cells[3]
             hsn = cells[4]
             price = cells[5]
             per = cells[6]
+            inline = self.get_images_for_range(row_cells, 0, 7, sr.replace('.',''))
             if part and not sr:
                 if part and len(part)>3 and part not in (",,", "ÆÆ"): self.cat_left = part
             elif sr:
                 if hsn: self.hsn_left = hsn
                 p = f"{itemno} {part}" if itemno else part
-                self.add_item(ti, sr, "Kundip Items", p, "", self.hsn_left, price, per, "")
+                self.add_item(ti, sr, "Kundip Items", p, "", self.hsn_left, price, per, "", inline)
 
         elif ti == 5 and nc == 13:
-            # Left: 0,1,2,3
             sr = cells[0]
             part = " ".join(list(dict.fromkeys([c for c in cells[1:3] if c and c not in (",,", "ÆÆ")])))
             price = cells[2]
             per = cells[3]
+            inline = self.get_images_for_range(row_cells, 0, 4, sr.replace('.',''))
             if part and not sr:
                 h, p = extract_hsn(part)
                 if h: self.hsn_left = h
@@ -348,26 +396,26 @@ class TableParser:
             elif sr:
                 h, p = extract_hsn(part)
                 if h: self.hsn_left = h
-                self.add_item(ti, sr, self.cat_left, p, "", self.hsn_left, price, per, "")
+                self.add_item(ti, sr, self.cat_left, p, "", self.hsn_left, price, per, "", inline)
 
-            # Right: 4,5,10(HSN),11,12
             sr_r = cells[4]
             part_r = " ".join(list(dict.fromkeys([c for c in cells[5:10] if c and c not in (",,", "ÆÆ")])))
             hsn_r = cells[10]
             price_r = cells[11]
             per_r = cells[12]
+            inline_r = self.get_images_for_range(row_cells, 4, 13, sr_r.replace('.',''))
             if part_r and not sr_r:
                 if part_r and len(part_r)>3 and part_r not in (",,", "ÆÆ"): self.cat_right = part_r
             elif sr_r:
                 if hsn_r: self.hsn_right = hsn_r
-                self.add_item(ti, sr_r, self.cat_right, part_r, "", self.hsn_right, price_r, per_r, "")
+                self.add_item(ti, sr_r, self.cat_right, part_r, "", self.hsn_right, price_r, per_r, "", inline_r)
 
         elif ti == 6 and nc == 8:
-            # Left: 0,1,2,3
             sr = cells[0]
             part = " ".join(list(dict.fromkeys([c for c in cells[1:3] if c and c not in (",,", "ÆÆ")])))
             price = cells[2]
             per = cells[3]
+            inline = self.get_images_for_range(row_cells, 0, 4, sr.replace('.',''))
             if part and not sr:
                 h, p = extract_hsn(part)
                 if h: self.hsn_left = h
@@ -375,13 +423,13 @@ class TableParser:
             elif sr:
                 h, p = extract_hsn(part)
                 if h: self.hsn_left = h
-                self.add_item(ti, sr, self.cat_left, p, "", self.hsn_left, price, per, "")
+                self.add_item(ti, sr, self.cat_left, p, "", self.hsn_left, price, per, "", inline)
 
-            # Right: 4,5,6,7
             sr_r = cells[4]
-            part_r = cells[5]
+            part_r = " ".join(list(dict.fromkeys([c for c in cells[5:7] if c and c not in (",,", "ÆÆ")])))
             price_r = cells[6]
             per_r = cells[7]
+            inline_r = self.get_images_for_range(row_cells, 4, 8, sr_r.replace('.',''))
             if part_r and not sr_r:
                 h, p = extract_hsn(part_r)
                 if h: self.hsn_right = h
@@ -389,72 +437,66 @@ class TableParser:
             elif sr_r:
                 h, p = extract_hsn(part_r)
                 if h: self.hsn_right = h
-                self.add_item(ti, sr_r, self.cat_right, p, "", self.hsn_right, price_r, per_r, "")
+                self.add_item(ti, sr_r, self.cat_right, p, "", self.hsn_right, price_r, per_r, "", inline_r)
 
         elif (ti == 7 or ti == 8) and nc == 12:
-            # Left: 0,1,2(Size),3,4
             sr = cells[0]
-            part = " ".join(list(dict.fromkeys([c for c in cells[1:3] if c and c not in (",,", "ÆÆ")])))
-            size = cells[2]
-            price = cells[3]
-            per = cells[4]
-            if part and not sr:
-                h, p = extract_hsn(part)
-                if h: self.hsn_left = h
-                if p and len(p)>3 and p not in (",,", "ÆÆ"): self.cat_left = p
+            part = " ".join(list(dict.fromkeys([c for c in cells[1:4] if c and c not in (",,", "ÆÆ")])))
+            hsn = cells[4]
+            price = cells[5]
+            per = cells[6]
+            inline = self.get_images_for_range(row_cells, 0, 7, sr.replace('.',''))
+            if part and not price and not sr:
+                if part and len(part)>3 and part not in (",,", "ÆÆ"): self.cat_left = part
             elif sr:
-                h, p = extract_hsn(part)
-                if h: self.hsn_left = h
-                self.add_item(ti, sr, self.cat_left, p, size, self.hsn_left, price, per, "")
+                if hsn: self.hsn_left = hsn
+                self.add_item(ti, sr, self.cat_left, part, "", self.hsn_left, price, per, "", inline)
 
-            # Right: 5,6,8(Size),10,11
-            sr_r = cells[5]
-            part_r = " ".join(list(dict.fromkeys([c for c in cells[6:8] if c and c not in (",,", "ÆÆ")])))
-            size_r = cells[8]
+            sr_r = cells[7]
+            part_r = cells[8]
+            hsn_r = cells[9]
             price_r = cells[10]
             per_r = cells[11]
-            if part_r and not sr_r:
-                h, p = extract_hsn(part_r)
-                if h: self.hsn_right = h
-                if p and len(p)>3 and p not in (",,", "ÆÆ"): self.cat_right = p
+            inline_r = self.get_images_for_range(row_cells, 7, 12, sr_r.replace('.',''))
+            if part_r and not price_r and not sr_r:
+                if part_r and len(part_r)>3 and part_r not in (",,", "ÆÆ"): self.cat_right = part_r
             elif sr_r:
-                h, p = extract_hsn(part_r)
-                if h: self.hsn_right = h
-                self.add_item(ti, sr_r, self.cat_right, p, size_r, self.hsn_right, price_r, per_r, "")
+                if hsn_r: self.hsn_right = hsn_r
+                self.add_item(ti, sr_r, self.cat_right, part_r, "", self.hsn_right, price_r, per_r, "", inline_r)
 
         elif ti in (9, 12) and nc == 10:
-            # Left: 0,1,2(HSN),3,4
             sr = cells[0]
             part = " ".join(list(dict.fromkeys([c for c in cells[1:3] if c and c not in (",,", "ÆÆ")])))
             hsn = cells[2]
             price = cells[3]
             per = cells[4]
+            inline = self.get_images_for_range(row_cells, 0, 5, sr.replace('.',''))
             if part and not sr:
                 if part and len(part)>3 and part not in (",,", "ÆÆ"): self.cat_left = part
             elif sr:
                 if hsn: self.hsn_left = hsn
-                self.add_item(ti, sr, self.cat_left, part, "", self.hsn_left, price, per, "")
+                self.add_item(ti, sr, self.cat_left, part, "", self.hsn_left, price, per, "", inline)
 
-            # Right: 5,6,7(HSN),8,9
             sr_r = cells[5]
             part_r = " ".join(list(dict.fromkeys([c for c in cells[6:8] if c and c not in (",,", "ÆÆ")])))
             hsn_r = cells[7]
             price_r = cells[8]
             per_r = cells[9]
+            inline_r = self.get_images_for_range(row_cells, 5, 10, sr_r.replace('.',''))
             if part_r and not sr_r:
                 if part_r and len(part_r)>3 and part_r not in (",,", "ÆÆ"): self.cat_right = part_r
             elif sr_r:
                 if hsn_r: self.hsn_right = hsn_r
-                self.add_item(ti, sr_r, self.cat_right, part_r, "", self.hsn_right, price_r, per_r, "")
+                self.add_item(ti, sr_r, self.cat_right, part_r, "", self.hsn_right, price_r, per_r, "", inline_r)
 
 
 if __name__ == "__main__":
-    doc_path = r"C:\Users\viken\Desktop\SKumarDirectory\List 2025.docx"
+    repo_dir = Path(__file__).resolve().parent
+    doc_path = repo_dir / "List 2025.docx"
     parser = TableParser(doc_path)
     parser.process()
     
-    # Save to CSV
-    out_path = Path(r"C:\Users\viken\Desktop\SKumarCatalog\data\catalog_data.csv")
+    out_path = repo_dir / "data" / "catalog_data.csv"
     fieldnames = ['sr_no', 'category', 'item_name', 'size', 'hsn_code', 'list_price', 'unit', 'packing', 'image_ref', 'page']
     
     with open(out_path, 'w', newline='', encoding='utf-8-sig') as f:

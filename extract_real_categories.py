@@ -1,7 +1,8 @@
 from docx import Document
+from pathlib import Path
 import re
 
-doc = Document(r'C:\Users\viken\Desktop\SKumarDirectory\List 2025.docx')
+doc = Document(Path(__file__).resolve().parent / 'List 2025.docx')
 
 categories = []
 current_cat = "Unknown"

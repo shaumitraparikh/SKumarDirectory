@@ -11,8 +11,9 @@ def clean_filename(text):
     return text.lower().strip('_')
 
 def extract_and_map_images():
-    photo_doc_path = Path(r"C:\Users\viken\Desktop\SKumarDirectory\GSC - SK Catlog Photo.docx")
-    out_dir = Path(r"C:\Users\viken\Desktop\SKumarCatalog\images")
+    repo_dir = Path(__file__).resolve().parent
+    photo_doc_path = repo_dir / "GSC - SK Catlog Photo.docx"
+    out_dir = repo_dir / "images"
     out_dir.mkdir(parents=True, exist_ok=True)
     
     doc = Document(photo_doc_path)

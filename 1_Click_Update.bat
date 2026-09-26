@@ -10,7 +10,7 @@ echo Rebuilding the catalogs from the current CSV, templates, and images...
 echo.
 
 set "EXIT_CODE=0"
-set "REPO_DIR=%~dp0.."
+set "REPO_DIR=%~dp0"
 cd /d "%REPO_DIR%" || goto :error
 
 for /f "delims=" %%B in ('git branch --show-current') do set "CURRENT_BRANCH=%%B"
@@ -23,7 +23,6 @@ for /f "delims=" %%H in ('git rev-parse HEAD') do set "LOCAL_HEAD=%%H"
 for /f "delims=" %%H in ('git rev-parse origin/main') do set "REMOTE_HEAD=%%H"
 if not "%LOCAL_HEAD%"=="%REMOTE_HEAD%" goto :branch_out_of_date
 
-cd /d "%~dp0" || goto :error
 python build_catalog.py
 if errorlevel 1 goto :error
 
@@ -38,17 +37,17 @@ echo.
 set /p "PUBLISH_CHANGES=Commit and push these catalog changes to origin/main? (Y/N): "
 if /I not "%PUBLISH_CHANGES%"=="Y" goto :declined
 
-git add -A -- .gitignore .github/workflows/deploy-pages.yml index.html SKumarCatalog
+git add -A
 if errorlevel 1 goto :error
 
-git diff --cached --quiet -- .gitignore .github/workflows/deploy-pages.yml index.html SKumarCatalog
+git diff --cached --quiet
 if errorlevel 2 goto :error
 if errorlevel 1 goto :commit_changes
 echo No catalog changes to commit. GitHub Pages is already up to date.
 goto :finish
 
 :commit_changes
-git commit -m "Update generated catalogs" -m "Rebuild GitHub Pages output from tested catalog sources." -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" --only -- .gitignore .github/workflows/deploy-pages.yml index.html SKumarCatalog
+git commit -m "Update generated catalogs" -m "Rebuild GitHub Pages output from tested catalog sources." -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 if errorlevel 1 goto :error
 
 echo.

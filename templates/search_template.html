@@ -6,7 +6,7 @@
 <meta name="description" content="Search the S. Kumar & Bros insulating materials and electrical accessories catalog and request an order.">
 <meta name="theme-color" content="#102a43">
 <title>{{ company.name }} - POS / Search Catalog</title>
-<link rel="stylesheet" href="../assets/css/search_catalog.css">
+<link rel="stylesheet" href="assets/css/search_catalog.css">
 </head>
 <body>
 
@@ -107,7 +107,7 @@
             <div class="card" data-search="{{ item.item_name | lower }} {{ cat.name | lower }} {{ item.hsn_code }} {{ item.sr_no }} {{ item.size }} {{ item.id_size }} {{ item.od_size }} {{ item.lf_size }}">
                 <div class="card-img-container">
                     {% if item.display_image_path %}
-                        <img src="../{{ item.display_image_path }}" class="card-img{% if item.image_is_representative %} representative-image{% endif %}" alt="{% if item.image_is_representative %}Representative image for {{ cat.name }}{% else %}{{ item.item_name }}{% endif %}" loading="lazy">
+                        <img src="{{ item.display_image_path }}" class="card-img{% if item.image_is_representative %} representative-image{% endif %}" alt="{% if item.image_is_representative %}Representative image for {{ cat.name }}{% else %}{{ item.item_name }}{% endif %}" loading="lazy">
                     {% else %}
                         <div style="color:#aaa; font-size:10px; font-style:italic;">No Image</div>
                     {% endif %}
@@ -218,7 +218,7 @@
     <div class="inv-footer">Thank you for your business.</div>
 </section>
 
-<script src="../assets/js/commerce_core.js"></script>
-<script src="../assets/js/search_catalog.js"></script>
+<script src="assets/js/commerce_core.js"></script>
+<script src="assets/js/search_catalog.js"></script>
 </body>
 </html>

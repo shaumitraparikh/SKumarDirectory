@@ -12,8 +12,8 @@ Reads:
     - templates/        : Jinja2 HTML templates
 
 Produces:
-    - output/print_catalog.html  : Full print-ready catalog
-    - output/search_catalog.html : Searchable web catalog
+    - print_catalog.html  : Full print-ready catalog
+    - search_catalog.html : Searchable web catalog
 """
 
 import csv
@@ -44,7 +44,7 @@ DATA_FILE = SCRIPT_DIR / "data" / "catalog_data.csv"
 DATA_NOTES_FILE = SCRIPT_DIR / "data" / "catalog_data_notes.json"
 IMAGES_DIR = SCRIPT_DIR / "images"
 TEMPLATES_DIR = SCRIPT_DIR / "templates"
-OUTPUT_DIR = SCRIPT_DIR / "output"
+OUTPUT_DIR = SCRIPT_DIR
 
 
 def load_config():
@@ -223,7 +223,7 @@ def build_print_catalog(config, categories, env):
         pages=pages,
         terms=config.get('terms', ''),
         generation_date=datetime.now().strftime('%Y-%m-%d %H:%M'),
-        images_base='../images'
+        images_base='images'
     )
     
     output_path = OUTPUT_DIR / 'print_catalog.html'
@@ -270,7 +270,7 @@ def build_search_catalog(config, categories, items, env):
         all_items_json=all_items_json,
         category_names=sorted(category_names),
         generation_date=datetime.now().strftime('%Y-%m-%d %H:%M'),
-        images_base='../images'
+        images_base='images'
     )
     output_path = OUTPUT_DIR / 'search_catalog.html'
     output_path = OUTPUT_DIR / 'search_catalog.html'
