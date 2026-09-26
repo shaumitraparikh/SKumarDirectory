@@ -22,9 +22,9 @@ The public pages are:
 - [Search catalog](https://shaumitraparikh.github.io/SKumarDirectory/search_catalog.html)
 - [Print catalog](https://shaumitraparikh.github.io/SKumarDirectory/print_catalog.html)
 
-Catalog source, assets, templates, tests, and generated pages live at the
-repository root (with only supporting folders), removing the nested
-catalog-directory segment from both page URLs.
+Catalog pages and the build entry point stay at the repository root to preserve
+the short Pages URLs. Supporting code and data are grouped into root-level
+folders; maintenance utilities and their reports are organized under `tools/`.
 
 The search catalog includes a browser-persisted cart, customer and delivery
 details, item discounts, a proforma estimate, and an order-request handoff.
@@ -78,7 +78,20 @@ images.
 ├── tests/
 │   ├── test_catalog.py          <- CSV, assets, and rendered page checks
 │   └── order_core.test.js       <- Checkout math and payload checks
+├── tools/
+│   ├── audit/                   <- Catalog and image audit utilities
+│   ├── extract/                 <- Source document extraction utilities
+│   ├── maintenance/             <- Manual data/image repair utilities
+│   └── reports/                 <- Generated and diagnostic reports
 └── README.md                    <- This file
+```
+
+The scripts under `tools/` are manual utilities, not part of the one-click
+catalog build or GitHub Pages deployment. Run them from any working directory;
+they resolve the repository root from their own file location. For example:
+
+```bash
+python tools/audit/check_gen.py
 ```
 
 ## How to Update Prices / Add Items

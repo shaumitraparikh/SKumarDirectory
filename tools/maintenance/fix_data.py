@@ -1,5 +1,9 @@
+import os
+from pathlib import Path
 import csv
 import re
+
+os.chdir(Path(__file__).resolve().parents[2])
 
 def clean_cat(cat):
     # Remove weird table header artifacts from categories

@@ -3,6 +3,8 @@ import os
 import re
 from pathlib import Path
 
+os.chdir(Path(__file__).resolve().parents[2])
+
 def sanitize_filename(name):
     # Remove invalid characters for Windows filenames
     clean = re.sub(r'[\\/*?:"<>|]', "", name)

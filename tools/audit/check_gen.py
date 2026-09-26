@@ -1,5 +1,9 @@
+import os
+from pathlib import Path
 import csv
 import re
+
+os.chdir(Path(__file__).resolve().parents[2])
 
 with open('data/catalog_data.csv', 'r', encoding='utf-8-sig') as f:
     rows = list(csv.DictReader(f))

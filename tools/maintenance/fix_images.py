@@ -1,5 +1,9 @@
+import os
+from pathlib import Path
 import csv
 import re
+
+os.chdir(Path(__file__).resolve().parents[2])
 
 # Precise mapping of category strings to available group image files
 IMG_MAP = {

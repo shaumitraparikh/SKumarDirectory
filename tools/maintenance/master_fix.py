@@ -1,4 +1,8 @@
+from pathlib import Path
+import os
 import csv
+
+os.chdir(Path(__file__).resolve().parents[2])
 
 # The PERFECT mapping based on docx analysis
 def get_true_category(sr):

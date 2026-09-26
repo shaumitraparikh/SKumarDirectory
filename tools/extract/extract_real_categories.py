@@ -2,7 +2,8 @@ from docx import Document
 from pathlib import Path
 import re
 
-doc = Document(Path(__file__).resolve().parent / 'List 2025.docx')
+repo_dir = Path(__file__).resolve().parents[2]
+doc = Document(repo_dir / 'List 2025.docx')
 
 categories = []
 current_cat = "Unknown"
@@ -29,7 +30,7 @@ for t in doc.tables:
                 categories.append((int(sr1), current_cat, part1[:30]))
         except: pass
 
-with open('cat_ranges.txt', 'w', encoding='utf-8') as f:
+with open(repo_dir / 'tools' / 'reports' / 'cat_ranges.txt', 'w', encoding='utf-8') as f:
     last_cat = None
     for sr, cat, part in categories:
         if cat != last_cat:

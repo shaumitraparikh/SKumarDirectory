@@ -1,4 +1,8 @@
+import os
+from pathlib import Path
 import csv
+
+os.chdir(Path(__file__).resolve().parents[2])
 import re
 
 with open('data/catalog_data.csv', 'r', encoding='utf-8-sig') as f:

@@ -1,4 +1,9 @@
-with open('extract_smart.py', 'r', encoding='utf-8') as f:
+from pathlib import Path
+
+repo_dir = Path(__file__).resolve().parents[2]
+extractor_path = repo_dir / 'tools' / 'extract' / 'extract_smart.py'
+
+with open(extractor_path, 'r', encoding='utf-8') as f:
     text = f.read()
 
 # Replace part assignments
@@ -23,5 +28,5 @@ text = text.replace(
     '# Right: 4,5,10(HSN),11,12\n            sr_r = cells[4]\n            part_r = " ".join(list(dict.fromkeys([c for c in cells[5:10] if c and c not in (",,", "ÆÆ")])))'
 )
 
-with open('extract_smart.py', 'w', encoding='utf-8') as f:
+with open(extractor_path, 'w', encoding='utf-8') as f:
     f.write(text)

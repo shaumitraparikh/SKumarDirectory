@@ -1,4 +1,8 @@
+import os
+from pathlib import Path
 import csv
+
+os.chdir(Path(__file__).resolve().parents[2])
 
 IMG_MAP = {
     "yellow": "fibreglass_b_class_yellow_tube",
