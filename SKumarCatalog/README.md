@@ -18,10 +18,11 @@ This creates two files in `output/`:
 
 Pushing to `main` automatically builds and deploys both catalogs to GitHub Pages.
 The repository landing page links to the searchable and print-ready catalogs.
-On Windows, `1_Click_Update.bat` rebuilds both HTML files, commits the catalog
-data, configuration, image-folder changes, and generated HTML files, then pushes
-to `origin/main` to start the deployment. Run it from a checkout on the `main`
-branch with Git credentials configured for pushing to the repository.
+On Windows, `1_Click_Update.bat` rebuilds both HTML files and commits the catalog
+data, configuration, image-folder changes, and generated HTML files locally.
+It asks before pushing to `origin/main`; choose **Y** to publish the updates and
+start the Pages deployment, or **N** to keep the commit local. Run it from a
+checkout on the `main` branch with Git credentials configured for pushing.
 
 ## Folder Structure
 

@@ -1,12 +1,13 @@
 {
     "company": {
         "name": "S. Kumar & Bros",
+        "legal_name": "GENERAL SUPPLY CORPORATION",
         "name2": "S. Kumar & Bros",
         "tagline": "Manufacturers, Importers & Stockist of Insulating Materials & Electrical Accessories",
-        "phone": "49233982",
+        "phone": "022-49233982",
         "mobile": "",
         "email": "",
-        "address": "Mumbai",
+        "address": "3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.",
         "gst": "",
         "estd_gsc": "1962",
         "estd_sk": "1991",
@@ -19,8 +20,8 @@
     "images_dir": "images",
     "data_file": "data/catalog_data.csv",
     "phone": "022-49233982",
-    "address": "3rd Central Building, Grd. Flr., 11, Bomanji Master Road, Mumbai - 400 002.",
-    "gst": "[Add GST Number Here]",
+    "address": "3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.",
+    "gst": "",
     "tagline": "INSULATING - ELECTRICALS - ELECTRONIC - HARDWARE - MATERIALS",
     "email": "sales@skumarbros.com"
 }

@@ -3,7 +3,7 @@ setlocal
 title Catalog Builder Update
 color 0A
 echo =======================================================
-echo         S. KUMAR & BROS - CATALOG UPDATER
+echo         S. KUMAR ^& BROS - CATALOG UPDATER
 echo =======================================================
 echo.
 echo Rebuilding your catalogs from the latest CSV data...
@@ -24,8 +24,21 @@ cd /d "%REPO_DIR%" || goto :error
 git add -A -- SKumarCatalog/config.json SKumarCatalog/data/catalog_data.csv SKumarCatalog/images SKumarCatalog/output/print_catalog.html SKumarCatalog/output/search_catalog.html
 if errorlevel 1 goto :error
 
-git commit --allow-empty -m "Update generated catalogs" --only -- SKumarCatalog/config.json SKumarCatalog/data/catalog_data.csv SKumarCatalog/images SKumarCatalog/output/print_catalog.html SKumarCatalog/output/search_catalog.html
+git diff --cached --quiet -- SKumarCatalog/config.json SKumarCatalog/data/catalog_data.csv SKumarCatalog/images SKumarCatalog/output/print_catalog.html SKumarCatalog/output/search_catalog.html
+if errorlevel 2 goto :error
+if errorlevel 1 goto :commit_changes
+echo No catalog, image, or configuration changes to commit.
+goto :confirm_push
+
+:commit_changes
+git commit -m "Update generated catalogs" --only -- SKumarCatalog/config.json SKumarCatalog/data/catalog_data.csv SKumarCatalog/images SKumarCatalog/output/print_catalog.html SKumarCatalog/output/search_catalog.html
 if errorlevel 1 goto :error
+
+:confirm_push
+echo.
+set "PUSH_CONFIRM=N"
+set /p "PUSH_CONFIRM=Push catalog updates to origin/main and deploy GitHub Pages? [Y/N] "
+if /i not "%PUSH_CONFIRM%"=="Y" goto :skip_push
 
 git push origin main
 if errorlevel 1 goto :error
@@ -35,6 +48,13 @@ echo =======================================================
 echo  UPDATE AND PUSH COMPLETE!
 echo  GitHub Actions will deploy the catalogs to GitHub Pages.
 echo =======================================================
+echo.
+goto :finish
+
+:skip_push
+echo.
+echo Catalog changes are saved in a local commit and were not pushed.
+echo GitHub Pages will remain unchanged until you approve a push.
 echo.
 goto :finish
 
