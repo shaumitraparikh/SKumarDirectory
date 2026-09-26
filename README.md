@@ -60,6 +60,7 @@ images.
 ├── 1_Click_Update.bat           <- Rebuild, test, ask before commit/push
 ├── build_catalog.py             <- Catalog generator for local and Pages builds
 ├── config.json                  <- Company and checkout configuration
+├── docs 2025/                   <- Original source price list and photo documents
 ├── data/
 │   ├── catalog_data.csv         <- EDIT this product list
 │   └── catalog_data_notes.json  <- Source ambiguity/review notes
