@@ -230,6 +230,7 @@
         .inv-brand h1 { margin: 0 0 5px; color: #173b57; font-size: 22pt; letter-spacing: .01em; }
         .inv-brand .tagline { color: #486581; font-size: 9pt; margin: 0 0 8px; }
         .inv-brand p { margin: 3px 0; color: #486581; font-size: 8.5pt; }
+        .inv-brand .inv-contact { font-size: 7.5pt; line-height: 1.35; }
         .inv-title { min-width: 165px; text-align: right; }
         .inv-title h2 { margin: 0 0 7px; color: #173b57; font-size: 17pt; letter-spacing: .06em; }
         .inv-title span { color: #627d98; font-size: 8pt; text-transform: uppercase; letter-spacing: .08em; }
@@ -373,6 +374,9 @@
             <p class="tagline">{{ company.tagline }}</p>
             <p>{{ billing.address }}</p>
             <p>{% if billing.phone %}Office phone: {{ billing.phone }}{% endif %}</p>
+{% for contact in company.sales_contacts %}
+            <p class="inv-contact">Sales contact: {{ contact.name }} · Mobile: {{ contact.mobile }} · Phone: {{ contact.phone }} · GSTIN: {{ contact.gstin }}</p>
+{% endfor %}
 {% if billing.gst and billing.gst != '[Add GST Number Here]' %}<p>GSTIN: {{ billing.gst }}</p>{% endif %}</div>
         <div class="inv-title">
             <h2>PROFORMA<br>INVOICE</h2>

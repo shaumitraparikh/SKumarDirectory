@@ -26,10 +26,13 @@ stored and shown as distinct specifications.
 Pushing to `main` automatically builds and deploys both catalogs to GitHub Pages.
 The repository landing page links to the searchable and print-ready catalogs.
 On Windows, `1_Click_Update.bat` rebuilds both HTML files and commits the catalog
-data, configuration, image-folder changes, and generated HTML files locally.
-It asks before pushing to `origin/main`; choose **Y** to publish the updates and
-start the Pages deployment, or **N** to keep the commit local. Run it from a
-checkout on the `main` branch with Git credentials configured for pushing.
+builder, templates, data, configuration, image-folder changes, and generated
+HTML files, then automatically pushes the catalog commit to `origin/main` to
+start the Pages deployment. No confirmation prompt is required. Run it from a
+cleanly synchronized checkout on the `main` branch with Git credentials
+configured for fetching and pushing. The updater stops without building or
+committing if local `main` is not exactly at `origin/main`; synchronize the
+branch first rather than risking a push of unrelated commits.
 
 ## Folder Structure
 
@@ -47,19 +50,28 @@ SKumarCatalog/
 ├── output/
 │   ├── print_catalog.html        <- GENERATED print catalog
 │   └── search_catalog.html       <- GENERATED search catalog
-├── build_catalog.py              <- Run this to generate catalogs
-├── extract_from_docx.py          <- Extract data from .docx files
+├── 1_Click_Update.bat            <- Rebuild, commit, and automatically push
+├── build_catalog.py              <- Catalog generator used by local and Pages builds
 ├── config.json                   <- Company info & settings
+├── maintenance scripts (*.py)    <- Data/image audit and repair utilities
 └── README.md                     <- This file
 ```
 
 ## How to Update Prices / Add Items
 
 1. Open `data/catalog_data.csv` in Excel
-2. Edit prices, add new rows, update item names
+2. Edit prices, add new rows with the next serial number, or update item names
 3. Save the CSV file
-4. Run: `python build_catalog.py`
-5. Open the HTML files in a browser to view
+4. Run `1_Click_Update.bat` from the repository's `main` checkout to rebuild and
+   commit and push the source and generated catalogs
+5. Wait for the success message; GitHub Actions then deploys both pages
+6. Open the generated HTML files locally or wait for the Pages workflow to
+   finish before refreshing the live pages
+
+The numbered product serials must remain unique and sequential. The updater
+includes the builder and templates as well as the CSV and generated HTML so a
+Pages build uses the same catalog data and layout as the local build. A run with
+no catalog changes creates no empty commit or unnecessary push.
 
 ## CSV Columns
 
