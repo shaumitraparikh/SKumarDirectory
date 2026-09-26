@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ company.name }} - POS / Search Catalog</title>
+<style>
+    :root {
+        --primary: #000080;
+        --secondary: #f5f7fa;
+        --accent: #28a745;
+        --danger: #dc3545;
+    }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--secondary);
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Header & Search */
+    .header {
+        background: var(--primary);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .header h1 { margin: 0 0 5px 0; font-size: 24px; }
+    
+    .sticky-bar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(5px);
+        padding: 15px 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border-bottom: 1px solid #ddd;
+    }
+    
+    #searchInput {
+        flex-grow: 1;
+        max-width: 600px;
+        padding: 12px 20px;
+        font-size: 16px;
+        border: 2px solid #ddd;
+        border-radius: 30px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+    #searchInput:focus { border-color: var(--primary); }
+    
+    .cart-toggle-btn {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 30px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: transform 0.1s;
+    }
+    .cart-toggle-btn:active { transform: scale(0.95); }
+    .cart-badge {
+        background: white;
+        color: var(--accent);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 14px;
+    }
+
+    /* Modern Off-Canvas Cart Drawer */
+    .cart-backdrop {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(0,0,0,0.4); z-index: 999;
+        opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
+        backdrop-filter: blur(2px);
+    }
+    .cart-backdrop.open { opacity: 1; visibility: visible; }
+    
+    .cart-drawer {
+        position: fixed; top: 0; right: -420px; width: 400px; height: 100vh;
+        background: white; z-index: 1000;
+        box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; flex-direction: column;
+    }
+    .cart-drawer.open { right: 0; }
+    
+    .cart-header {
+        background: var(--primary); color: white; padding: 20px;
+        font-weight: bold; font-size: 18px;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .close-cart { 
+        background: none; border: none; color: white; 
+        font-size: 28px; cursor: pointer; line-height: 1; padding: 0;
+        transition: transform 0.2s;
+    }
+    .close-cart:hover { transform: scale(1.1); }
+    
+    .buyer-info { padding: 15px 20px; background: #f9f9f9; border-bottom: 1px solid #ddd; }
+    .buyer-info input {
+        width: 100%; padding: 10px; margin-bottom: 10px;
+        border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+        font-size: 14px;
+    }
+    
+    .cart-items { flex-grow: 1; overflow-y: auto; padding: 15px 20px; }
+    .cart-item {
+        border-bottom: 1px solid #eee; padding: 15px 0;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .cart-item-details { width: 65%; }
+    .cart-item-title { font-size: 13px; font-weight: bold; line-height: 1.3; margin-bottom: 8px; color: #333;}
+    
+    .cart-qty-controls { display: flex; align-items: center; gap: 8px; }
+    .qty-btn {
+        background: #f1f1f1; border: 1px solid #ddd; width: 26px; height: 26px;
+        border-radius: 50%; cursor: pointer; font-weight: bold; color: #555;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .qty-btn:hover { background: #e2e2e2; color: #000; }
+    .cart-item-total { font-size: 15px; font-weight: bold; text-align: right; width: 30%; color: var(--primary);}
+    
+    .cart-summary { 
+        background: #fff; padding: 20px; border-top: 1px solid #ddd;
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.03);
+    }
+    .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px; color: #555;}
+    .summary-total { font-size: 20px; font-weight: bold; color: var(--primary); border-top: 2px dashed #ccc; padding-top: 12px; margin-top: 5px; }
+    .tax-input { width: 45px; padding: 4px; margin-right: 5px; text-align: right; border: 1px solid #ccc; border-radius: 4px;}
+    
+    .print-btn {
+        width: 100%; background: var(--accent); color: white; border: none;
+        padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; 
+        cursor: pointer; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px;
+        transition: background 0.2s;
+    }
+    .print-btn:hover { background: #218838; }
+
+    /* Catalog Grid */
+    .catalog-wrapper { padding: 20px; max-width: 1400px; margin: 0 auto; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
+    
+    /* Cards */
+    .card {
+        background: white; border-radius: 8px; overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex;
+        padding: 12px; align-items: center; gap: 12px; border: 1px solid #eee;
+    }
+    .card:hover { border-color: #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+    
+    .card-img-container {
+        width: 60px; height: 60px; background: #fff; display: flex;
+        align-items: center; justify-content: center; border-radius: 6px;
+        border: 1px solid #eee; flex-shrink: 0; padding: 5px;
+    }
+    .card-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    
+    .card-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+    .card-title { font-size: 14px; font-weight: bold; margin: 0 0 5px 0; line-height: 1.2; }
+    .card-meta { font-size: 11px; color: #666; margin-bottom: 2px;}
+    .card-price { font-size: 15px; color: var(--primary); font-weight: bold; margin: 5px 0 0 0; }
+    
+    /* Add to Cart Controls */
+    .add-controls { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+    .qty-input { width: 45px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
+    .add-btn { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+    .add-btn:hover { background: #000050; }
+
+    /* Toast */
+    #toast {
+        visibility: hidden; min-width: 250px; background-color: #333; color: #fff;
+        text-align: center; border-radius: 20px; padding: 12px; position: fixed;
+        z-index: 300; left: 50%; bottom: 30px; transform: translateX(-50%);
+        font-size: 14px; opacity: 0; transition: opacity 0.3s;
+    }
+    #toast.show { visibility: visible; opacity: 1; }
+
+    /* Print Invoice Styles */
+    #printBill { display: none; }
+    
+    @media print {
+        @page { size: A4 portrait; margin: 15mm; }
+        body { background: white; }
+        .header, .sticky-bar, .catalog-wrapper, .cart-dropdown, #toast { display: none !important; }
+        #printBill { display: block !important; font-family: Arial, sans-serif; color: #000; }
+        .inv-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+        .inv-header h1 { margin: 0; font-size: 24px; text-transform: uppercase;}
+        .inv-header p { margin: 2px 0; font-size: 12px; }
+        .inv-meta { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14px; }
+        .inv-buyer { font-weight: bold; font-size: 16px; }
+        table.inv-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .inv-table th, .inv-table td { border: 1px solid #000; padding: 6px; font-size: 12px; }
+        .inv-table th { background: #f0f0f0; }
+        .inv-table td.num { text-align: right; }
+        .inv-summary { width: 300px; float: right; }
+        .inv-summary table { width: 100%; border-collapse: collapse; }
+        .inv-summary td { padding: 5px; font-size: 14px; border: 1px solid #000; }
+        .inv-summary td.num { text-align: right; }
+        .inv-summary .total { font-weight: bold; font-size: 16px; }
+        .clear { clear: both; }
+        .footer { text-align: center; margin-top: 40px; font-size: 12px; font-style: italic; }
+    }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>{{ company.name }}</h1>
+    <p style="margin:0; font-size:14px; opacity:0.8;">Digital Search Catalog & Point of Sale</p>
+</div>
+
+<div class="sticky-bar">
+    <input type="text" id="searchInput" placeholder="Search by Part Name, Size, Category, HSN, or Sr.No..." onkeyup="filterCatalog()">
+    <button class="cart-toggle-btn" onclick="toggleCart()">
+        🛒 Cart <span class="cart-badge" id="cartCountBadge">0</span>
+    </button>
+</div>
+
+<div class="cart-backdrop" id="cartBackdrop" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cartDropdown">
+    <div class="cart-header">
+        <span>🛒 Your Cart</span>
+        <button class="close-cart" onclick="toggleCart()">×</button>
+    </div>
+    <div class="buyer-info">
+        <input type="text" id="buyerName" placeholder="Buyer Name (e.g. Acme Corp)">
+        <input type="text" id="buyerContact" placeholder="Phone / Email">
+        <input type="text" id="buyerAddress" placeholder="Address">
+    </div>
+    <div class="cart-items" id="cartItems">
+        <div style="text-align:center; color:#888; margin-top:20px;">Cart is empty</div>
+    </div>
+    <div class="cart-summary">
+        <div class="summary-row"><span>Subtotal:</span><span>₹<span id="subTotal">0.00</span></span></div>
+        <div class="tax-row summary-row">
+            <span>Tax (<input type="number" id="taxRate" class="tax-input" value="18" onchange="renderCart()">%):</span>
+            <span>₹<span id="taxAmount">0.00</span></span>
+        </div>
+        <div class="summary-row summary-total"><span>Grand Total:</span><span>₹<span id="grandTotal">0.00</span></span></div>
+        <button class="print-btn" onclick="generateBill()">🖨️ Print Bill</button>
+    </div>
+</div>
+
+<div class="catalog-wrapper">
+    <div class="grid" id="catalogGrid">
+        {% for cat in categories %}
+            {% for item in cat.products %}
+            <div class="card" data-search="{{ item.item_name | lower }} {{ cat.name | lower }} {{ item.hsn_code }} {{ item.sr_no }}">
+                <div class="card-img-container">
+                    {% if item.image_path %}
+                        <img src="../{{ item.image_path }}" class="card-img" alt="" loading="lazy">
+                    {% else %}
+                        <div style="color:#aaa; font-size:10px; font-style:italic;">No Image</div>
+                    {% endif %}
+                </div>
+                <div class="card-content">
+                    <p class="card-title" id="name-{{ item.sr_no }}">{{ item.item_name }}</p>
+                    <p class="card-meta">Sr: {{ item.sr_no }} | HSN: <span class="hsn-val">{{ item.hsn_code }}</span></p>
+                    <p class="card-meta">Unit: {{ item.unit }}</p>
+                    <p class="card-price">₹<span id="price-{{ item.sr_no }}">{{ item.list_price }}</span></p>
+                </div>
+                <div class="add-controls">
+                    <input type="number" id="qty-{{ item.sr_no }}" class="qty-input" value="1" min="1">
+                    <button class="add-btn" onclick="addToCart('{{ item.sr_no }}')">Add</button>
+                </div>
+            </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+
+<div id="toast">Item added to cart</div>
+
+<!-- Hidden Print Invoice View -->
+<div id="printBill">
+    <div class="inv-header">
+        <h1>{{ company.name }}</h1>
+        <p>11, Bomanji Master Road, Mumbai - 400 002</p>
+        <p>Email: example@example.com | Phone: 49233982</p>
+        <h2>PROFORMA INVOICE</h2>
+    </div>
+    <div class="inv-meta">
+        <div>
+            <div><strong>Bill To:</strong></div>
+            <div class="inv-buyer" id="pBuyerName">Cash</div>
+            <div id="pBuyerContact"></div>
+            <div id="pBuyerAddress"></div>
+        </div>
+        <div>
+            <div><strong>Date:</strong> <span id="pDate"></span></div>
+            <div><strong>Invoice No:</strong> #<span id="pInvNo"></span></div>
+        </div>
+    </div>
+    <table class="inv-table" id="pTable">
+        <thead>
+            <tr>
+                <th>Sr.No</th>
+                <th>Particulars</th>
+                <th>HSN Code</th>
+                <th>Qty</th>
+                <th>Rate (₹)</th>
+                <th>Amount (₹)</th>
+            </tr>
+        </thead>
+        <tbody id="pTableBody"></tbody>
+    </table>
+    <div class="inv-summary">
+        <table>
+            <tr><td>Subtotal</td><td class="num">₹<span id="pSubTotal"></span></td></tr>
+            <tr><td>Tax (<span id="pTaxRate"></span>%)</td><td class="num">₹<span id="pTaxAmount"></span></td></tr>
+            <tr><td class="total">Grand Total</td><td class="num total">₹<span id="pGrandTotal"></span></td></tr>
+        </table>
+    </div>
+    <div class="clear"></div>
+    <div class="footer">
+        * This is a computer generated document. <br>
+        * Subject to Mumbai Jurisdiction.
+    </div>
+</div>
+
+<script>
+    function toggleCart() {
+        document.getElementById('cartDropdown').classList.toggle('open');
+        document.getElementById('cartBackdrop').classList.toggle('open');
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.className = "show";
+        setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000);
+    }
+
+    function filterCatalog() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.getElementsByClassName('card');
+        for (let i = 0; i < cards.length; i++) {
+            const searchData = cards[i].getAttribute('data-search');
+            cards[i].style.display = searchData.includes(input) ? 'flex' : 'none';
+        }
+    }
+
+    let cart = {};
+
+    function getHsn(sr_no) {
+        const card = document.getElementById('name-'+sr_no).closest('.card');
+        const hsnSpan = card.querySelector('.hsn-val');
+        return hsnSpan ? hsnSpan.innerText.trim() : "";
+    }
+
+    function addToCart(sr_no) {
+        const name = document.getElementById('name-' + sr_no).innerText;
+        const priceStr = document.getElementById('price-' + sr_no).innerText;
+        const qtyInput = document.getElementById('qty-' + sr_no);
+        const qty = parseInt(qtyInput.value);
+        const hsn = getHsn(sr_no);
+        const price = parseFloat(priceStr.replace(/,/g, ''));
+        
+        if (isNaN(price) || isNaN(qty) || qty <= 0) {
+            showToast("Invalid price or quantity for " + sr_no);
+            return;
+        }
+
+        if (cart[sr_no]) {
+            cart[sr_no].qty += qty;
+        } else {
+            cart[sr_no] = { sr_no, name, price, qty, hsn };
+        }
+        
+        qtyInput.value = 1; // reset
+        renderCart();
+        showToast("Added " + qty + " x " + name);
+        
+        // Auto open cart briefly if it's the first item
+        if (Object.keys(cart).length === 1 && !document.getElementById('cartDropdown').classList.contains('open')) {
+            toggleCart();
+        }
+    }
+
+    function updateItemQty(sr_no, change) {
+        if (!cart[sr_no]) return;
+        cart[sr_no].qty += change;
+        if (cart[sr_no].qty <= 0) {
+            delete cart[sr_no];
+        }
+        renderCart();
+    }
+
+    function renderCart() {
+        const cartItemsDiv = document.getElementById('cartItems');
+        cartItemsDiv.innerHTML = '';
+        let subTotal = 0;
+        let totalItems = 0;
+        
+        const keys = Object.keys(cart);
+        if (keys.length === 0) {
+            cartItemsDiv.innerHTML = '<div style="text-align:center; color:#888; margin-top:20px;">Cart is empty</div>';
+        } else {
+            keys.forEach(k => {
+                const item = cart[k];
+                const total = item.price * item.qty;
+                subTotal += total;
+                totalItems += item.qty;
+                
+                cartItemsDiv.innerHTML += `
+                    <div class="cart-item">
+                        <div class="cart-item-details">
+                            <div class="cart-item-title">${item.name}</div>
+                            <div class="cart-qty-controls">
+                                <button class="qty-btn" onclick="updateItemQty('${k}', -1)">-</button>
+                                <span style="font-size:12px; width:20px; text-align:center;">${item.qty}</span>
+                                <button class="qty-btn" onclick="updateItemQty('${k}', 1)">+</button>
+                                <span style="font-size:11px; color:#555; margin-left:5px;">@ ₹${item.price.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div class="cart-item-total">
+                            <div>₹${total.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        document.getElementById('cartCountBadge').innerText = totalItems;
+        
+        const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+        const taxAmount = subTotal * (taxRate / 100);
+        const grandTotal = subTotal + taxAmount;
+        
+        document.getElementById('subTotal').innerText = subTotal.toFixed(2);
+        document.getElementById('taxAmount').innerText = taxAmount.toFixed(2);
+        document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
+    }
+
+    function generateBill() {
+        if (Object.keys(cart).length === 0) {
+            alert("Cart is empty! Please add items before printing a bill.");
+            return;
+        }
+        
+        const bName = document.getElementById('buyerName').value || "Cash";
+        document.getElementById('pBuyerName').innerText = bName;
+        document.getElementById('pBuyerContact').innerText = document.getElementById('buyerContact').value || "";
+        document.getElementById('pBuyerAddress').innerText = document.getElementById('buyerAddress').value || "";
+        
+        const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        document.getElementById('pDate').innerText = dateStr;
+        document.getElementById('pInvNo').innerText = Math.floor(Math.random() * 1000000);
+        
+        const tbody = document.getElementById('pTableBody');
+        tbody.innerHTML = '';
+        
+        let subTotal = 0;
+        Object.keys(cart).forEach(k => {
+            const item = cart[k];
+            const total = item.price * item.qty;
+            subTotal += total;
+            
+            tbody.innerHTML += `
+                <tr>
+                    <td>${item.sr_no}</td>
+                    <td>${item.name}</td>
+                    <td>${item.hsn}</td>
+                    <td class="num">${item.qty}</td>
+                    <td class="num">${item.price.toFixed(2)}</td>
+                    <td class="num">${total.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+        
+        const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+        const taxAmount = subTotal * (taxRate / 100);
+        
+        document.getElementById('pSubTotal').innerText = subTotal.toFixed(2);
+        document.getElementById('pTaxRate').innerText = taxRate;
+        document.getElementById('pTaxAmount').innerText = taxAmount.toFixed(2);
+        document.getElementById('pGrandTotal').innerText = (subTotal + taxAmount).toFixed(2);
+        
+        window.print();
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{ company.name }} - Price List</title>
+<style>
+    @page {
+        size: A4 landscape;
+        margin: 8mm 10mm;
+    }
+    body {
+        font-family: 'Arial Narrow', Arial, sans-serif;
+        font-size: 8.5pt;
+        color: #000;
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
+    }
+    
+    .header {
+        text-align: center;
+        margin-bottom: 8px;
+    }
+    
+    .header h1 {
+        font-size: 16pt;
+        margin: 0;
+        color: #000;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+    
+    .header p { margin: 2px 0; font-size: 9pt; font-weight: bold; }
+    
+    .page-content {
+        column-count: 2;
+        column-gap: 8mm;
+        column-rule: 1px solid #ccc;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+        page-break-inside: avoid;
+    }
+    
+    th, td {
+        padding: 2px 3px;
+        vertical-align: middle;
+        border: 1px solid #ddd;
+    }
+    
+    th {
+        background-color: #fff;
+        border-top: 2px solid #000;
+        border-bottom: 2px solid #000;
+        border-left: none;
+        border-right: none;
+        font-weight: bold;
+        font-size: 8pt;
+        text-align: left;
+    }
+
+    td {
+        border-left: none;
+        border-right: none;
+    }
+    
+    .cat-header {
+        background-color: #f8f8f8;
+        border-top: 1px solid #000;
+        border-bottom: 1px solid #000;
+        font-weight: bold;
+        font-size: 9.5pt;
+        text-align: center;
+        padding: 4px;
+        color: #000;
+    }
+
+    .item-img {
+        max-height: 22px;
+        max-width: 30px;
+        object-fit: contain;
+    }
+
+    .col-sr { width: 5%; text-align: center; font-weight: bold; }
+    .col-img { width: 8%; text-align: center; }
+    .col-desc { width: 50%; }
+    .col-hsn { width: 14%; text-align: center; font-size: 7.5pt; }
+    .col-price { width: 13%; text-align: right; font-weight: bold; }
+    .col-per { width: 10%; text-align: center; }
+
+    .desc-text { font-weight: bold; }
+    .size-text { color: #333; font-size: 8pt; margin-left: 4px; }
+    .pack-text { color: #555; font-size: 7.5pt; font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>{{ company.name }}</h1>
+    <p>PRICE LIST W.E.F. {{ company.date }}</p>
+</div>
+
+<div class="page-content">
+    {% for cat in categories %}
+    <table>
+        <thead>
+            <tr>
+                <td colspan="6" class="cat-header">
+                    {{ cat.name }}
+                </td>
+            </tr>
+            <tr>
+                <th class="col-sr">Sr.No.</th>
+                <th class="col-img"></th>
+                <th class="col-desc">P A R T I C U L A R S</th>
+                <th class="col-hsn">HSN Code</th>
+                <th class="col-price">List</th>
+                <th class="col-per">Per</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cat.products %}
+            <tr>
+                <td class="col-sr">{{ item.sr_no }}.</td>
+                <td class="col-img">
+                    {% if item.image_path %}
+                        <img src="../{{ item.image_path }}" class="item-img" alt="">
+                    {% endif %}
+                </td>
+                <td class="col-desc">
+                    <span class="desc-text">{{ item.item_name }}</span>
+                    {% if item.size and item.size not in item.item_name %}
+                        <span class="size-text">{{ item.size }}</span>
+                    {% endif %}
+                    {% if item.packing %}
+                        <br><span class="pack-text">Pack: {{ item.packing }}</span>
+                    {% endif %}
+                </td>
+                <td class="col-hsn">{{ item.hsn_code }}</td>
+                <td class="col-price">{{ item.list_price }}</td>
+                <td class="col-per">{{ item.unit }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+</div>
+
+</body>
+</html>

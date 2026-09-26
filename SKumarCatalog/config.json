@@ -1,0 +1,26 @@
+{
+    "company": {
+        "name": "S. Kumar & Bros",
+        "name2": "S. Kumar & Bros",
+        "tagline": "Manufacturers, Importers & Stockist of Insulating Materials & Electrical Accessories",
+        "phone": "49233982",
+        "mobile": "",
+        "email": "",
+        "address": "Mumbai",
+        "gst": "",
+        "estd_gsc": "1962",
+        "estd_sk": "1991",
+        "price_list_ref": "GSC/2025 & SK/2025",
+        "date": "1ST MAY 2025"
+    },
+    "terms": "Prices are Ex-Godowns. S.T./C.S.T., Packing & Forwarding Extra. Special Material Prices on Request. E. & O.E.",
+    "items_per_page": 60,
+    "output_dir": "output",
+    "images_dir": "images",
+    "data_file": "data/catalog_data.csv",
+    "phone": "022-49233982",
+    "address": "3rd Central Building, Grd. Flr., 11, Bomanji Master Road, Mumbai - 400 002.",
+    "gst": "[Add GST Number Here]",
+    "tagline": "INSULATING - ELECTRICALS - ELECTRONIC - HARDWARE - MATERIALS",
+    "email": "sales@skumarbros.com"
+}
