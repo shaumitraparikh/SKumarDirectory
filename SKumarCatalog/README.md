@@ -14,6 +14,14 @@ This creates two files in `output/`:
 - **print_catalog.html** - Print-ready catalog (Ctrl+P in browser -> Save as PDF)
 - **search_catalog.html** - Searchable web catalog with filters
 
+## GitHub Pages
+
+Pushing to `main` automatically builds and deploys both catalogs to GitHub Pages.
+The repository landing page links to the searchable and print-ready catalogs.
+On Windows, `1_Click_Update.bat` rebuilds both HTML files, commits them, and pushes
+to `origin/main` to start the deployment. Run it from a checkout on the `main`
+branch with Git credentials configured for pushing to the repository.
+
 ## Folder Structure
 
 ```

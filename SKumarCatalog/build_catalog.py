@@ -71,7 +71,7 @@ def load_csv_data(csv_path):
             if unit in (',,', ','):
                 item['unit'] = ''
                 
-            item['image_path'] = find_image(item.get('image_ref', ''), Path('images'))
+            item['image_path'] = find_image(item.get('image_ref', ''), IMAGES_DIR)
             
             items.append(item)
     
@@ -86,7 +86,7 @@ def find_image(image_ref, images_dir):
     for ext in ['.jpg', '.jpeg', '.png', '.gif', '.bmp']:
         img_path = images_dir / f"{image_ref}{ext}"
         if img_path.exists():
-            return str(img_path.relative_to(images_dir.parent))
+            return img_path.relative_to(images_dir.parent).as_posix()
     
     return None
 
