@@ -308,9 +308,14 @@
         <div class="summary-row summary-discount"><span>Item discounts</span><span>−₹<span id="discountTotal">0.00</span></span></div>
         <div class="summary-row summary-subtotal"><span>Taxable subtotal</span><span>₹<span id="subTotal">0.00</span></span></div>
         <div class="tax-row summary-row">
-            <label for="taxRate">Tax (<input type="number" id="taxRate" class="tax-input" value="18" min="0" max="100" step="0.01" onchange="renderCart()">%)</label>
-            <span>₹<span id="taxAmount">0.00</span></span>
+            <label for="cgstRate">CGST (<input type="number" id="cgstRate" class="tax-input" value="9" min="0" max="100" step="0.01" required onchange="renderCart()">%)</label>
+            <span>₹<span id="cgstAmount">0.00</span></span>
         </div>
+        <div class="tax-row summary-row">
+            <label for="sgstRate">SGST (<input type="number" id="sgstRate" class="tax-input" value="9" min="0" max="100" step="0.01" required onchange="renderCart()">%)</label>
+            <span>₹<span id="sgstAmount">0.00</span></span>
+        </div>
+        <div class="tax-row summary-row"><span>Total tax (<span id="totalTaxRate">18</span>%)</span><span>₹<span id="taxAmount">0.00</span></span></div>
         <div class="summary-total"><span>Grand total</span><strong>₹<span id="grandTotal">0.00</span></strong></div>
         <button class="print-btn" onclick="generateBill()">Print proforma invoice</button>
     </div>
@@ -320,7 +325,7 @@
     <div class="grid" id="catalogGrid">
         {% for cat in categories %}
             {% for item in cat.products %}
-            <div class="card" data-search="{{ item.item_name | lower }} {{ cat.name | lower }} {{ item.hsn_code }} {{ item.sr_no }}">
+            <div class="card" data-search="{{ item.item_name | lower }} {{ cat.name | lower }} {{ item.hsn_code }} {{ item.sr_no }} {{ item.size }} {{ item.id_size }} {{ item.od_size }} {{ item.lf_size }}">
                 <div class="card-img-container">
                     {% if item.image_path %}
                         <img src="../{{ item.image_path }}" class="card-img" alt="" loading="lazy">
@@ -331,7 +336,16 @@
                 <div class="card-content">
                     <p class="card-title" id="name-{{ item.sr_no }}">{{ item.item_name }}</p>
                     <p class="card-meta">Sr: {{ item.sr_no }} | HSN: <span class="hsn-val">{{ item.hsn_code }}</span></p>
-                    {% if item.size %}<p class="card-meta">Size: <span class="size-val">{{ item.size }}</span></p>{% else %}<span class="size-val" hidden></span>{% endif %}
+{% if item.size and item.size not in item.item_name %}<p class="card-meta">Size: <span class="size-val">{{ item.size }}</span></p>{% else %}<span class="size-val" hidden></span>{% endif %}
+{% if item.id_size or item.od_size or item.lf_size %}
+                    <p class="card-meta">
+{% if item.id_size %}ID Size: <span class="id-size-val">{{ item.id_size }}</span>{% else %}<span class="id-size-val" hidden></span>{% endif %}
+{% if item.od_size %} · OD Size: <span class="od-size-val">{{ item.od_size }}</span>{% else %}<span class="od-size-val" hidden></span>{% endif %}
+{% if item.lf_size %} · L/F Size: <span class="lf-size-val">{{ item.lf_size }}</span>{% else %}<span class="lf-size-val" hidden></span>{% endif %}
+                    </p>
+{% else %}
+                    <span class="id-size-val" hidden></span><span class="od-size-val" hidden></span><span class="lf-size-val" hidden></span>
+{% endif %}
                     <p class="card-meta">
                         {% if item.unit %}Unit: <span class="unit-val">{{ item.unit }}</span>{% else %}<span class="unit-val" hidden></span>{% endif %}
                         {% if item.packing %} · Pack: <span class="packing-val">{{ item.packing }}</span>{% else %}<span class="packing-val" hidden></span>{% endif %}
@@ -398,7 +412,9 @@
             <tr><td>Items subtotal</td><td class="num">₹<span id="pItemsSubtotal"></span></td></tr>
             <tr><td>Item discounts</td><td class="num">−₹<span id="pDiscountTotal"></span></td></tr>
             <tr><td>Taxable subtotal</td><td class="num">₹<span id="pSubTotal"></span></td></tr>
-            <tr><td>Tax (<span id="pTaxRate"></span>%)</td><td class="num">₹<span id="pTaxAmount"></span></td></tr>
+            <tr><td>CGST (<span id="pCgstRate"></span>%)</td><td class="num">₹<span id="pCgstAmount"></span></td></tr>
+            <tr><td>SGST (<span id="pSgstRate"></span>%)</td><td class="num">₹<span id="pSgstAmount"></span></td></tr>
+            <tr><td>Total tax (<span id="pTaxRate"></span>%)</td><td class="num">₹<span id="pTaxAmount"></span></td></tr>
             <tr class="total"><td>Grand total</td><td class="num">₹<span id="pGrandTotal"></span></td></tr>
         </table>
     </div>
@@ -465,6 +481,9 @@
         const qtyInput = document.getElementById('qty-' + sr_no);
         const card = document.getElementById('name-' + sr_no).closest('.card');
         const sizeElement = card.querySelector('.size-val');
+        const idSizeElement = card.querySelector('.id-size-val');
+        const odSizeElement = card.querySelector('.od-size-val');
+        const lfSizeElement = card.querySelector('.lf-size-val');
         const unitElement = card.querySelector('.unit-val');
         const packingElement = card.querySelector('.packing-val');
         const qty = parseInt(qtyInput.value);
@@ -485,6 +504,9 @@
                 qty,
                 hsn: getHsn(sr_no),
                 size: sizeElement ? sizeElement.innerText.trim() : '',
+                idSize: idSizeElement ? idSizeElement.innerText.trim() : '',
+                odSize: odSizeElement ? odSizeElement.innerText.trim() : '',
+                lfSize: lfSizeElement ? lfSizeElement.innerText.trim() : '',
                 unit: unitElement ? unitElement.innerText.trim() : '',
                 packing: packingElement ? packingElement.innerText.trim() : '',
                 discountPct: 0,
@@ -537,6 +559,44 @@
         return amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
+    function formatRate(rate) {
+        return formatAmount(rate).replace(/\.?0+$/, '');
+    }
+
+    function getTaxRates() {
+        const cgstInput = document.getElementById('cgstRate');
+        const sgstInput = document.getElementById('sgstRate');
+        if (!cgstInput.checkValidity() || !sgstInput.checkValidity()) return null;
+
+        return {
+            cgstRate: cgstInput.valueAsNumber,
+            sgstRate: sgstInput.valueAsNumber
+        };
+    }
+
+    function getTaxBreakdown(subTotal, rates = getTaxRates()) {
+        if (!rates) return null;
+        const { cgstRate, sgstRate } = rates;
+        const cgstAmount = roundCurrency(subTotal * cgstRate / 100);
+        const sgstAmount = roundCurrency(subTotal * sgstRate / 100);
+        return {
+            cgstRate,
+            cgstAmount,
+            sgstRate,
+            sgstAmount,
+            totalRate: roundCurrency(cgstRate + sgstRate),
+            totalAmount: roundCurrency(cgstAmount + sgstAmount)
+        };
+    }
+
+    function displayTaxBreakdown(tax, subTotal) {
+        document.getElementById('cgstAmount').innerText = tax ? formatAmount(tax.cgstAmount) : '—';
+        document.getElementById('sgstAmount').innerText = tax ? formatAmount(tax.sgstAmount) : '—';
+        document.getElementById('totalTaxRate').innerText = tax ? formatRate(tax.totalRate) : '—';
+        document.getElementById('taxAmount').innerText = tax ? formatAmount(tax.totalAmount) : '—';
+        document.getElementById('grandTotal').innerText = tax ? formatAmount(roundCurrency(subTotal + tax.totalAmount)) : '—';
+    }
+
     function renderCart() {
         const cartItemsDiv = document.getElementById('cartItems');
         cartItemsDiv.replaceChildren();
@@ -570,7 +630,14 @@
                 title.textContent = item.name;
                 const meta = document.createElement('div');
                 meta.className = 'cart-item-meta';
-                meta.textContent = [item.size && `Size: ${item.size}`, item.unit && `Unit: ${item.unit}`, item.packing && `Pack: ${item.packing}`].filter(Boolean).join(' · ');
+                meta.textContent = [
+                    item.size && `Size: ${item.size}`,
+                    item.idSize && `ID Size: ${item.idSize}`,
+                    item.odSize && `OD Size: ${item.odSize}`,
+                    item.lfSize && `L/F Size: ${item.lfSize}`,
+                    item.unit && `Unit: ${item.unit}`,
+                    item.packing && `Pack: ${item.packing}`
+                ].filter(Boolean).join(' · ');
                 const rate = document.createElement('div');
                 rate.className = 'cart-item-rate';
                 rate.textContent = `Unit price · ₹${formatAmount(item.price)}`;
@@ -635,20 +702,23 @@
         subTotal = roundCurrency(subTotal);
         document.getElementById('cartCountBadge').innerText = totalItems;
         
-        const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
-        const taxAmount = roundCurrency(subTotal * (taxRate / 100));
-        const grandTotal = roundCurrency(subTotal + taxAmount);
-        
         document.getElementById('itemsSubtotal').innerText = formatAmount(itemsSubtotal);
         document.getElementById('discountTotal').innerText = formatAmount(discountTotal);
         document.getElementById('subTotal').innerText = formatAmount(subTotal);
-        document.getElementById('taxAmount').innerText = formatAmount(taxAmount);
-        document.getElementById('grandTotal').innerText = formatAmount(grandTotal);
+        displayTaxBreakdown(getTaxBreakdown(subTotal), subTotal);
     }
 
     function generateBill() {
         if (Object.keys(cart).length === 0) {
             alert("Cart is empty! Please add items before printing a bill.");
+            return;
+        }
+
+        const taxRates = getTaxRates();
+        if (!taxRates) {
+            const invalidInput = [document.getElementById('cgstRate'), document.getElementById('sgstRate')]
+                .find(input => !input.checkValidity());
+            invalidInput.reportValidity();
             return;
         }
         
@@ -685,6 +755,9 @@
             const itemName = item.name.toLowerCase();
             const specifications = [];
             if (item.size && !itemName.includes(item.size.toLowerCase())) specifications.push(`Size: ${item.size}`);
+            if (item.idSize) specifications.push(`ID Size: ${item.idSize}`);
+            if (item.odSize) specifications.push(`OD Size: ${item.odSize}`);
+            if (item.lfSize) specifications.push(`L/F Size: ${item.lfSize}`);
             if (item.packing && !itemName.includes(item.packing.toLowerCase())) specifications.push(`Pack: ${item.packing}`);
             if (specifications.length) {
                 const detail = document.createElement('div');
@@ -708,15 +781,18 @@
         itemsSubtotal = roundCurrency(itemsSubtotal);
         discountTotal = roundCurrency(discountTotal);
         subTotal = roundCurrency(subTotal);
-        const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
-        const taxAmount = roundCurrency(subTotal * (taxRate / 100));
+        const taxBreakdown = getTaxBreakdown(subTotal, taxRates);
         
         document.getElementById('pItemsSubtotal').innerText = formatAmount(itemsSubtotal);
         document.getElementById('pDiscountTotal').innerText = formatAmount(discountTotal);
         document.getElementById('pSubTotal').innerText = formatAmount(subTotal);
-        document.getElementById('pTaxRate').innerText = formatAmount(taxRate).replace(/\.00$/, '');
-        document.getElementById('pTaxAmount').innerText = formatAmount(taxAmount);
-        document.getElementById('pGrandTotal').innerText = formatAmount(roundCurrency(subTotal + taxAmount));
+        document.getElementById('pCgstRate').innerText = formatRate(taxBreakdown.cgstRate);
+        document.getElementById('pCgstAmount').innerText = formatAmount(taxBreakdown.cgstAmount);
+        document.getElementById('pSgstRate').innerText = formatRate(taxBreakdown.sgstRate);
+        document.getElementById('pSgstAmount').innerText = formatAmount(taxBreakdown.sgstAmount);
+        document.getElementById('pTaxRate').innerText = formatRate(taxBreakdown.totalRate);
+        document.getElementById('pTaxAmount').innerText = formatAmount(taxBreakdown.totalAmount);
+        document.getElementById('pGrandTotal').innerText = formatAmount(roundCurrency(subTotal + taxBreakdown.totalAmount));
         
         window.print();
     }

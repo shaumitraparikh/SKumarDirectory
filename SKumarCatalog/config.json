@@ -5,9 +5,27 @@
         "name2": "S. Kumar & Bros",
         "tagline": "Manufacturers, Importers & Stockist of Insulating Materials & Electrical Accessories",
         "phone": "022-49233982",
+        "phone_display": "49233982",
         "mobile": "",
         "email": "",
         "address": "3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.",
+        "sales_contacts": [
+            {
+                "name": "Amit G. Parikh",
+                "mobile": "9869905779",
+                "phone": "45242910",
+                "gstin": "27ACJPP2955J1Z4"
+            },
+            {
+                "name": "Shaumitra G Parikh",
+                "mobile": "9821361314, 8369398586",
+                "phone": "35989674",
+                "gstin": "27AAGPP1621C1Z5"
+            }
+        ],
+        "product_range": "Empire, Fibreglass, Cotton, Silicon, Teflon, P.V.C., Heatshrinkable, etc. Tube, Cable, Wire, Cloth, Tape.",
+        "product_details": "Solder Items, Paste, Tester, Fuse Wire, All Cord Wires, Iron Element, T.V. & Cable Plug, Socket, Pin & Splitter.",
+        "price_list_tagline": "INSULATING -:- ELECTRICALS -:- ELECTRONIC -:- HARDWARE -:- MATERIALS",
         "gst": "",
         "estd_gsc": "1962",
         "estd_sk": "1991",

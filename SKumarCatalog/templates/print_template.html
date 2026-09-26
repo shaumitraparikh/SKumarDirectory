@@ -18,19 +18,22 @@
     }
     
     .header {
-        text-align: center;
         margin-bottom: 8px;
+        padding-bottom: 7px;
+        border-bottom: 1px solid #777;
     }
     
-    .header h1 {
-        font-size: 16pt;
-        margin: 0;
-        color: #000;
-        text-transform: uppercase;
-        font-weight: bold;
-    }
-    
-    .header p { margin: 2px 0; font-size: 9pt; font-weight: bold; }
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 5px; }
+    .contact { border: 1px solid #999; padding: 3px 6px; font-size: 7.5pt; line-height: 1.25; }
+    .contact-name { font-size: 8.5pt; font-weight: bold; }
+    .contact-details { display: flex; justify-content: space-between; gap: 8px; }
+    .company-name { margin: 3px 0 1px; font-size: 15pt; line-height: 1.1; text-align: center; font-weight: bold; text-transform: uppercase; }
+    .legal-name, .company-address, .company-tagline, .product-range, .product-details, .price-reference { margin: 2px 0; text-align: center; }
+    .legal-name { font-size: 10pt; font-weight: bold; letter-spacing: .08em; }
+    .company-address { font-size: 8pt; }
+    .company-tagline { font-size: 8pt; font-weight: bold; letter-spacing: .04em; }
+    .product-range, .product-details { font-size: 7.5pt; }
+    .price-reference { margin-top: 4px; font-size: 8pt; font-weight: bold; }
     
     .page-content {
         column-count: 2;
@@ -99,8 +102,25 @@
 <body>
 
 <div class="header">
-    <h1>{{ company.name }}</h1>
-    <p>PRICE LIST W.E.F. {{ company.date }}</p>
+    <div class="contact-grid">
+{% for contact in company.sales_contacts %}
+        <div class="contact">
+            <div class="contact-name">{{ contact.name }}</div>
+            <div class="contact-details">
+                <span>Mobile: {{ contact.mobile }}</span>
+                <span>Phone: {{ contact.phone }}</span>
+            </div>
+            <div>GSTIN: {{ contact.gstin }}</div>
+        </div>
+{% endfor %}
+    </div>
+    <div class="legal-name">{{ company.legal_name }}</div>
+    <h1 class="company-name">{{ company.name }}</h1>
+    <p class="company-address">{{ company.address }}</p>
+    <p class="company-tagline">{{ company.price_list_tagline }}</p>
+    <p class="product-range">{{ company.product_range }}</p>
+    <p class="product-details">{{ company.product_details }}</p>
+    <p class="price-reference">Phone: - {{ company.phone_display }} &nbsp; | &nbsp; Price Lists: GSC/2025 (Estd. {{ company.estd_gsc }}) &amp; SK/2025 (Estd. {{ company.estd_sk }}) &nbsp; | &nbsp; Effective {{ company.date }}</p>
 </div>
 
 <div class="page-content">
@@ -135,6 +155,15 @@
                     {% if item.size and item.size not in item.item_name %}
                         <span class="size-text">{{ item.size }}</span>
                     {% endif %}
+{% if item.id_size %}
+                        <br><span class="size-text">ID Size: {{ item.id_size }}</span>
+{% endif %}
+{% if item.od_size %}
+                        <br><span class="size-text">OD Size: {{ item.od_size }}</span>
+{% endif %}
+{% if item.lf_size %}
+                        <br><span class="size-text">L/F Size: {{ item.lf_size }}</span>
+{% endif %}
                     {% if item.packing %}
                         <br><span class="pack-text">Pack: {{ item.packing }}</span>
                     {% endif %}

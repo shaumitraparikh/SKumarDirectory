@@ -14,6 +14,13 @@ This creates two files in `output/`:
 - **print_catalog.html** - Print-ready catalog (Ctrl+P in browser -> Save as PDF)
 - **search_catalog.html** - Searchable web catalog with filters
 
+The search catalog's proforma bill calculates CGST and SGST separately at 9%
+each by default (18% total). Both rates can be adjusted in the cart; tax is
+calculated on the taxable subtotal after item discounts.
+The print catalog starts with the source price-list business and sales-contact
+header. Product dimensions such as base-bar L/F size and Teflon ID/OD sizes are
+stored and shown as distinct specifications.
+
 ## GitHub Pages
 
 Pushing to `main` automatically builds and deploys both catalogs to GitHub Pages.
