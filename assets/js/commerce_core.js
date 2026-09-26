@@ -103,8 +103,6 @@
         const email = String(buyer.email || '').trim();
         const gstin = String(buyer.gstin || '').trim().toUpperCase();
         const mobile = normalizeIndianMobile(buyer.phone);
-        const deliveryInstructions = String(buyer.deliveryInstructions || '').trim();
-        const transportPreference = String(buyer.transportPreference || '').trim();
 
         if (name.length < 2) errors.push('Enter the customer or business name.');
         if (!mobile) errors.push('Enter a valid 10-digit Indian mobile number.');
@@ -117,11 +115,7 @@
         return {
             valid: errors.length === 0,
             errors,
-            normalized: { 
-                name, phone: mobile, email, address, state, pincode, gstin,
-                delivery_instructions: deliveryInstructions,
-                transport_preference: transportPreference
-            }
+            normalized: { name, phone: mobile, email, address, state, pincode, gstin }
         };
     }
 
@@ -227,8 +221,6 @@
             'WhatsApp: +' + order.customer.phone,
             'Delivery: ' + order.customer.address + ', ' + order.customer.state + ' - ' + order.customer.pincode
         ];
-        if (order.customer.delivery_instructions) lines.push('Instructions: ' + order.customer.delivery_instructions);
-        if (order.customer.transport_preference) lines.push('Transport: ' + order.customer.transport_preference);
         if (order.customer.email) lines.push('Email: ' + order.customer.email);
         if (order.customer.gstin) lines.push('GSTIN: ' + order.customer.gstin);
         lines.push('', 'Items:');

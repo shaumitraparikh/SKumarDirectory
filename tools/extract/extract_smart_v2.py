@@ -517,19 +517,20 @@ if __name__ == "__main__":
         parser.items,
         key=lambda item: int(item['sr_number']) if item['sr_number'].isdigit() else 9999,
     )
-    group_number = 0
-    item_number = 0
-    previous_category = None
+    catalog_path = repo_dir / "data" / "catalog_data.csv"
+    canonical_rows = []
+    if catalog_path.exists():
+        with open(catalog_path, 'r', encoding='utf-8-sig') as f:
+            canonical_rows = list(csv.DictReader(f))
+            
     for item in sorted_items:
-        if item['category'] != previous_category:
-            group_number += 1
-            item_number = 0
-            previous_category = item['category']
-        item_number += 1
-        item['group_number'] = str(group_number)
-        item['item_number'] = str(item_number)
+        if item['sr_number'].isdigit():
+            idx = int(item['sr_number']) - 1
+            if 0 <= idx < len(canonical_rows):
+                item['sr_number'] = canonical_rows[idx]['sr_number']
+                
     fieldnames = [
-        'sr_number', 'group_number', 'item_number', 'category', 'item_name', 'size', 'id_size', 'od_size',
+        'sr_number', 'category', 'item_name', 'size', 'id_size', 'od_size',
         'lf_size', 'hsn_code', 'list_price', 'unit', 'packing', 'image_ref',
         'page'
     ]

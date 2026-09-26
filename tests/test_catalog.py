@@ -14,12 +14,12 @@ class CatalogDataTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.items = build_catalog.load_csv_data(CATALOG_ROOT / "data" / "catalog_data.csv")
-        cls.by_serial = {int(item["sr_number"]): item for item in cls.items}
+        cls.by_serial = {item["sr_number"]: item for item in cls.items}
 
     def test_serial_and_hierarchical_numbers_are_unique_and_positive(self):
-        serials = [int(item["sr_number"]) for item in self.items]
-        hierarchy = [(int(item["group_number"]), int(item["item_number"])) for item in self.items]
-        self.assertTrue(all(serial > 0 for serial in serials))
+        serials = [item["sr_number"] for item in self.items]
+        hierarchy = [(int(item["sr_number"].split(".")[0]), int(item["sr_number"].split(".")[1])) for item in self.items]
+        self.assertTrue(all(len(serial.split(".")) == 2 for serial in serials))
         self.assertEqual(len(serials), len(set(serials)))
         self.assertTrue(all(group > 0 and number > 0 for group, number in hierarchy))
         self.assertEqual(len(hierarchy), len(set(hierarchy)))
@@ -29,14 +29,14 @@ class CatalogDataTests(unittest.TestCase):
         build_catalog.validate_catalog_data(remaining)
 
     def test_manual_item_is_complete_and_has_expected_price(self):
-        item = self.by_serial[1412]
+        item = self.by_serial["65.1"]
         self.assertEqual(item["item_name"], "Bulbs & Holders 1000W bulb")
         self.assertEqual(item["hsn_code"], "94059900")
         self.assertEqual(item["list_price"], "996")
         self.assertEqual(item["unit"], "Pcs.")
 
     def test_inferable_hsn_is_filled_from_consistent_category_peers(self):
-        item = self.by_serial[71]
+        item = self.by_serial["7.2"]
         self.assertEqual(item["hsn_code"], "39173210")
         self.assertTrue(all(row["hsn_code"] for row in self.items))
         peer_codes = {
@@ -52,29 +52,26 @@ class CatalogDataTests(unittest.TestCase):
             self.assertEqual(item["list_price"], "")
 
     def test_ambiguous_source_price_is_preserved_as_a_quote_note(self):
-        self.assertEqual(self.by_serial[303]["list_price"], "50.00")
-        item = self.by_serial[393]
+        self.assertEqual(self.by_serial["19.6"]["list_price"], "50.00")
+        item = self.by_serial["21.15"]
         self.assertEqual(item["list_price"], "")
         notes_path = CATALOG_ROOT / "data" / "catalog_data_notes.json"
         notes = json.loads(notes_path.read_text(encoding="utf-8"))
-        self.assertEqual(notes["393"]["source_text"], "280.00 / 190.00")
-        self.assertEqual(notes["393"]["status"], "requires_business_review")
+        self.assertEqual(notes["21.15"]["source_text"], "280.00 / 190.00")
+        self.assertEqual(notes["21.15"]["status"], "requires_business_review")
 
     def test_invalid_price_and_serial_sequences_fail_fast(self):
         valid = {
-            "sr_number": "1", "group_number": "1", "item_number": "1",
+            "sr_number": "1.1", "group_number": "1", "item_number": "1",
             "category": "Test", "item_name": "Part", "list_price": ""
         }
         build_catalog.validate_catalog_data([valid.copy()])
         invalid_price = dict(valid, list_price="-5")
         with self.assertRaisesRegex(ValueError, "non-negative"):
             build_catalog.validate_catalog_data([invalid_price])
-        duplicate_serial = [valid.copy(), dict(valid, item_number="2")]
+        duplicate_serial = [valid.copy(), dict(valid, sr_number="1.1")]
         with self.assertRaisesRegex(ValueError, "unique"):
             build_catalog.validate_catalog_data(duplicate_serial)
-        duplicate_group_item = [valid.copy(), dict(valid, sr_number="2")]
-        with self.assertRaisesRegex(ValueError, "Duplicate hierarchical"):
-            build_catalog.validate_catalog_data(duplicate_group_item)
 
     def test_category_images_are_marked_as_representative_fallbacks(self):
         categories = build_catalog.group_by_category(self.items, build_catalog.IMAGES_DIR)

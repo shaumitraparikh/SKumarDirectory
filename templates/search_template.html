@@ -18,7 +18,6 @@
         <span>This editor runs only from the local seller server.</span>
     </div>
     <div class="seller-tool-actions">
-        <a href="seller_view_bills.html" target="_blank" style="text-decoration: none; padding: 6px 12px; border-radius: 4px; background: #e2e8f0; color: #102a43; font-size: 14px; font-weight: 500;">View Bills Archive</a>
         <button type="button" id="sellerAddButton">Add product</button>
         <button type="button" id="sellerUndoButton" disabled>Undo last change</button>
         <button type="button" id="sellerSaveButton">Save &amp; run updater</button>
@@ -42,16 +41,31 @@
 
 <div class="header">
     <h1>{{ company.name }}</h1>
-    <p style="margin:0; font-size:14px; opacity:0.8;">Digital Search Catalog & Point of Sale</p>
+    <p style="margin:4px 0 8px; font-size:14px; opacity:0.8;">Digital Search Catalog & Point of Sale</p>
+    <div style="font-size: 13px; opacity: 0.9; line-height: 1.5; max-width: 600px; margin: 0 auto;">
+        <p style="margin: 2px 0;">{{ billing.address }}</p>
+        <p style="margin: 2px 0;">{% if billing.phone %}Office phone: {{ billing.phone }} | {% endif %}
+        {% for contact in company.sales_contacts %}
+            Sales: {{ contact.mobile }} ({{ contact.name }}){% if not loop.last %} | {% endif %}
+        {% endfor %}
+        </p>
+        {% if billing.gst and billing.gst != '[Add GST Number Here]' %}<p style="margin: 2px 0;">GSTIN: {{ billing.gst }}</p>{% endif %}
+    </div>
 </div>
 <div id="checkoutConfig" hidden
      data-provider="{{ billing.get('checkout', {}).get('provider', 'whatsapp') }}"
      data-whatsapp-number="{{ billing.get('checkout', {}).get('whatsapp_number', '') }}"
      data-api-base-url="{{ billing.get('checkout', {}).get('api_base_url', '') }}"></div>
 
-<div class="sticky-bar">
-    <input type="search" id="searchInput" aria-label="Search products" placeholder="Search by part, size, category, HSN, or serial number..." oninput="filterCatalog()">
-    <button class="cart-toggle-btn" onclick="toggleCart()" aria-controls="cartDropdown" aria-expanded="false">
+<div class="sticky-bar" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+    <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" style="padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; min-width: 200px; flex: 1 1 auto; max-width: 300px; background: #fff;">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+        <option value="{{ cat.name }}">{{ cat.name }}</option>
+        {% endfor %}
+    </select>
+    <input type="search" id="searchInput" aria-label="Search products" placeholder="Search by part, size, category, HSN, or serial number..." oninput="filterCatalog()" style="flex: 2 1 auto; min-width: 200px;">
+    <button class="cart-toggle-btn" onclick="toggleCart()" aria-controls="cartDropdown" aria-expanded="false" style="flex: 0 0 auto;">
         Cart <span class="cart-badge" id="cartCountBadge">0</span>
     </button>
 </div>
@@ -81,9 +95,6 @@
             <input type="tel" id="buyerPhone" autocomplete="tel-national" inputmode="tel" maxlength="20" placeholder="10-digit mobile number" required>
             <label for="buyerEmail">Email (optional)</label>
             <input type="email" id="buyerEmail" autocomplete="email" maxlength="254" placeholder="name@example.com">
-            
-            <h4 style="margin: 16px 0 8px; font-size: 15px; color: #334e68; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">Delivery Details</h4>
-            
             <label for="buyerAddress">Delivery address <span aria-hidden="true">*</span></label>
             <textarea id="buyerAddress" autocomplete="street-address" maxlength="400" placeholder="Building, street, area" required></textarea>
             <div class="buyer-location">
@@ -108,11 +119,6 @@
                     <input type="text" id="buyerPincode" autocomplete="postal-code" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="6-digit PIN" required>
                 </div>
             </div>
-            
-            <label for="deliveryInstructions">Delivery / Transport Instructions (optional)</label>
-            <textarea id="deliveryInstructions" maxlength="300" placeholder="e.g. Courier via DTDC, Transport via VRL, or leave at gate" rows="2" style="width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 12px; font-family: inherit; font-size: 16px;"></textarea>
-            
-            <h4 style="margin: 16px 0 8px; font-size: 15px; color: #334e68; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">Tax Information</h4>
             <label for="buyerGstin">Customer GSTIN (optional)</label>
             <input type="text" id="buyerGstin" maxlength="15" autocapitalize="characters" placeholder="15-character GSTIN">
         </div>

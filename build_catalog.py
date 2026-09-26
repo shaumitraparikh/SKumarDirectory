@@ -60,7 +60,7 @@ def load_csv_data(csv_path):
     with open(csv_path, 'r', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f)
         required_fields = {
-            'sr_number', 'group_number', 'item_number', 'category', 'item_name', 'hsn_code', 'list_price',
+            'sr_number', 'category', 'item_name', 'hsn_code', 'list_price',
             'unit', 'packing', 'image_ref', 'page'
         }
         missing_fields = required_fields - set(reader.fieldnames or [])
@@ -122,31 +122,17 @@ def visible_catalog_items(items):
 def validate_catalog_data(items):
     """Reject duplicate identifiers and malformed prices while allowing quote-only items."""
     serials = []
-    hierarchy_ids = set()
     for item in items:
+        serial = item.get('sr_number', '')
         try:
-            serial = int(item['sr_number'])
-        except (KeyError, TypeError, ValueError) as error:
-            raise ValueError(f"Invalid catalog serial number: {item.get('sr_number', '')!r}") from error
-        if serial < 1:
-            raise ValueError(f"Catalog serial number must be positive: {serial}.")
-        serials.append(serial)
-
-        try:
-            group_number = int(item['group_number'])
-            item_number = int(item['item_number'])
-        except (KeyError, TypeError, ValueError) as error:
-            raise ValueError(
-                f"Catalog item {serial} needs positive group_number and item_number values."
-            ) from error
+            group_str, item_str = serial.split('.')
+            group_number = int(group_str)
+            item_number = int(item_str)
+        except (KeyError, TypeError, ValueError, AttributeError) as error:
+            raise ValueError(f"Invalid catalog serial number: {serial!r}") from error
         if group_number < 1 or item_number < 1:
-            raise ValueError(f"Catalog item {serial} needs positive group/item numbers.")
-        hierarchy_id = (group_number, item_number)
-        if hierarchy_id in hierarchy_ids:
-            raise ValueError(
-                f"Duplicate hierarchical item number: {group_number}.{item_number}."
-            )
-        hierarchy_ids.add(hierarchy_id)
+            raise ValueError(f"Catalog serial number must have positive parts: {serial}.")
+        serials.append(serial)
 
         if not item.get('category') or not item.get('item_name'):
             raise ValueError(f"Catalog item {serial} needs a category and item name.")

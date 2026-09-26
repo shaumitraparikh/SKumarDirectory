@@ -346,8 +346,13 @@ function toggleCart(forceOpen) {
             grid.appendChild(fragment);
         }
         const input = normalizeSearchText(document.getElementById('searchInput').value);
+        const categoryFilter = document.getElementById('categoryFilter');
+        const selectedCategory = categoryFilter ? categoryFilter.value : '';
+        
         catalogSearchIndex.forEach(entry => {
-            entry.card.style.display = entry.searchableText.includes(input) ? 'flex' : 'none';
+            const matchesSearch = entry.searchableText.includes(input);
+            const matchesCategory = !selectedCategory || entry.item.category === selectedCategory;
+            entry.card.style.display = (matchesSearch && matchesCategory) ? 'flex' : 'none';
         });
     }
 
@@ -678,9 +683,7 @@ function toggleCart(forceOpen) {
             address: document.getElementById('buyerAddress').value,
             state: document.getElementById('buyerState').value,
             pincode: document.getElementById('buyerPincode').value,
-            gstin: document.getElementById('buyerGstin').value,
-            deliveryInstructions: (document.getElementById('deliveryInstructions') || {}).value || '',
-            transportPreference: (document.getElementById('transportPreference') || {}).value || ''
+            gstin: document.getElementById('buyerGstin').value
         };
     }
 

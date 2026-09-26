@@ -39,7 +39,7 @@ class SellerEditorTests(unittest.TestCase):
             )
             writer.writeheader()
             writer.writerow({
-                "sr_number": "1", "group_number": "1", "item_number": "1",
+                "sr_number": "1.1",
                 "category": "Test", "item_name": "Item", "hsn_code": "",
                 "list_price": "10", "hidden": "",
             })

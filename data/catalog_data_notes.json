@@ -1,71 +1,71 @@
 {
-  "393": {
+  "21.15": {
     "field": "list_price",
     "source_text": "280.00 / 190.00",
     "status": "requires_business_review",
     "reason": "The 2025 source price cell contains two amounts without identifying which variant or condition each applies to. Keep the web price on request until sales confirms the correct mapping."
   },
-  "1350": {
+  "56.9": {
     "field": "item_name",
     "source_text": "",
     "status": "requires_business_review",
     "reason": "The 2025 source document has a serial number but no product particulars on this row. Confirm the product before replacing the generic catalog entry."
   },
-  "1351": {
+  "56.10": {
     "field": "item_name",
     "source_text": "",
     "status": "requires_business_review",
     "reason": "The 2025 source document has a serial number but no product particulars on this row. Confirm the product before replacing the generic catalog entry."
   },
-  "1352": {
+  "56.11": {
     "field": "item_name",
     "source_text": "",
     "status": "requires_business_review",
     "reason": "The 2025 source document has a serial number but no product particulars on this row. Confirm the product before replacing the generic catalog entry."
   },
-  "1353": {
+  "56.12": {
     "field": "item_name",
     "source_text": "",
     "status": "requires_business_review",
     "reason": "The 2025 source document has a serial number but no product particulars on this row. Confirm the product before replacing the generic catalog entry."
   },
-  "1354": {
+  "56.13": {
     "field": "item_name",
     "source_text": "",
     "status": "requires_business_review",
     "reason": "The 2025 source document has a serial number but no product particulars on this row. Confirm the product before replacing the generic catalog entry."
   },
-  "1355": {
+  "56.14": {
     "field": "item_name",
     "source_text": "",
     "status": "requires_business_review",
     "reason": "The 2025 source document has a serial number but no product particulars on this row. Confirm the product before replacing the generic catalog entry."
   },
-  "1356": {
+  "56.15": {
     "field": "item_name",
     "source_text": "",
     "status": "requires_business_review",
     "reason": "The 2025 source document has a serial number but no product particulars on this row. Confirm the product before replacing the generic catalog entry."
   },
-  "1357": {
+  "56.16": {
     "field": "item_name",
     "source_text": "",
     "status": "requires_business_review",
     "reason": "The 2025 source document has a serial number but no product particulars on this row. Confirm the product before replacing the generic catalog entry."
   },
-  "1358": {
+  "56.17": {
     "field": "item_name",
     "source_text": "",
     "status": "requires_business_review",
     "reason": "The 2025 source document has a serial number but no product particulars on this row. Confirm the product before replacing the generic catalog entry."
   },
-  "1359": {
+  "56.18": {
     "field": "item_name",
     "source_text": "",
     "status": "requires_business_review",
     "reason": "The 2025 source document has a serial number but no product particulars on this row. Confirm the product before replacing the generic catalog entry."
   },
-  "1360": {
+  "56.19": {
     "field": "item_name",
     "source_text": "",
     "status": "requires_business_review",

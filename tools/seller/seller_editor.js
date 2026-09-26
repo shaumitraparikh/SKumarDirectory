@@ -91,6 +91,7 @@
             card.dataset.srNumber = row.sr_number;
             card.dataset.groupNumber = row.group_number;
             card.dataset.itemNumber = row.item_number;
+            card.dataset.category = row.category;
             card.dataset.search = [
                 row.item_name, row.category, row.hsn_code, row.sr_number,
                 row.group_number + '.' + row.item_number, row.size,
@@ -317,12 +318,17 @@
     // Expose filterCatalog globally for the HTML oninput handler
     window.filterCatalog = function() {
         var input = document.getElementById('searchInput').value.toLocaleLowerCase().trim();
+        var categoryFilter = document.getElementById('categoryFilter');
+        var selectedCategory = categoryFilter ? categoryFilter.value : '';
+        
         var grid = document.getElementById('catalogGrid');
         var cards = grid.getElementsByClassName('card');
         for (var i = 0; i < cards.length; i++) {
             var card = cards[i];
             var searchData = card.dataset.search || '';
-            card.style.display = searchData.includes(input) ? 'flex' : 'none';
+            var matchesSearch = searchData.includes(input);
+            var matchesCategory = !selectedCategory || card.dataset.category === selectedCategory;
+            card.style.display = (matchesSearch && matchesCategory) ? 'flex' : 'none';
         }
     };
 

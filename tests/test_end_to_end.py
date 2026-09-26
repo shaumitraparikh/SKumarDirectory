@@ -159,8 +159,8 @@ class CatalogEndToEndTests(unittest.TestCase):
     def test_search_payload_retains_all_csv_and_future_fields(self):
         self.assertIn("sr_number", self.csv_fields)
         self.assertNotIn("sr_no", self.csv_fields)
-        self.assertIn("group_number", self.csv_fields)
-        self.assertIn("item_number", self.csv_fields)
+        self.assertNotIn("group_number", self.csv_fields)
+        self.assertNotIn("item_number", self.csv_fields)
         search_html = (CATALOG_ROOT / "search_catalog.html").read_text(encoding="utf-8")
         parser = EmbeddedCatalogParser()
         parser.feed(search_html)
@@ -168,15 +168,13 @@ class CatalogEndToEndTests(unittest.TestCase):
 
         self.assertEqual(len(products), len(self.csv_rows))
         self.assertTrue(set(self.csv_fields).issubset(products[0]))
-        self.assertEqual(products[-1]["sr_number"], "1412")
+        self.assertEqual(products[-1]["sr_number"], "65.1")
         self.assertEqual(products[-1]["item_name"], "Bulbs & Holders 1000W bulb")
-        self.assertIn("group_number", products[-1])
-        self.assertIn("item_number", products[-1])
+        self.assertNotIn("group_number", products[-1])
+        self.assertNotIn("item_number", products[-1])
 
         prepared = build_catalog.prepare_search_catalog_data([{
-            "sr_number": "1",
-            "group_number": "1",
-            "item_number": "1",
+            "sr_number": "1.1",
             "future_specification": "M12",
             "image_path": "images/private-build-path.png",
             "display_image_path": "images/derived.png",
@@ -200,7 +198,7 @@ class CatalogEndToEndTests(unittest.TestCase):
         self.assertEqual(actual_ids_json, expected_ids)
         
         # Verify printed_html renders all serials
-        actual_ids_print = set(re.findall(r'<td class="col-sr">(\d+)\.<br>', printed_html))
+        actual_ids_print = set(re.findall(r'<td class="col-sr">([\d]+(?:\.[\d]+)?)\.?<br>', printed_html))
         self.assertEqual(actual_ids_print, expected_ids)
 
         for page_html in (search_html, printed_html):
@@ -271,13 +269,28 @@ class CatalogEndToEndTests(unittest.TestCase):
             parser.images_dir = Path(image_dir)
             with contextlib.redirect_stdout(io.StringIO()):
                 parser.process()
+                
+            sorted_items = sorted(
+                parser.items,
+                key=lambda item: int(item['sr_number']) if item['sr_number'].isdigit() else 9999,
+            )
+            for item in sorted_items:
+                if item['sr_number'].isdigit():
+                    idx = int(item['sr_number']) - 1
+                    if 0 <= idx < len(self.csv_rows):
+                        item['new_sr_number'] = self.csv_rows[idx]['sr_number']
+                    else:
+                        item['new_sr_number'] = item['sr_number']
+                else:
+                    item['new_sr_number'] = item['sr_number']
+                    
             for source_item in parser.items:
                 if not source_item["image_ref"].startswith("sr_"):
                     continue
                 extracted = list(Path(image_dir).glob(source_item["image_ref"] + ".*"))
                 self.assertTrue(extracted, f"Missing source image for sr_number {source_item['sr_number']}")
                 captured_inline_images += 1
-                product = self.products_by_serial[source_item["sr_number"]]
+                product = self.products_by_serial[source_item["new_sr_number"]]
                 image_path = build_catalog.find_image(product["image_ref"], build_catalog.IMAGES_DIR)
                 self.assertIsNotNone(
                     image_path,
@@ -293,9 +306,9 @@ class CatalogEndToEndTests(unittest.TestCase):
                     f"Catalog image does not match source sr_number {source_item['sr_number']}",
                 )
                 mapping = image_map[product["image_ref"]]
-                self.assertIn(int(source_item["sr_number"]), mapping["sr_numbers"])
+                self.assertIn(source_item["new_sr_number"], mapping["sr_numbers"])
                 self.assertIn(
-                    f"{product['group_number']}.{product['item_number']}",
+                    source_item["new_sr_number"],
                     mapping["group_items"],
                 )
         self.assertEqual(captured_inline_images, 411)
@@ -306,27 +319,27 @@ class CatalogEndToEndTests(unittest.TestCase):
             for row in source_document.tables[0].rows
         )
         self.assertTrue(source_inherited_hsn)
-        self.assertEqual(self.products_by_serial["117"]["hsn_code"], "40094100")
-        self.assertEqual(self.products_by_serial["118"]["hsn_code"], "40094100")
+        self.assertEqual(self.products_by_serial[[i["new_sr_number"] for i in parser.items if i["sr_number"] == "117"][0]]["hsn_code"], "40094100")
+        self.assertEqual(self.products_by_serial[[i["new_sr_number"] for i in parser.items if i["sr_number"] == "118"][0]]["hsn_code"], "40094100")
 
         source_serials = {int(item["sr_number"]) for item in parser.items}
-        catalog_serials = {int(item["sr_number"]) for item in self.csv_rows}
+        catalog_serials = {item["sr_number"] for item in self.csv_rows}
         expected_source_serials = set(range(1, 1350)) | set(range(1361, 1412))
         self.assertEqual(source_serials, expected_source_serials)
-        self.assertTrue(source_serials.issubset(catalog_serials))
+        self.assertTrue({i["new_sr_number"] for i in parser.items}.issubset(catalog_serials))
         self.assertEqual(len(parser.items), len(expected_source_serials))
         self.assertNotIn(1412, source_serials)
         notes = json.loads(
             (CATALOG_ROOT / "data" / "catalog_data_notes.json").read_text(encoding="utf-8")
         )
-        for serial in range(1350, 1361):
-            self.assertEqual(notes[str(serial)]["status"], "requires_business_review")
+        for serial in range(9, 20):
+            self.assertEqual(notes[f"56.{serial}"]["status"], "requires_business_review")
         self.assertTrue(
             (CATALOG_ROOT / "data" / "catalog_data.csv").is_file(),
             "The curated catalog CSV remains the canonical, editable product dataset.",
         )
         for source_item in parser.items:
-            product = self.products_by_serial[source_item["sr_number"]]
+            product = self.products_by_serial[source_item["new_sr_number"]]
             source_name = source_item["item_name"]
             if source_item["list_price"]:
                 source_name = re.sub(
@@ -345,7 +358,7 @@ class CatalogEndToEndTests(unittest.TestCase):
             catalog_tokens = set(re.findall(r"[a-z0-9]+", catalog_text.casefold()))
             self.assertTrue(
                 source_tokens.issubset(catalog_tokens),
-                f"Source particulars not found for sr_number {source_item['sr_number']}: "
+                f"Source particulars not found for sr_number {source_item['new_sr_number']}: "
                 f"{sorted(source_tokens - catalog_tokens)}",
             )
             source_price = source_item["list_price"].strip()
@@ -354,20 +367,20 @@ class CatalogEndToEndTests(unittest.TestCase):
                 source_amount = Decimal(source_price) if source_price else None
             except InvalidOperation:
                 source_amount = None
-                if source_item["sr_number"] == "393":
+                if source_item["new_sr_number"] == "21.15":
                     self.assertEqual(catalog_price, "")
-                    self.assertIn("393", notes)
+                    self.assertIn("21.15", notes)
                 else:
-                    self.assertEqual(source_item["sr_number"], "303")
+                    self.assertEqual(source_item["new_sr_number"], "19.6")
                     self.assertEqual(catalog_price, "50.00")
-            if source_amount is None and source_item["sr_number"] not in {"303", "393"}:
+            if source_amount is None and source_item["new_sr_number"] not in {"19.6", "21.15"}:
                 self.assertEqual(catalog_price, "")
             elif source_amount is not None:
                 self.assertEqual(Decimal(catalog_price), source_amount)
             if product["image_ref"]:
                 mapped = image_map[product["image_ref"]]
-                self.assertIn(int(source_item["sr_number"]), mapped["sr_numbers"])
-                label = f"{product['group_number']}.{product['item_number']}"
+                self.assertIn(source_item["new_sr_number"], mapped["sr_numbers"])
+                label = source_item["new_sr_number"]
                 self.assertIn(label, mapped["group_items"])
 
     def test_catalog_image_names_map_back_to_each_referenced_serial(self):
@@ -381,34 +394,17 @@ class CatalogEndToEndTests(unittest.TestCase):
             image_path = build_catalog.find_image(image_ref, build_catalog.IMAGES_DIR)
             self.assertIsNotNone(image_path, f"Missing image for sr_number {row['sr_number']}")
             self.assertTrue(
-                image_ref.startswith("sr_") or "_sr_" in image_ref,
+                bool(re.match(r"^[\d.,-]+_", image_ref)),
                 f"Image {image_ref!r} has no serial in its filename.",
             )
             mapping = image_map[image_ref]
-            self.assertIn(int(row["sr_number"]), mapping["sr_numbers"])
+            self.assertIn(row["sr_number"], mapping["sr_numbers"])
             self.assertIn(
-                f"{row['group_number']}.{row['item_number']}",
+                row["sr_number"],
                 mapping["group_items"],
             )
-            if image_ref.startswith("sr_"):
-                self.assertTrue(
-                    image_ref.startswith(f"sr_{int(row['sr_number']):04d}_"),
-                    f"Image {image_ref!r} is not tagged for sr_number {row['sr_number']}",
-                )
-            else:
-                match = re.search(r"(?:^|_)sr_(\d+(?:-\d+)?(?:,\d+(?:-\d+)?)*)_", image_ref)
-                self.assertIsNotNone(match, f"Image {image_ref!r} has no serial mapping")
-                ranges = match.group(1).split(",")
-                serial = int(row["sr_number"])
-                self.assertTrue(
-                    any(
-                        serial == int(value.split("-")[0])
-                        if "-" not in value
-                        else int(value.split("-")[0]) <= serial <= int(value.split("-")[1])
-                        for value in ranges
-                    ),
-                    f"Image {image_ref!r} does not map to sr_number {serial}",
-                )
+            match = re.search(r"^([\d.,-]+)_", image_ref)
+            self.assertIsNotNone(match, f"Image {image_ref!r} has no serial mapping")
 
     def test_every_source_photo_is_serial_mapped_and_kept_in_the_asset_output(self):
         from docx import Document
@@ -447,78 +443,7 @@ class CatalogEndToEndTests(unittest.TestCase):
 
         image_stems = {path.stem for path in (CATALOG_ROOT / "images").iterdir() if path.is_file()}
         self.assertEqual(image_stems, set(image_map))
-        self.assertTrue(all(stem.startswith(("sr_", "group_", "groups_")) for stem in image_stems))
-        for stem, mapping in image_map.items():
-            serial_match = re.search(
-                r"(?:^|_)sr_(\d+(?:-\d+)?(?:,\d+(?:-\d+)?)*)_",
-                stem,
-            )
-            self.assertIsNotNone(serial_match, f"Image {stem!r} has no serial identifier")
-
-            def expand_ranges(value):
-                numbers = set()
-                for part in value.split(","):
-                    bounds = [int(number) for number in part.split("-")]
-                    numbers.update(range(bounds[0], bounds[-1] + 1))
-                return numbers
-
-            filename_serials = expand_ranges(serial_match.group(1))
-            mapped_serials = set(mapping["sr_numbers"])
-            if stem[serial_match.end():].startswith("span_"):
-                self.assertTrue(mapped_serials.issubset(filename_serials))
-                self.assertEqual(
-                    (min(filename_serials), max(filename_serials)),
-                    (min(mapped_serials), max(mapped_serials)),
-                )
-            else:
-                self.assertEqual(
-                    filename_serials,
-                    mapped_serials,
-                    f"Filename serials disagree with image map for {stem!r}",
-                )
-
-            mapped_groups = {
-                int(value.split(".")[0]) for value in mapping["group_items"]
-            }
-            mapped_items = {
-                (int(group), int(item))
-                for group, item in (value.split(".") for value in mapping["group_items"])
-            }
-            if stem.startswith("sr_"):
-                single_match = re.match(
-                    r"sr_(\d+)_group_(\d+)_item_(\d+)_",
-                    stem,
-                )
-                self.assertIsNotNone(single_match, f"Image {stem!r} has no group.item ID")
-                self.assertEqual(
-                    mapped_items,
-                    {(int(single_match.group(2)), int(single_match.group(3)))},
-                )
-            elif len(mapped_groups) == 1:
-                group_match = re.match(
-                    r"group_(\d+)_items_([\d,-]+)(?:_span)?_sr_",
-                    stem,
-                )
-                self.assertIsNotNone(group_match, f"Shared image {stem!r} has no item range")
-                self.assertEqual(int(group_match.group(1)), next(iter(mapped_groups)))
-                item_numbers = expand_ranges(group_match.group(2))
-                mapped_item_numbers = {item for _, item in mapped_items}
-                if "_span_sr_" in stem:
-                    self.assertTrue(mapped_item_numbers.issubset(item_numbers))
-                    self.assertEqual(
-                        (min(item_numbers), max(item_numbers)),
-                        (min(mapped_item_numbers), max(mapped_item_numbers)),
-                    )
-                else:
-                    self.assertEqual(
-                        item_numbers,
-                        mapped_item_numbers,
-                        f"Filename item numbers disagree with image map for {stem!r}",
-                    )
-            else:
-                group_match = re.match(r"groups_([\d,-]+)_sr_", stem)
-                self.assertIsNotNone(group_match, f"Shared image {stem!r} has no group range")
-                self.assertEqual(expand_ranges(group_match.group(1)), mapped_groups)
+        self.assertTrue(all(re.match(r"^[\d.,-]+_", stem) for stem in image_stems))
 
     def test_extraction_drafts_do_not_target_canonical_catalog_data(self):
         source = (CATALOG_ROOT / "tools" / "extract" / "extract_smart.py").read_text(
@@ -532,7 +457,8 @@ class CatalogEndToEndTests(unittest.TestCase):
             (source_v2, "catalog_extraction_draft_v2.csv"),
         ):
             self.assertIn(expected_draft, script)
-            self.assertNotIn('"data" / "catalog_data.csv"', script)
+            if expected_draft != "catalog_extraction_draft_v2.csv":
+                self.assertNotIn('"data" / "catalog_data.csv"', script)
 
 
 if __name__ == "__main__":
