@@ -14,9 +14,7 @@ const validBuyer = {
 };
 
 const pricedItem = {
-    sr_number: '1412',
-    group_number: '65',
-    item_number: '1',
+    sr_number: '65.1',
     name: 'Test lamp',
     hsn: '94059900',
     price: 996,
@@ -73,14 +71,12 @@ assert.strictEqual(order.currency, 'INR');
 assert.strictEqual(order.status, 'awaiting_merchant_confirmation');
 assert.strictEqual(order.payment.status, 'not_started');
 assert.strictEqual(order.customer.phone, '919869905779');
-assert.strictEqual(order.items[0].sku, '1412');
-assert.strictEqual(order.items[0].group_number, '65');
-assert.strictEqual(order.items[0].item_number, '1');
+assert.strictEqual(order.items[0].sku, '65.1');
 assert.strictEqual(order.items[1].unit_price, null);
 assert.strictEqual(order.amounts.estimate_excludes_unpriced_items, true);
 assert.ok(/No payment has been taken/.test(commerce.formatOrderMessage(order)));
 assert.ok(/price to be confirmed/.test(commerce.formatOrderMessage(order)));
-assert.ok(/Sr 1412 \(65\.1\)/.test(commerce.formatOrderMessage(order)));
+assert.ok(/Sr 65\.1/.test(commerce.formatOrderMessage(order)));
 
 const legacyOrder = commerce.createOrder({
     id: 'SK-20260926-000002',

@@ -246,12 +246,39 @@ def build_print_catalog(config, categories, env):
     return output_path
 
 
+import unicodedata
+
+def normalize_search_text(text):
+    if not text:
+        return ""
+    # Remove diacritics and make lowercase
+    text = str(text)
+    normalized = ''.join(
+        c for c in unicodedata.normalize('NFKD', text)
+        if not unicodedata.combining(c)
+    )
+    return normalized.lower().strip()
+
 def prepare_search_catalog_data(items):
     """Retain CSV fields and public display paths in the machine-readable catalog payload, excluding private image_path."""
-    return [
-        {key: value for key, value in item.items() if key != 'image_path'}
-        for item in items
-    ]
+    processed = []
+    for item in items:
+        clean_item = {key: value for key, value in item.items() if key != 'image_path'}
+        
+        search_parts = [
+            clean_item.get('item_name', ''),
+            clean_item.get('category', ''),
+            clean_item.get('hsn_code', ''),
+            clean_item.get('sr_number', ''),
+            clean_item.get('size', ''),
+            clean_item.get('id_size', ''),
+            clean_item.get('od_size', ''),
+            clean_item.get('lf_size', '')
+        ]
+        clean_item['search_text'] = normalize_search_text(' '.join(filter(None, search_parts)))
+        processed.append(clean_item)
+        
+    return processed
 
 
 def build_search_catalog(config, categories, items, env, seller_mode=False):

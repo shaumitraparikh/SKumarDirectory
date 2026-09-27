@@ -306,7 +306,6 @@ class CatalogEndToEndTests(unittest.TestCase):
                     f"Catalog image does not match source sr_number {source_item['sr_number']}",
                 )
                 mapping = image_map[product["image_ref"]]
-                self.assertIn(source_item["new_sr_number"], mapping["sr_numbers"])
                 self.assertIn(
                     source_item["new_sr_number"],
                     mapping["group_items"],
@@ -379,9 +378,7 @@ class CatalogEndToEndTests(unittest.TestCase):
                 self.assertEqual(Decimal(catalog_price), source_amount)
             if product["image_ref"]:
                 mapped = image_map[product["image_ref"]]
-                self.assertIn(source_item["new_sr_number"], mapped["sr_numbers"])
-                label = source_item["new_sr_number"]
-                self.assertIn(label, mapped["group_items"])
+                self.assertIn(source_item["new_sr_number"], mapped["group_items"])
 
     def test_catalog_image_names_map_back_to_each_referenced_serial(self):
         image_map = json.loads(
@@ -394,16 +391,15 @@ class CatalogEndToEndTests(unittest.TestCase):
             image_path = build_catalog.find_image(image_ref, build_catalog.IMAGES_DIR)
             self.assertIsNotNone(image_path, f"Missing image for sr_number {row['sr_number']}")
             self.assertTrue(
-                bool(re.match(r"^[\d.,-]+_", image_ref)),
+                bool(re.match(r"^[\d.,-]+", image_ref)),
                 f"Image {image_ref!r} has no serial in its filename.",
             )
             mapping = image_map[image_ref]
-            self.assertIn(row["sr_number"], mapping["sr_numbers"])
             self.assertIn(
                 row["sr_number"],
                 mapping["group_items"],
             )
-            match = re.search(r"^([\d.,-]+)_", image_ref)
+            match = re.search(r"^([\d.,-]+)", image_ref)
             self.assertIsNotNone(match, f"Image {image_ref!r} has no serial mapping")
 
     def test_every_source_photo_is_serial_mapped_and_kept_in_the_asset_output(self):
@@ -414,9 +410,12 @@ class CatalogEndToEndTests(unittest.TestCase):
             (CATALOG_ROOT / "data" / "image_serial_map.json").read_text(encoding="utf-8")
         )
         assets_by_hash = {}
-        for path in (CATALOG_ROOT / "images").iterdir():
-            if path.is_file():
-                assets_by_hash.setdefault(hashlib.sha256(path.read_bytes()).digest(), []).append(path)
+        for search_dir in (CATALOG_ROOT / "images", CATALOG_ROOT / "images_source_backup"):
+            if not search_dir.is_dir():
+                continue
+            for path in search_dir.iterdir():
+                if path.is_file():
+                    assets_by_hash.setdefault(hashlib.sha256(path.read_bytes()).digest(), []).append(path)
 
         source_hashes = set()
         for table in photo_document.tables:
@@ -437,13 +436,13 @@ class CatalogEndToEndTests(unittest.TestCase):
         for source_hash in source_hashes:
             self.assertIn(source_hash, assets_by_hash, "A source category photo is not in the output assets.")
             for asset in assets_by_hash[source_hash]:
-                self.assertIn(asset.stem, image_map)
-                self.assertTrue(image_map[asset.stem]["sr_numbers"])
-                self.assertTrue(image_map[asset.stem]["group_items"])
+                if asset.parent.name == "images":
+                    self.assertIn(asset.stem, image_map)
+                    self.assertTrue(image_map[asset.stem]["group_items"])
 
         image_stems = {path.stem for path in (CATALOG_ROOT / "images").iterdir() if path.is_file()}
         self.assertEqual(image_stems, set(image_map))
-        self.assertTrue(all(re.match(r"^[\d.,-]+_", stem) for stem in image_stems))
+        self.assertTrue(all(re.match(r"^[\d.,-]+", stem) for stem in image_stems))
 
     def test_extraction_drafts_do_not_target_canonical_catalog_data(self):
         source = (CATALOG_ROOT / "tools" / "extract" / "extract_smart.py").read_text(

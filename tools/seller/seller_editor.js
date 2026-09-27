@@ -134,7 +134,13 @@
                 row.list_price ? 'card-price' : 'card-price quote-price',
                 row.list_price ? '₹' + row.list_price : 'Price on request'
             );
-            price.dataset.listPrice = row.list_price;
+            price.dataset.listPrice = row.list_price || '';
+            var editIcon = document.createElement('span');
+            editIcon.innerHTML = ' ✏️';
+            editIcon.style.cursor = 'pointer';
+            editIcon.style.fontSize = '12px';
+            editIcon.dataset.quickEditSerial = row.sr_number;
+            price.appendChild(editIcon);
 
             var controls = textElement(card, 'div', 'add-controls', '');
             if (row.hidden) textElement(controls, 'span', 'seller-hidden-label', 'Hidden from customers');
@@ -278,9 +284,56 @@
         });
     });
 
+    function enableQuickPriceEdit(priceElem, srNumber) {
+        var currentPrice = priceElem.dataset.listPrice || '';
+        var input = document.createElement('input');
+        input.type = 'number';
+        input.step = '0.01';
+        input.value = currentPrice;
+        input.style.width = '80px';
+        input.style.padding = '2px 4px';
+        input.style.fontSize = '14px';
+
+        var finishEdit = function () {
+            if (input.dataset.saved) return;
+            input.dataset.saved = 'true';
+            var newPrice = input.value.trim();
+            pushDraftUndo();
+            var editRow = rowForSerial(srNumber);
+            if (editRow) {
+                editRow.list_price = newPrice;
+                saveDraft();
+                renderDraft();
+                status.textContent = 'Price updated in draft. Save to persist.';
+                var toast = document.getElementById('toast');
+                if (toast) {
+                    toast.textContent = 'Price updated to ' + (newPrice ? '₹' + newPrice : 'Price on request');
+                    toast.classList.add('show');
+                    setTimeout(function() { toast.classList.remove('show'); }, 3000);
+                }
+            }
+        };
+
+        input.addEventListener('blur', finishEdit);
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') finishEdit();
+            if (e.key === 'Escape') {
+                input.dataset.saved = 'true';
+                renderDraft();
+            }
+        });
+
+        priceElem.replaceChildren(input);
+        input.focus();
+    }
+
     document.getElementById('catalogGrid').addEventListener('click', function (event) {
         var target = event.target;
         if (!target || !target.dataset) return;
+        if (target.dataset.quickEditSerial) {
+            enableQuickPriceEdit(target.parentElement, target.dataset.quickEditSerial);
+            return;
+        }
         if (target.dataset.editSerial) {
             var editRow = rowForSerial(target.dataset.editSerial);
             if (!editRow) return;

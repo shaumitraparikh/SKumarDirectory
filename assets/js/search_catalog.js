@@ -11,23 +11,60 @@ let clientRecords = [];
 let visibleBills = new Map();
 const catalogDataElement = document.getElementById('catalogData');
 const rawCatalog = catalogDataElement ? JSON.parse(catalogDataElement.textContent) : [];
-const catalogSearchIndex = rawCatalog.map(item => ({
-    item,
-    searchableText: normalizeSearchText([
-        item.item_name, item.category, item.hsn_code, item.sr_number,
-        item.size, item.id_size, item.od_size, item.lf_size
-    ].join(' '))
-}));
+    // Keep normalizeSearchText for backward compatibility if needed, but we rely on pre-computed item.search_text
+    function normalizeSearchText(value) {
+        return String(value)
+            .normalize('NFKD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLocaleLowerCase()
+            .trim();
+    }
 
-function normalizeSearchText(value) {
-    return String(value)
-        .normalize('NFKD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLocaleLowerCase()
-        .trim();
-}
+    function characterOverlap(a, b) {
+        if (a.length < 2 || b.length < 2) return 0;
+        let matches = 0;
+        const bChars = new Set(b.split(''));
+        for (const c of a) if (bChars.has(c)) matches++;
+        const ratio = matches / Math.max(a.length, b.length);
+        return ratio > 0.6 ? ratio * 0.8 : 0;
+    }
 
-billArchive.restoreDirectory().catch(error => {
+    function fuzzyScore(text, query) {
+        if (!query) return 1;
+        if (text.includes(query)) return 1;
+        
+        const tokens = query.split(/\s+/).filter(Boolean);
+        if (!tokens.length) return 1;
+        
+        let totalScore = 0;
+        const words = text.split(/\s+/);
+        
+        for (const token of tokens) {
+            if (text.includes(token)) { totalScore += 1; continue; }
+            let bestWordScore = 0;
+            for (const word of words) {
+                if (word.startsWith(token) || token.startsWith(word)) {
+                    bestWordScore = Math.max(bestWordScore, 0.9);
+                } else {
+                    const overlap = characterOverlap(token, word);
+                    bestWordScore = Math.max(bestWordScore, overlap);
+                }
+            }
+            if (bestWordScore < 0.4) return 0;
+            totalScore += bestWordScore;
+        }
+        return totalScore / tokens.length;
+    }
+
+    // Initialize catalogSearchIndex
+    const catalogSearchIndex = rawCatalog.map(item => ({
+        item,
+        searchableText: item.search_text || normalizeSearchText([
+            item.item_name, item.category, item.hsn_code, item.sr_number,
+            item.size, item.id_size, item.od_size, item.lf_size
+        ].join(' ')),
+        score: 1
+    }));
     console.error('Unable to restore the generated-bills folder.', error);
 });
 
@@ -214,6 +251,7 @@ function toggleCart(forceOpen) {
         document.getElementById('cartBackdrop').classList.toggle('open', shouldOpen);
         drawer.setAttribute('aria-hidden', String(!shouldOpen));
         document.querySelector('.cart-toggle-btn').setAttribute('aria-expanded', String(shouldOpen));
+        document.body.style.overflow = shouldOpen ? 'hidden' : '';
         if (shouldOpen) {
             document.querySelector('.close-cart').focus();
         } else {
@@ -333,8 +371,8 @@ function toggleCart(forceOpen) {
     }
 
     function filterCatalog() {
+        const grid = document.getElementById('catalogGrid');
         if (!catalogSearchIndex[0]?.card) {
-            const grid = document.getElementById('catalogGrid');
             const fragment = document.createDocumentFragment();
             catalogSearchIndex.forEach(entry => {
                 entry.card = createCard(entry.item);
@@ -346,11 +384,35 @@ function toggleCart(forceOpen) {
         const categoryFilter = document.getElementById('categoryFilter');
         const selectedCategory = categoryFilter ? categoryFilter.value : '';
         
+        let matchCount = 0;
         catalogSearchIndex.forEach(entry => {
-            const matchesSearch = entry.searchableText.includes(input);
             const matchesCategory = !selectedCategory || entry.item.category === selectedCategory;
-            entry.card.style.display = (matchesSearch && matchesCategory) ? 'flex' : 'none';
+            if (!matchesCategory) {
+                entry.score = 0;
+            } else {
+                entry.score = fuzzyScore(entry.searchableText, input);
+            }
+            if (entry.score >= 0.4) {
+                matchCount++;
+                entry.card.style.display = 'flex';
+            } else {
+                entry.card.style.display = 'none';
+            }
         });
+
+        if (input) {
+            catalogSearchIndex.sort((a, b) => b.score - a.score);
+            const fragment = document.createDocumentFragment();
+            catalogSearchIndex.forEach(entry => {
+                if (entry.score >= 0.4) fragment.appendChild(entry.card);
+            });
+            grid.appendChild(fragment);
+        }
+
+        const countIndicator = document.getElementById('searchResultCount');
+        if (countIndicator) {
+            countIndicator.textContent = 'Showing ' + matchCount + ' of ' + catalogSearchIndex.length + ' products';
+        }
     }
 
     function readProduct(sr_number, qty, discountPct) {
