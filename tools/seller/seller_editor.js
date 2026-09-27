@@ -119,6 +119,8 @@
                 image.src = imagePath;
                 image.alt = row.image_is_representative ? 'Representative image for ' + row.category : row.item_name;
                 image.loading = 'lazy';
+                image.style.cursor = 'zoom-in';
+                image.onclick = function() { window.openLightbox && window.openLightbox(image.src); };
                 imageContainer.appendChild(image);
             } else {
                 textElement(imageContainer, 'span', '', 'No image');
