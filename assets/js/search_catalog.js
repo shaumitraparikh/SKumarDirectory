@@ -57,13 +57,14 @@ const rawCatalog = catalogDataElement ? JSON.parse(catalogDataElement.textConten
     }
 
     // Initialize catalogSearchIndex
-    const catalogSearchIndex = rawCatalog.map(item => ({
+    const catalogSearchIndex = rawCatalog.map((item, index) => ({
         item,
         searchableText: item.search_text || normalizeSearchText([
             item.item_name, item.category, item.hsn_code, item.sr_number,
             item.size, item.id_size, item.od_size, item.lf_size
         ].join(' ')),
-        score: 1
+        score: 1,
+        originalIndex: index
     }));
     console.error('Unable to restore the generated-bills folder.', error);
 });
@@ -402,12 +403,15 @@ function toggleCart(forceOpen) {
 
         if (input) {
             catalogSearchIndex.sort((a, b) => b.score - a.score);
-            const fragment = document.createDocumentFragment();
-            catalogSearchIndex.forEach(entry => {
-                if (entry.score >= 0.4) fragment.appendChild(entry.card);
-            });
-            grid.appendChild(fragment);
+        } else {
+            catalogSearchIndex.sort((a, b) => a.originalIndex - b.originalIndex);
         }
+
+        const fragment = document.createDocumentFragment();
+        catalogSearchIndex.forEach(entry => {
+            if (entry.score >= 0.4) fragment.appendChild(entry.card);
+        });
+        grid.appendChild(fragment);
 
         const countIndicator = document.getElementById('searchResultCount');
         if (countIndicator) {

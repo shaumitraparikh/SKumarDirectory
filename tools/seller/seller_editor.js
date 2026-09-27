@@ -294,6 +294,18 @@
         input.style.padding = '2px 4px';
         input.style.fontSize = '14px';
 
+        var restorePriceDisplay = function (newPrice) {
+            priceElem.className = newPrice ? 'card-price' : 'card-price quote-price';
+            priceElem.textContent = newPrice ? '₹' + newPrice : 'Price on request';
+            priceElem.dataset.listPrice = newPrice;
+            var editIcon = document.createElement('span');
+            editIcon.innerHTML = ' ✏️';
+            editIcon.style.cursor = 'pointer';
+            editIcon.style.fontSize = '12px';
+            editIcon.dataset.quickEditSerial = srNumber;
+            priceElem.appendChild(editIcon);
+        };
+
         var finishEdit = function () {
             if (input.dataset.saved) return;
             input.dataset.saved = 'true';
@@ -303,7 +315,7 @@
             if (editRow) {
                 editRow.list_price = newPrice;
                 saveDraft();
-                renderDraft();
+                restorePriceDisplay(newPrice);
                 status.textContent = 'Price updated in draft. Save to persist.';
                 var toast = document.getElementById('toast');
                 if (toast) {
@@ -311,6 +323,8 @@
                     toast.classList.add('show');
                     setTimeout(function() { toast.classList.remove('show'); }, 3000);
                 }
+            } else {
+                restorePriceDisplay(currentPrice);
             }
         };
 
@@ -319,7 +333,7 @@
             if (e.key === 'Enter') finishEdit();
             if (e.key === 'Escape') {
                 input.dataset.saved = 'true';
-                renderDraft();
+                restorePriceDisplay(currentPrice);
             }
         });
 
