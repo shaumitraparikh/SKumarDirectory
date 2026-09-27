@@ -243,7 +243,7 @@ class SellerHandler(SimpleHTTPRequestHandler):
         if not self.authorized_local_request():
             self.send_error(403, "Seller tools are available only over the local loopback server.")
             return
-                if self.path == "/api/clients":
+        if self.path == "/api/clients":
             self.send_json(200, {"clients": read_clients()})
             return
         if self.path == "/api/catalog":
@@ -287,10 +287,10 @@ class SellerHandler(SimpleHTTPRequestHandler):
             if content_length <= 0 or content_length > 10_000_000:
                 raise ValueError("Request body must be between 1 byte and 10 MB.")
             payload = json.loads(self.rfile.read(content_length))
-                        if self.path == "/api/clients/add":
-                added = append_client(payload)
-                self.send_json(200, {"success": True, "added": added})
-                return
+            if self.path == "/api/clients/add":
+            added = append_client(payload)
+            self.send_json(200, {"success": True, "added": added})
+            return
             if self.path == "/api/catalog/save":
                 fields, rows, revision = update_catalog(payload["rows"], payload["revision"])
                 try:

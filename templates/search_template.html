@@ -104,7 +104,8 @@ if (isEditMode) {
         <button class="close-cart" onclick="toggleCart(false)" aria-label="Close cart">×</button>
     </div>
     <div class="cart-main">
-        <div class="cart-scroll-area">
+        <div class="cart-layout">
+        <div class="cart-main-col">
         <details class="buyer-info" id="buyerDetails" open>
             <summary class="buyer-summary">Customer &amp; delivery details <span class="disclosure-hint">Choose an existing customer or enter details manually</span></summary>
             <div class="buyer-fields">
@@ -185,6 +186,8 @@ if (isEditMode) {
             <button class="print-btn" onclick="generateBill()">Print proforma invoice</button>
         </div>
     </div>
+</div>
+        </div>
 </aside>
 
 <dialog class="bill-archive-dialog" id="billArchiveDialog" aria-labelledby="billArchiveTitle">
