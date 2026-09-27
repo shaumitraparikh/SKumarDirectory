@@ -1065,6 +1065,10 @@ function fuzzyScore(text, query) {
                         ` Archive detail: ${result.entry.archiveWarning}`;
                 }
             }).catch(error => {
+                if (error.name === 'AbortError') {
+                    document.getElementById('billArchiveStatus').textContent = 'Bill print: Folder selection cancelled.';
+                    return;
+                }
                 console.error('The proforma invoice could not be archived.', error);
                 const message = `Bill printed but not saved: ${error.message || 'archive error'}`;
                 document.getElementById('billArchiveStatus').textContent = message;
