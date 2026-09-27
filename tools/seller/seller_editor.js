@@ -84,7 +84,7 @@
 
     function renderDraft() {
         var grid = document.getElementById('catalogGrid');
-        grid.replaceChildren();
+        grid.innerHTML = '';
         rows.forEach(function (row) {
             var card = document.createElement('div');
             card.className = 'card' + (row.hidden ? ' seller-hidden-item' : '');
@@ -164,7 +164,7 @@
     }
 
     function buildEditor(row, isNew) {
-        editorFields.replaceChildren();
+        editorFields.innerHTML = '';
         fields.forEach(function (field) {
             var wrapper = document.createElement('div');
             wrapper.className = 'seller-field' + (
@@ -186,7 +186,8 @@
             }
             if (field === 'list_price') input.inputMode = 'decimal';
             if (isNew && field === 'hidden') input.value = '';
-            wrapper.append(label, input);
+            wrapper.appendChild(label);
+            wrapper.appendChild(input);
             editorFields.appendChild(wrapper);
         });
         document.getElementById('sellerEditorTitle').textContent =
@@ -337,7 +338,8 @@
             }
         });
 
-        priceElem.replaceChildren(input);
+        priceElem.innerHTML = '';
+        priceElem.appendChild(input);
         input.focus();
     }
 
