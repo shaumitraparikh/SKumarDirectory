@@ -281,7 +281,7 @@ def prepare_search_catalog_data(items):
     return processed
 
 
-def build_search_catalog(config, categories, items, env, seller_mode=False):
+def build_search_catalog(config, categories, items, env):
     """Generate a customer or local seller searchable catalog."""
     template = env.get_template('search_template.html')
     catalog_data = prepare_search_catalog_data(items)
@@ -298,10 +298,9 @@ def build_search_catalog(config, categories, items, env, seller_mode=False):
         catalog_data=catalog_data,
         category_names=sorted(category_names),
         generation_date=datetime.now().strftime('%Y-%m-%d %H:%M'),
-        images_base='images',
-        seller_mode=seller_mode,
+        images_base='images'
     )
-    output_path = OUTPUT_DIR / ('search_catalog.html' if seller_mode else 'customer_catalog.html')
+    output_path = OUTPUT_DIR / 'search_catalog.html'
     write_html_output(output_path, html)
     
     print(f"  [OK] Search catalog: {output_path}")
@@ -346,9 +345,8 @@ def main():
     print("\n4. Generating catalogs...")
     
     print_path = build_print_catalog(config, categories, env)
-    customer_path = build_search_catalog(config, categories, active_items, env)
     seller_categories = group_by_category(items, IMAGES_DIR)
-    seller_path = build_search_catalog(config, seller_categories, items, env, seller_mode=True)
+    customer_path = build_search_catalog(config, seller_categories, items, env)
     
     # Summary
     print("\n" + "=" * 60)
@@ -358,8 +356,7 @@ def main():
     print(f"  Categories: {len(categories)}")
     print(f"\n  Output files:")
     print(f"    Print catalog:  {print_path}")
-    print(f"    Customer catalog: {customer_path}")
-    print(f"    Local seller catalog: {seller_path}")
+    print(f"    Interactive catalog: {customer_path}")
     print(f"\n  Open the HTML files in a browser to view!")
     print(f"  Print catalog -> Ctrl+P -> Save as PDF for sharing")
     

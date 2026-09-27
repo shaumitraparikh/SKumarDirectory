@@ -7,21 +7,23 @@
 <meta name="theme-color" content="#102a43">
 <title>{{ company.name }} - POS / Search Catalog</title>
 <link rel="stylesheet" href="assets/css/search_catalog.css">
-{% if seller_mode %}<link rel="stylesheet" href="tools/seller/seller_editor.css">{% endif %}
+<link rel="stylesheet" href="tools/seller/seller_editor.css" id="sellerCss" disabled>
 </head>
 <body>
 
-{% if seller_mode %}
 <script>
-// Auto-redirect to the seller server port if opened from a different port
-(function() {
-    var h = location.hostname;
-    if ((h === '127.0.0.1' || h === 'localhost') && location.port !== '8766') {
-        location.replace('http://127.0.0.1:8766' + location.pathname);
+// Check if we are running locally (which enables edit mode capabilities)
+var isLocal = (location.hostname === '127.0.0.1' || location.hostname === 'localhost');
+var isEditMode = isLocal && location.search.indexOf('edit=true') > -1;
+
+if (isEditMode) {
+    document.getElementById('sellerCss').disabled = false;
+    if (location.port !== '8766') {
+        location.replace('http://127.0.0.1:8766' + location.pathname + location.search);
     }
-})();
+}
 </script>
-<section class="seller-tools" aria-label="Seller catalog controls">
+<section class="seller-tools" id="sellerTools" style="display: none;" aria-label="Seller catalog controls">
     <div class="seller-tools-title">
         <strong>Seller workspace</strong>
         <span>This editor runs only from the local seller server.</span>
@@ -33,7 +35,7 @@
         <span id="sellerStatus" role="status" aria-live="polite">Connecting to local editor…</span>
     </div>
 </section>
-<dialog class="seller-editor-dialog" id="sellerEditorDialog" aria-labelledby="sellerEditorTitle">
+<dialog class="seller-editor-dialog" style="display: none;" id="sellerEditorDialog" aria-labelledby="sellerEditorTitle">
     <form id="sellerEditorForm">
         <div class="seller-editor-heading">
             <h2 id="sellerEditorTitle">Edit catalog item</h2>
@@ -46,7 +48,6 @@
         </div>
     </form>
 </dialog>
-{% endif %}
 
 <div class="header">
     <h1>{{ company.name }}</h1>
