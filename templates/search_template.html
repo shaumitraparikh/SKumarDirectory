@@ -19,7 +19,7 @@ var isEditMode = isLocal && location.search.indexOf('edit=true') > -1;
 if (isEditMode) {
     if (sessionStorage.getItem('sellerAuth') !== 'true') {
         var pw = prompt('Enter Seller Password to access Edit Mode:');
-        if (pw !== 'skumar') {
+        if (pw !== 'S. Kumar & Bros') {
             alert('Incorrect password. Access denied.');
             location.replace(location.pathname + '?edit=false');
         } else {
