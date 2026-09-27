@@ -200,20 +200,32 @@ function loadCustomerCsv(file) {
 
 
 // Auto-load server client data if available
-fetch('data/client_data.csv')
-    .then(response => {
-        if (response.ok) return response.text();
-        throw new Error('No server client data found.');
+// Auto-load server client data if available
+fetch('http://127.0.0.1:8766/api/clients')
+    .then(response => response.ok ? response.json() : Promise.reject())
+    .then(data => {
+        if (data.clients && data.clients.length > 0) {
+            window.ClientDirectory.clients = data.clients;
+            window.ClientDirectory.renderDataList();
+            document.getElementById('clientDirectoryStatus').textContent = 'Loaded ' + data.clients.length + ' customers from database.';
+            var btn = document.getElementById('loadClientsButton');
+            if (btn) btn.style.display = 'none';
+        }
     })
-    .then(text => {
-        const count = window.ClientDirectory.loadCsv(text);
-        document.getElementById('clientDirectoryStatus').textContent = 'Loaded ' + count + ' customers from database.';
-        
-        // Hide the manual upload button to prevent confusion
-        var btn = document.getElementById('loadClientsButton');
-        if (btn) btn.style.display = 'none';
+    .catch(() => {
+        return fetch('data/client_data.csv')
+            .then(response => {
+                if (response.ok) return response.text();
+                throw new Error('No server client data found.');
+            })
+            .then(text => {
+                const count = window.ClientDirectory.loadCsv(text);
+                document.getElementById('clientDirectoryStatus').textContent = 'Loaded ' + count + ' customers from database.';
+                var btn = document.getElementById('loadClientsButton');
+                if (btn) btn.style.display = 'none';
+            });
     })
-    .catch(() => { /* Silent failure, fallback to manual upload */ });
+    .catch(() => { /* Silent failure */ });
 
 document.getElementById('loadClientsButton').addEventListener('click', () => {
 
