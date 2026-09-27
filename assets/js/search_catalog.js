@@ -124,6 +124,10 @@ document.getElementById('chooseBillsFolderButton').addEventListener('click', () 
             status.textContent = 'Folder selected. Bills will be saved into monthly subfolders.';
             refreshSavedBills();
         }).catch(error => {
+            if (error.name === 'AbortError') {
+                status.textContent = 'Folder selection was cancelled.';
+                return;
+            }
             console.error('Unable to select the generated-bills folder.', error);
             status.textContent = error.message || 'Could not select the generated_bills folder.';
         });
@@ -822,7 +826,7 @@ function fuzzyScore(text, query) {
             showToast('Add at least one product before requesting an order.');
             return;
         }
-        const requiredFields = ['buyerName', 'buyerPhone', 'buyerAddress', 'buyerState', 'buyerPincode'];
+        const requiredFields = ['buyerName', 'buyerPhone'];
         const invalidField = requiredFields.map(id => document.getElementById(id)).find(field => !field.checkValidity());
         if (invalidField) {
             invalidField.reportValidity();
