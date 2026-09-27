@@ -24,6 +24,37 @@ sys.path.insert(0, str(ROOT))
 import build_catalog
 
 
+
+CLIENT_FILE = ROOT / "data" / "client_data.csv"
+
+def read_clients():
+    if not CLIENT_FILE.exists():
+        return []
+    with CLIENT_FILE.open(encoding="utf-8-sig", newline="") as source:
+        return list(csv.DictReader(source))
+
+def append_client(new_client):
+    clients = read_clients()
+    gstin = new_client.get('gstin', '').strip()
+    name = new_client.get('name', '').strip()
+    for c in clients:
+        if (gstin and c.get('gstin') == gstin) or (name and c.get('name') == name):
+            return False
+    
+    if not new_client.get('client_id'):
+        new_client['client_id'] = gstin if gstin else name.upper().replace(' ', '_')[:10]
+        
+    fieldnames = ['client_id','name','business_name','phone','email','address','state','pincode','gstin']
+    mode = 'a' if CLIENT_FILE.exists() else 'w'
+    with CLIENT_FILE.open(mode=mode, encoding="utf-8-sig", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        if mode == 'w':
+            writer.writeheader()
+        row = {k: new_client.get(k, '') for k in fieldnames}
+        writer.writerow(row)
+    return True
+
+
 def read_catalog():
     raw = DATA_FILE.read_bytes()
     with DATA_FILE.open(encoding="utf-8-sig", newline="") as source:
@@ -212,6 +243,9 @@ class SellerHandler(SimpleHTTPRequestHandler):
         if not self.authorized_local_request():
             self.send_error(403, "Seller tools are available only over the local loopback server.")
             return
+                if self.path == "/api/clients":
+            self.send_json(200, {"clients": read_clients()})
+            return
         if self.path == "/api/catalog":
             fields, rows, revision = read_catalog()
             # Augment rows with image paths using build_catalog logic
@@ -253,6 +287,10 @@ class SellerHandler(SimpleHTTPRequestHandler):
             if content_length <= 0 or content_length > 10_000_000:
                 raise ValueError("Request body must be between 1 byte and 10 MB.")
             payload = json.loads(self.rfile.read(content_length))
+                        if self.path == "/api/clients/add":
+                added = append_client(payload)
+                self.send_json(200, {"success": True, "added": added})
+                return
             if self.path == "/api/catalog/save":
                 fields, rows, revision = update_catalog(payload["rows"], payload["revision"])
                 try:
