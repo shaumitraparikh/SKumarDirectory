@@ -283,12 +283,23 @@ if (isEditMode) {
 
 <script src="assets/js/client_directory_core.js"></script>
 <script id="catalogData" type="application/json">{{ catalog_data | tojson }}</script>
-{% if not seller_mode %}
 <script src="assets/js/commerce_core.js"></script>
 <script src="assets/js/bill_archive.js"></script>
-<script src="assets/js/search_catalog.js"></script>
-{% else %}
-<script src="tools/seller/seller_editor.js"></script>
-{% endif %}
+<script>
+    if (isEditMode) {
+        document.getElementById('sellerTools').style.display = 'block';
+        var script = document.createElement('script');
+        script.src = 'tools/seller/seller_editor.js?v=6';
+        document.body.appendChild(script);
+        
+        // Hide cart button in edit mode
+        var cartBtn = document.querySelector('.cart-toggle-btn');
+        if (cartBtn) cartBtn.style.display = 'none';
+    } else {
+        var script = document.createElement('script');
+        script.src = 'assets/js/search_catalog.js?v=6';
+        document.body.appendChild(script);
+    }
+</script>
 </body>
 </html>
