@@ -419,7 +419,7 @@
     request('catalog').then(function (data) {
         setCatalog(data);
         var restoredDraft = restoreDraft(data);
-        if (restoredDraft) renderDraft();
+        renderDraft();
         status.textContent = 'Connected to the loopback-only seller editor. ' + rows.length + ' products loaded.'
             + (restoredDraft ? ' Unsaved draft restored.' : '');
         request('undo/status').then(function (undo) {

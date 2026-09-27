@@ -373,7 +373,7 @@ function toggleCart(forceOpen) {
 
     function filterCatalog() {
         const grid = document.getElementById('catalogGrid');
-        if (!catalogSearchIndex[0]?.card) {
+        if (catalogSearchIndex.length > 0 && !catalogSearchIndex[0].card) {
             const fragment = document.createDocumentFragment();
             catalogSearchIndex.forEach(entry => {
                 entry.card = createCard(entry.item);
