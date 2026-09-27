@@ -427,13 +427,35 @@ function fuzzyScore(text, query) {
             } else {
                 entry.score = fuzzyScore(entry.searchableText, input);
             }
-            if (entry.score >= 0.4) {
+if (entry.score >= 0.4) {
                 matchCount++;
                 entry.card.style.display = 'flex';
             } else {
                 entry.card.style.display = 'none';
             }
         });
+
+        // Re-order the DOM based on match score if there is a search query
+        if (input) {
+            // Create a sorted copy
+            const sorted = [...catalogSearchIndex].sort((a, b) => b.score - a.score);
+            const fragment = document.createDocumentFragment();
+            sorted.forEach(entry => {
+                if (entry.score >= 0.4) {
+                    fragment.appendChild(entry.card);
+                }
+            });
+            grid.appendChild(fragment); // Append re-ordered matching items to the end
+        } else {
+            // Restore original order if search is empty
+            const fragment = document.createDocumentFragment();
+            catalogSearchIndex.forEach(entry => {
+                if (entry.score >= 0.4) {
+                    fragment.appendChild(entry.card);
+                }
+            });
+            grid.appendChild(fragment);
+        }
 
         if (input) {
             catalogSearchIndex.sort((a, b) => b.score - a.score);
