@@ -33,11 +33,16 @@
             options.body = JSON.stringify(payload);
         }
         return fetch(endpoint + path, options).then(function (response) {
-            if (!response.ok) {
-                throw new Error('Local seller API failed (' + response.status + '). Ensure start_seller.bat is running.');
-            }
-            return response.json().catch(function() {
-                throw new Error('Received an invalid response from the seller server. Did you open the right port?');
+            return response.text().then(function(text) {
+                var data;
+                try { data = JSON.parse(text); } catch(e) {}
+                if (!response.ok) {
+                    throw new Error(data && data.error ? data.error : ('Local seller API failed (' + response.status + '). Ensure start_seller.bat is running.'));
+                }
+                if (!data) throw new Error('Received an invalid response from the seller server.');
+                return data;
+            });
+        });
             });
         });
     }
