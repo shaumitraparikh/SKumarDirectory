@@ -288,9 +288,9 @@ class SellerHandler(SimpleHTTPRequestHandler):
                 raise ValueError("Request body must be between 1 byte and 10 MB.")
             payload = json.loads(self.rfile.read(content_length))
             if self.path == "/api/clients/add":
-            added = append_client(payload)
-            self.send_json(200, {"success": True, "added": added})
-            return
+                added = append_client(payload)
+                self.send_json(200, {"success": True, "added": added})
+                return
             if self.path == "/api/catalog/save":
                 fields, rows, revision = update_catalog(payload["rows"], payload["revision"])
                 try:
@@ -326,7 +326,7 @@ class SellerHandler(SimpleHTTPRequestHandler):
                     "fields": fields,
                     "rows": rows,
                     "revision": revision,
-                    "message": "Last saved catalog change was undone and the local updater checks passed.",
+                    "message": "Undo applied successfully and one-click update checks passed.",
                 })
                 return
             self.send_error(404, "Unknown seller API endpoint.")
