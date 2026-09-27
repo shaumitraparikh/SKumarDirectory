@@ -37,21 +37,34 @@ def append_client(new_client):
     clients = read_clients()
     gstin = new_client.get('gstin', '').strip()
     name = new_client.get('name', '').strip()
-    for c in clients:
-        if (gstin and c.get('gstin') == gstin) or (name and c.get('name') == name):
-            return False
     
-    if not new_client.get('client_id'):
-        new_client['client_id'] = gstin if gstin else name.upper().replace(' ', '_')[:10]
-        
+    updated_existing = False
+    for c in clients:
+        # Match by GSTIN or Name (case-insensitive)
+        if (gstin and c.get('gstin') == gstin) or (name and c.get('name', '').lower() == name.lower()):
+            updated_existing = True
+            # Update any missing fields
+            for k in ['phone', 'email', 'address', 'state', 'pincode', 'gstin']:
+                if new_client.get(k) and not c.get(k):
+                    c[k] = new_client.get(k)
+            break
+            
     fieldnames = ['client_id','name','business_name','phone','email','address','state','pincode','gstin']
-    mode = 'a' if CLIENT_FILE.exists() else 'w'
-    with CLIENT_FILE.open(mode=mode, encoding="utf-8-sig", newline="") as f:
+    
+    if not updated_existing:
+        if not new_client.get('client_id'):
+            new_client['client_id'] = gstin if gstin else name.upper().replace(' ', '_')[:10]
+        # Only keep known fields
+        clean_new = {k: new_client.get(k, '') for k in fieldnames}
+        clients.append(clean_new)
+
+    # Rewrite the whole file to save updates
+    with CLIENT_FILE.open(mode='w', encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
-        if mode == 'w':
-            writer.writeheader()
-        row = {k: new_client.get(k, '') for k in fieldnames}
-        writer.writerow(row)
+        writer.writeheader()
+        for c in clients:
+            writer.writerow({k: c.get(k, '') for k in fieldnames})
+            
     return True
 
 
