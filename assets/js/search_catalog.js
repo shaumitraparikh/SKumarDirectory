@@ -1133,7 +1133,7 @@ if (!lightboxDialog) {
     lightboxDialog = document.createElement('dialog');
     lightboxDialog.id = 'imageLightbox';
     lightboxDialog.style.cssText = 'padding:0; border:none; border-radius:8px; background:transparent; max-width:90vw; max-height:90vh; overflow:visible;';
-    lightboxDialog.innerHTML = '<form method="dialog" style="display:flex; flex-direction:column; align-items:center; position:relative;"><button type="button" onclick="this.closest('&quot;dialog&quot;').close()" style="position:absolute; top:-15px; right:-15px; width:30px; height:30px; border-radius:50%; background:#102a43; color:white; border:2px solid white; cursor:pointer; font-weight:bold; font-size:14px; z-index:10;">X</button><img id="lightboxImg" style="max-width:90vw; max-height:85vh; border-radius:8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); object-fit:contain; background:white; padding:10px;" src="" alt="Large"></form>';
+    lightboxDialog.innerHTML = `<form method=\"dialog\" style="display:flex; flex-direction:column; align-items:center; position:relative;"><button type="button" onclick=\"this.closest('dialog').close()\" style="position:absolute; top:-15px; right:-15px; width:30px; height:30px; border-radius:50%; background:#102a43; color:white; border:2px solid white; cursor:pointer; font-weight:bold; font-size:14px; z-index:10;">X</button><img id="lightboxImg" style="max-width:90vw; max-height:85vh; border-radius:8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); object-fit:contain; background:white; padding:10px;" src="" alt="Large"></form>`;
     lightboxDialog.addEventListener('click', (e) => {
         if(e.target === lightboxDialog) lightboxDialog.close();
     });
