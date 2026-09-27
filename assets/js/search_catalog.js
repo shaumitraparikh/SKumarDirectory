@@ -208,6 +208,10 @@ fetch('data/client_data.csv')
     .then(text => {
         const count = window.ClientDirectory.loadCsv(text);
         document.getElementById('clientDirectoryStatus').textContent = 'Loaded ' + count + ' customers from database.';
+        
+        // Hide the manual upload button to prevent confusion
+        var btn = document.getElementById('loadClientsButton');
+        if (btn) btn.style.display = 'none';
     })
     .catch(() => { /* Silent failure, fallback to manual upload */ });
 
