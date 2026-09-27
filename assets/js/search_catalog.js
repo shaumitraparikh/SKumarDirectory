@@ -194,7 +194,21 @@ function loadCustomerCsv(file) {
     });
 }
 
+
+// Auto-load server client data if available
+fetch('data/client_data.csv')
+    .then(response => {
+        if (response.ok) return response.text();
+        throw new Error('No server client data found.');
+    })
+    .then(text => {
+        const count = window.ClientDirectory.loadCsv(text);
+        document.getElementById('clientDirectoryStatus').textContent = 'Loaded ' + count + ' customers from database.';
+    })
+    .catch(() => { /* Silent failure, fallback to manual upload */ });
+
 document.getElementById('loadClientsButton').addEventListener('click', () => {
+
     document.getElementById('clientCsvFile').click();
 });
 document.getElementById('clientCsvFile').addEventListener('change', event => {

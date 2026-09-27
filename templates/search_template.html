@@ -114,16 +114,16 @@ if (isEditMode) {
                 <span class="client-directory-status" id="clientDirectoryStatus" role="status">Customer records stay in this browser session and are not saved or sent until you submit an order.</span>
                 <label for="buyerName">Name / business <span aria-hidden="true">*</span></label>
                 <input type="text" id="buyerName" autocomplete="name" maxlength="120" placeholder="Customer or company name" required>
-                <label for="buyerPhone">Indian mobile / WhatsApp <span aria-hidden="true">*</span></label>
-                <input type="tel" id="buyerPhone" autocomplete="tel-national" inputmode="tel" maxlength="20" placeholder="10-digit mobile number" required>
+                <label for="buyerPhone">Indian mobile / WhatsApp</label>
+                <input type="tel" id="buyerPhone" autocomplete="tel-national" inputmode="tel" maxlength="20" placeholder="10-digit mobile number">
                 <label for="buyerEmail">Email (optional)</label>
                 <input type="email" id="buyerEmail" autocomplete="email" maxlength="254" placeholder="name@example.com">
-                <label for="buyerAddress">Delivery address <span aria-hidden="true">*</span></label>
+                <label for="buyerAddress">Delivery address (optional)</label>
                 <textarea id="buyerAddress" autocomplete="street-address" maxlength="400" placeholder="Building, street, area" required></textarea>
                 <div class="buyer-location">
                     <div>
-                        <label for="buyerState">State / union territory <span aria-hidden="true">*</span></label>
-                        <select id="buyerState" autocomplete="address-level1" required>
+                        <label for="buyerState">State / union territory (optional)</label>
+                        <select id="buyerState" autocomplete="address-level1">
                             <option value="">Select state / UT</option>
                             <option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
                             <option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option>
@@ -138,8 +138,8 @@ if (isEditMode) {
                         </select>
                     </div>
                     <div>
-                        <label for="buyerPincode">PIN code <span aria-hidden="true">*</span></label>
-                        <input type="text" id="buyerPincode" autocomplete="postal-code" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="6-digit PIN" required>
+                        <label for="buyerPincode">PIN code (optional)</label>
+                        <input type="text" id="buyerPincode" autocomplete="postal-code" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="6-digit PIN">
                     </div>
                 </div>
                 <label for="buyerGstin">Customer GSTIN (optional)</label>
