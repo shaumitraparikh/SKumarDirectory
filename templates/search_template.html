@@ -12,6 +12,15 @@
 <body>
 
 {% if seller_mode %}
+<script>
+// Auto-redirect to the seller server port if opened from a different port
+(function() {
+    var h = location.hostname;
+    if ((h === '127.0.0.1' || h === 'localhost') && location.port !== '8766') {
+        location.replace('http://127.0.0.1:8766' + location.pathname);
+    }
+})();
+</script>
 <section class="seller-tools" aria-label="Seller catalog controls">
     <div class="seller-tools-title">
         <strong>Seller workspace</strong>

@@ -65,6 +65,18 @@
         transition: transform 0.1s;
     }
     .cart-toggle-btn:active { transform: scale(0.95); }
+    .mode-toggle-btn {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 10px 16px; border-radius: 30px; font-size: 13px; font-weight: 700;
+        text-decoration: none; white-space: nowrap; cursor: pointer;
+        background: #102a43; color: #fff;
+        border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: background 0.15s, transform 0.1s;
+    }
+    .mode-toggle-btn:hover { background: #243b53; }
+    .mode-toggle-btn:active { transform: scale(0.95); }
+    .mode-toggle-edit { background: #d97706; }
+    .mode-toggle-edit:hover { background: #b45309; }
     .cart-badge {
         background: white;
         color: var(--accent);

@@ -1,7 +1,14 @@
 (function () {
     'use strict';
 
-    var endpoint = window.location.origin + '/api/';
+    // The seller API only runs on port 8766 (local_seller.py).
+    // Auto-redirect if this page was opened from any other port.
+    if (location.port !== '8766' && (location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {
+        location.href = 'http://127.0.0.1:8766' + location.pathname + location.search;
+        return;
+    }
+
+    var endpoint = '/api/';
     var fields = [];
     var rows = [];
     var revision = '';
@@ -26,9 +33,11 @@
             options.body = JSON.stringify(payload);
         }
         return fetch(endpoint + path, options).then(function (response) {
-            return response.json().then(function (result) {
-                if (!response.ok) throw new Error(result.error || 'Local seller request failed.');
-                return result;
+            if (!response.ok) {
+                throw new Error('Local seller API failed (' + response.status + '). Ensure start_seller.bat is running.');
+            }
+            return response.json().catch(function() {
+                throw new Error('Received an invalid response from the seller server. Did you open the right port?');
             });
         });
     }
@@ -84,8 +93,9 @@
 
     function renderDraft() {
         var grid = document.getElementById('catalogGrid');
-        grid.innerHTML = '';
-        rows.forEach(function (row) {
+        try {
+            grid.innerHTML = '';
+            rows.forEach(function (row) {
             var card = document.createElement('div');
             card.className = 'card' + (row.hidden ? ' seller-hidden-item' : '');
             card.dataset.srNumber = row.sr_number;
@@ -155,6 +165,10 @@
             });
             grid.appendChild(card);
         });
+        } catch (err) {
+            status.textContent = 'Render Error: ' + err.message;
+            console.error(err);
+        }
     }
 
     function fieldLabel(field) {
