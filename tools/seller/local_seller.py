@@ -162,7 +162,7 @@ def run_updater():
             subprocess.run(["node", f"tests/{test_file}"], cwd=ROOT, check=True)
         return
     subprocess.run(
-        [str(ROOT / "1_Click_Update.bat"), "/local"],
+        [str(ROOT / "1_Click_Update.bat")],
         cwd=ROOT,
         check=True,
         shell=True,
