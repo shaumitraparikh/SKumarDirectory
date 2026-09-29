@@ -3,7 +3,7 @@ TITLE Stop SKumar Local Server
 echo Stopping SKumar Local Server (Port 8766)...
 
 set FOUND=0
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8766') do (
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8766 ^| findstr LISTENING') do (
     set FOUND=1
     echo Killing process %%a...
     taskkill /F /PID %%a >nul 2>&1
