@@ -155,18 +155,10 @@ def load_photo_document_images():
 
 
 def image_mapping(rows, method, source_document, source_label=""):
-    serials = sorted({int(row["sr_number"]) for row in rows})
+    serials = sorted({str(row["sr_number"]) for row in rows}, key=lambda value: tuple(int(part) for part in str(value).split(".")))
     if not serials:
         raise ValueError(f"Image has no mapped product serials: {source_label!r}")
-    return {
-        "sr_numbers": serials,
-        "group_items": sorted({
-            f"{row['group_number']}.{row['item_number']}" for row in rows
-        }, key=lambda value: tuple(int(part) for part in value.split("."))),
-        "source_image_ref": source_label,
-        "source_document": source_document,
-        "mapping_method": method,
-    }
+    return serials
 
 
 def image_identity_prefix(rows):
@@ -212,12 +204,8 @@ def main():
     products = load_products()
     by_serial = {row["sr_number"]: row for row in products}
     image_map = json.loads(IMAGE_MAP_PATH.read_text(encoding="utf-8"))
-    for mapping in image_map.values():
-        mapping["sr_numbers"] = sorted(set(mapping["sr_numbers"]))
-        mapping["group_items"] = sorted(
-            set(mapping["group_items"]),
-            key=lambda value: tuple(int(part) for part in value.split(".")),
-        )
+    for key, mapping in image_map.items():
+        image_map[key] = sorted(set(mapping), key=lambda value: tuple(int(part) for part in str(value).split(".")))
     price_hashes = load_price_list_images()
     photo_images = load_photo_document_images()
     current_images = [path for path in IMAGES_DIR.iterdir() if path.is_file()]
@@ -232,7 +220,7 @@ def main():
     for path in current_images:
         if path.stem in original_image_map:
             mapping = original_image_map[path.stem]
-            mapped_rows = [by_serial[str(serial)] for serial in mapping["sr_numbers"]]
+            mapped_rows = [by_serial[str(serial)] for serial in mapping if str(serial) in by_serial]
             expected_prefix = image_identity_prefix(mapped_rows)
             if not path.stem.startswith(expected_prefix + "_"):
                 suffix_match = re.search(r"_sr_[\d,-]+_(.+)$", path.stem)

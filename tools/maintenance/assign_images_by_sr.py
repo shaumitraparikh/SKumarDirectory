@@ -91,14 +91,14 @@ image_map = {}
 for it in items:
     ref = it.get('image_ref')
     if ref:
-        image_map.setdefault(ref, {"group_items": []})
-        if it['sr_number'] not in image_map[ref]["group_items"]:
-            image_map[ref]["group_items"].append(it['sr_number'])
+        image_map.setdefault(ref, [])
+        if it['sr_number'] not in image_map[ref]:
+            image_map[ref].append(it['sr_number'])
 
 # Ensure all files on disk are keys in the map
 for stem in sorted(existing_images):
     if stem not in image_map:
-        image_map[stem] = {"group_items": []}
+        image_map[stem] = []
 
 with open(MAP_FILE, 'w', encoding='utf-8') as f:
     json.dump(image_map, f, indent=2)

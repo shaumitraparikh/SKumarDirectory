@@ -308,7 +308,7 @@ class CatalogEndToEndTests(unittest.TestCase):
                 mapping = image_map[product["image_ref"]]
                 self.assertIn(
                     source_item["new_sr_number"],
-                    mapping["group_items"],
+                    mapping,
                 )
         self.assertEqual(captured_inline_images, 411)
         source_document = extractor.Document(source_path)
@@ -378,7 +378,7 @@ class CatalogEndToEndTests(unittest.TestCase):
                 self.assertEqual(Decimal(catalog_price), source_amount)
             if product["image_ref"]:
                 mapped = image_map[product["image_ref"]]
-                self.assertIn(source_item["new_sr_number"], mapped["group_items"])
+                self.assertIn(source_item["new_sr_number"], mapped)
 
     def test_catalog_image_names_map_back_to_each_referenced_serial(self):
         image_map = json.loads(
@@ -397,7 +397,7 @@ class CatalogEndToEndTests(unittest.TestCase):
             mapping = image_map[image_ref]
             self.assertIn(
                 row["sr_number"],
-                mapping["group_items"],
+                mapping,
             )
             match = re.search(r"^([\d.,-]+)", image_ref)
             self.assertIsNotNone(match, f"Image {image_ref!r} has no serial mapping")
@@ -438,7 +438,7 @@ class CatalogEndToEndTests(unittest.TestCase):
             for asset in assets_by_hash[source_hash]:
                 if asset.parent.name == "images":
                     self.assertIn(asset.stem, image_map)
-                    self.assertTrue(image_map[asset.stem]["group_items"])
+                    self.assertTrue(image_map[asset.stem])
 
         image_stems = {path.stem for path in (CATALOG_ROOT / "images").iterdir() if path.is_file()}
         self.assertEqual(image_stems, set(image_map))
