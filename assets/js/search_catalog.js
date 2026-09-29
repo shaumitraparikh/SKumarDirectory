@@ -200,14 +200,14 @@ function loadCustomerCsv(file) {
 
 
 // Auto-load server client data if available
-// Auto-load server client data if available
 fetch('http://127.0.0.1:8766/api/clients')
     .then(response => response.ok ? response.json() : Promise.reject())
     .then(data => {
         if (data.clients && data.clients.length > 0) {
+            clientRecords = data.clients;
             window.ClientDirectory.clients = data.clients;
             window.ClientDirectory.renderDataList();
-            document.getElementById('clientDirectoryStatus').textContent = 'Loaded ' + data.clients.length + ' customers from database.';
+            document.getElementById('clientDirectoryStatus').textContent = '✓ ' + data.clients.length + ' saved customers ready to auto-fill.';
             var btn = document.getElementById('loadClientsButton');
             if (btn) btn.style.display = 'none';
         }
@@ -219,8 +219,11 @@ fetch('http://127.0.0.1:8766/api/clients')
                 throw new Error('No server client data found.');
             })
             .then(text => {
-                const count = window.ClientDirectory.loadCsv(text);
-                document.getElementById('clientDirectoryStatus').textContent = 'Loaded ' + count + ' customers from database.';
+                const records = ClientDirectory.parseCsv ? ClientDirectory.parseCsv(text) : [];
+                clientRecords = records;
+                window.ClientDirectory.clients = records;
+                window.ClientDirectory.renderDataList();
+                document.getElementById('clientDirectoryStatus').textContent = '✓ ' + records.length + ' saved customers ready to auto-fill.';
                 var btn = document.getElementById('loadClientsButton');
                 if (btn) btn.style.display = 'none';
             });
@@ -249,6 +252,7 @@ function toggleCart(forceOpen) {
         document.getElementById('cartBackdrop').classList.toggle('open', shouldOpen);
         drawer.setAttribute('aria-hidden', String(!shouldOpen));
         document.querySelector('.cart-toggle-btn').setAttribute('aria-expanded', String(shouldOpen));
+        document.body.style.overflow = shouldOpen ? 'hidden' : '';
         if (shouldOpen) {
             document.querySelector('.close-cart').focus();
         } else {

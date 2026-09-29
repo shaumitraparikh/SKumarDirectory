@@ -97,97 +97,199 @@ if (isEditMode) {
 <div class="cart-backdrop" id="cartBackdrop" onclick="toggleCart(false)" aria-hidden="true"></div>
 <aside class="cart-drawer" id="cartDropdown" role="dialog" aria-modal="true" aria-labelledby="cartTitle" aria-hidden="true">
     <div class="cart-header">
-        <div>
-            <h2 class="cart-heading" id="cartTitle">Order summary</h2>
-            <div class="cart-subtitle">Review items and customer details</div>
+        <div class="cart-header-title">
+            <h2 class="cart-heading" id="cartTitle">🛒 Checkout &amp; Order Request</h2>
+            <div class="cart-subtitle">Review items, enter customer details, or print a proforma bill</div>
         </div>
-        <button class="close-cart" onclick="toggleCart(false)" aria-label="Close cart">×</button>
+        <button class="close-cart" onclick="toggleCart(false)" aria-label="Close cart">✕</button>
     </div>
-    <div class="cart-main">
-        <div class="cart-layout">
+
+    <div class="cart-layout">
+        <!-- Left Column: Customer details & Cart Items -->
         <div class="cart-main-col">
-        <details class="buyer-info" id="buyerDetails" open>
-            <summary class="buyer-summary">Customer &amp; delivery details <span class="disclosure-hint">Choose an existing customer or enter details manually</span></summary>
-            <div class="buyer-fields">
-                <label for="customerLookup">Find an existing customer (optional)</label>
-                <input type="search" id="customerLookup" list="clientSuggestions" autocomplete="off" placeholder="Search by name, business, phone, or customer ID">
-                <datalist id="clientSuggestions"></datalist>
-                <button type="button" class="load-clients-btn" id="loadClientsButton">Load customer list (CSV)</button>
-                <input type="file" id="clientCsvFile" accept=".csv,text/csv" hidden>
-                <span class="client-directory-status" id="clientDirectoryStatus" role="status">Customer records stay in this browser session and are not saved or sent until you submit an order.</span>
-                <label for="buyerName">Name / business <span aria-hidden="true">*</span></label>
-                <input type="text" id="buyerName" autocomplete="name" maxlength="120" placeholder="Customer or company name" required>
-                <label for="buyerPhone">Indian mobile / WhatsApp</label>
-                <input type="tel" id="buyerPhone" autocomplete="tel-national" inputmode="tel" maxlength="20" placeholder="10-digit mobile number">
-                <label for="buyerEmail">Email (optional)</label>
-                <input type="email" id="buyerEmail" autocomplete="email" maxlength="254" placeholder="name@example.com">
-                <label for="buyerAddress">Delivery address (optional)</label>
-                <textarea id="buyerAddress" autocomplete="street-address" maxlength="400" placeholder="Building, street, area" required></textarea>
-                <div class="buyer-location">
-                    <div>
-                        <label for="buyerState">State / union territory (optional)</label>
-                        <select id="buyerState" autocomplete="address-level1">
-                            <option value="">Select state / UT</option>
-                            <option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
-                            <option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option>
-                            <option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option>
-                            <option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option>
-                            <option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option>
-                            <option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
-                            <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option>
-                            <option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option>
-                            <option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option>
-                            <option>Uttarakhand</option><option>West Bengal</option>
-                        </select>
+            <!-- Customer Details Card -->
+            <div class="checkout-card" id="buyerDetailsCard">
+                <details class="buyer-info" id="buyerDetails" open>
+                    <summary class="buyer-summary">
+                        <div class="summary-title-wrap">
+                            <span class="summary-icon">👤</span>
+                            <div>
+                                <span class="summary-main-title">Customer &amp; Delivery Details</span>
+                                <span class="disclosure-hint">Choose an existing customer or enter details manually</span>
+                            </div>
+                        </div>
+                    </summary>
+                    <div class="buyer-fields-wrap">
+                        <!-- Quick Customer Lookup Bar -->
+                        <div class="customer-lookup-box">
+                            <label for="customerLookup" class="lookup-label">🔍 Find existing customer (optional)</label>
+                            <div class="lookup-input-row">
+                                <input type="search" id="customerLookup" list="clientSuggestions" autocomplete="off" placeholder="Search by name, business, phone, or GSTIN to auto-fill...">
+                                <datalist id="clientSuggestions"></datalist>
+                                <button type="button" class="load-clients-btn" id="loadClientsButton" title="Upload client CSV">📁 Import CSV</button>
+                                <input type="file" id="clientCsvFile" accept=".csv,text/csv" hidden>
+                            </div>
+                            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Saved customers auto-fill your order details instantly.</span>
+                        </div>
+
+                        <!-- 2-Column Form Fields -->
+                        <div class="buyer-form-grid">
+                            <div class="form-group span-2">
+                                <label for="buyerName">Name / Business Name <span class="required-star">*</span></label>
+                                <input type="text" id="buyerName" autocomplete="name" maxlength="120" placeholder="Customer or company name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buyerPhone">Indian Mobile / WhatsApp</label>
+                                <input type="tel" id="buyerPhone" autocomplete="tel-national" inputmode="tel" maxlength="20" placeholder="10-digit mobile number">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buyerEmail">Email Address (optional)</label>
+                                <input type="email" id="buyerEmail" autocomplete="email" maxlength="254" placeholder="name@example.com">
+                            </div>
+
+                            <div class="form-group span-2">
+                                <label for="buyerAddress">Delivery Address</label>
+                                <textarea id="buyerAddress" autocomplete="street-address" maxlength="400" placeholder="Building, street, area, city" rows="2"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buyerState">State / Union Territory</label>
+                                <select id="buyerState" autocomplete="address-level1">
+                                    <option value="">Select state / UT</option>
+                                    <option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
+                                    <option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option>
+                                    <option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option>
+                                    <option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option>
+                                    <option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option>
+                                    <option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
+                                    <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option>
+                                    <option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option>
+                                    <option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option>
+                                    <option>Uttarakhand</option><option>West Bengal</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buyerPincode">PIN Code</label>
+                                <input type="text" id="buyerPincode" autocomplete="postal-code" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="6-digit PIN">
+                            </div>
+
+                            <div class="form-group span-2">
+                                <label for="buyerGstin">Customer GSTIN (optional)</label>
+                                <input type="text" id="buyerGstin" maxlength="15" autocapitalize="characters" placeholder="15-character GSTIN">
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label for="buyerPincode">PIN code (optional)</label>
-                        <input type="text" id="buyerPincode" autocomplete="postal-code" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="6-digit PIN">
+                </details>
+            </div>
+
+            <!-- Items in Cart Card -->
+            <div class="checkout-card" id="cartItemsCard">
+                <details class="cart-items-section" id="orderSummaryDetails" open>
+                    <summary class="order-summary-toggle">
+                        <div class="summary-title-wrap">
+                            <span class="summary-icon">📦</span>
+                            <div>
+                                <span class="summary-main-title">Selected Products</span>
+                                <span class="disclosure-hint">Review items, quantities, and discounts</span>
+                            </div>
+                        </div>
+                        <span id="orderSummaryCount" class="badge-pill">0 items</span>
+                    </summary>
+                    <div class="cart-items-container">
+                        <div class="cart-items" id="cartItems" aria-live="polite">
+                            <div class="cart-empty">
+                                <div class="empty-icon">🛒</div>
+                                <strong>Your cart is empty</strong>
+                                <p>Add products from the catalog to begin your order request or generate an invoice.</p>
+                                <button type="button" class="browse-catalog-btn" onclick="toggleCart(false)">← Browse Catalog</button>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <!-- Right Column: Order Summary & Actions -->
+        <aside class="cart-summary-col cart-summary">
+            <div class="summary-sticky-wrap">
+                <div class="summary-panel-header">
+                    <h3>Order Breakdown</h3>
+                    <span class="summary-status-pill">Proforma Estimate</span>
+                </div>
+
+                <div class="summary-calc-box">
+                    <div class="calc-row subtotal-row">
+                        <span>Items Subtotal</span>
+                        <strong>₹<span id="itemsSubtotal">0.00</span></strong>
+                    </div>
+
+                    <details class="price-breakdown" id="priceBreakdown">
+                        <summary class="price-breakdown-toggle">
+                            <span>Taxes &amp; Discounts</span>
+                        </summary>
+                        <div class="price-breakdown-content">
+                            <div class="summary-row summary-discount">
+                                <span>Item discounts</span>
+                                <span>−₹<span id="discountTotal">0.00</span></span>
+                            </div>
+                            <div class="summary-row summary-subtotal">
+                                <span>Taxable subtotal</span>
+                                <span>₹<span id="subTotal">0.00</span></span>
+                            </div>
+                            <div class="tax-row summary-row">
+                                <label for="cgstRate">CGST (<input type="number" id="cgstRate" class="tax-input" value="9" min="0" max="100" step="0.01" required onchange="renderCart()">%)</label>
+                                <span>₹<span id="cgstAmount">0.00</span></span>
+                            </div>
+                            <div class="tax-row summary-row">
+                                <label for="sgstRate">SGST (<input type="number" id="sgstRate" class="tax-input" value="9" min="0" max="100" step="0.01" required onchange="renderCart()">%)</label>
+                                <span>₹<span id="sgstAmount">0.00</span></span>
+                            </div>
+                            <div class="tax-row summary-row">
+                                <span>Total Tax (<span id="totalTaxRate">18</span>%)</span>
+                                <span>₹<span id="taxAmount">0.00</span></span>
+                            </div>
+                        </div>
+                    </details>
+
+                    <div class="calc-row grand-total-row">
+                        <div>
+                            <span class="total-label">Estimated Total</span>
+                            <small class="total-gst-tag">(Incl. GST)</small>
+                        </div>
+                        <strong class="grand-total-amount">₹<span id="grandTotal">0.00</span></strong>
                     </div>
                 </div>
-                <label for="buyerGstin">Customer GSTIN (optional)</label>
-                <input type="text" id="buyerGstin" maxlength="15" autocapitalize="characters" placeholder="15-character GSTIN">
-            </div>
-        </details>
-        <details class="cart-items-section" id="orderSummaryDetails" open>
-            <summary class="order-summary-toggle">Order summary <span id="orderSummaryCount">0 items</span></summary>
-            <div class="cart-items" id="cartItems" aria-live="polite">
-                <div class="cart-empty"><strong>Your cart is empty</strong>Add products from the catalog to begin.</div>
-            </div>
-        </details>
-        </div>
-        <div class="cart-summary">
-            <details class="price-breakdown" id="priceBreakdown">
-                <summary class="price-breakdown-toggle">
-                    <span>Priced items subtotal</span>
-                    <strong>₹<span id="itemsSubtotal">0.00</span></strong>
-                </summary>
-                <div class="price-breakdown-content">
-                    <div class="summary-row summary-discount"><span>Item discounts</span><span>−₹<span id="discountTotal">0.00</span></span></div>
-                    <div class="summary-row summary-subtotal"><span>Taxable subtotal</span><span>₹<span id="subTotal">0.00</span></span></div>
-                    <div class="tax-row summary-row">
-                        <label for="cgstRate">CGST (<input type="number" id="cgstRate" class="tax-input" value="9" min="0" max="100" step="0.01" required onchange="renderCart()">%)</label>
-                        <span>₹<span id="cgstAmount">0.00</span></span>
-                    </div>
-                    <div class="tax-row summary-row">
-                        <label for="sgstRate">SGST (<input type="number" id="sgstRate" class="tax-input" value="9" min="0" max="100" step="0.01" required onchange="renderCart()">%)</label>
-                        <span>₹<span id="sgstAmount">0.00</span></span>
-                    </div>
-                    <div class="tax-row summary-row"><span>Total tax (<span id="totalTaxRate">18</span>%)</span><span>₹<span id="taxAmount">0.00</span></span></div>
+
+                <div class="estimate-disclaimers">
+                    <p class="estimate-note" id="quoteItemsNote" hidden>⚠️ Price-on-request items, stock, delivery and final GST are confirmed by sales and may change this estimate.</p>
+                    <p class="estimate-note">ℹ️ This is an order request only. No payment is collected here; prices, tax and delivery are confirmed by sales.</p>
                 </div>
-            </details>
-            <div class="summary-total"><span>Estimated total</span><strong>₹<span id="grandTotal">0.00</span></strong></div>
-            <p class="estimate-note" id="quoteItemsNote" hidden>Price-on-request items, stock, delivery and final GST are confirmed by sales and may change this estimate.</p>
-            <p class="estimate-note">This is an order request only. No payment is collected here; prices, tax and delivery are confirmed by sales.</p>
-            <button class="order-btn" id="placeOrderButton" type="button" onclick="placeOrderRequest()" disabled>Request order on WhatsApp</button>
-            <a class="order-fallback" id="whatsAppFallback" hidden target="_blank" rel="noopener noreferrer">Continue to WhatsApp</a>
-            <button class="order-copy-btn" id="orderCopyButton" type="button" onclick="downloadOrderCopy()" hidden>Download structured order copy</button>
-            <button class="archive-btn" id="openBillsButton" type="button">View saved bills</button>
-            <button class="print-btn" onclick="generateBill()">Print proforma invoice</button>
-        </div>
+
+                <div class="checkout-actions-group">
+                    <button class="order-btn" id="placeOrderButton" type="button" onclick="placeOrderRequest()" disabled>
+                        <span>💬 Request Order on WhatsApp</span>
+                    </button>
+                    <a class="order-fallback" id="whatsAppFallback" hidden target="_blank" rel="noopener noreferrer">Continue to WhatsApp</a>
+
+                    <button class="print-btn" type="button" onclick="generateBill()">
+                        <span>🖨️ Print Proforma Invoice</span>
+                    </button>
+
+                    <div class="secondary-btn-row">
+                        <button class="archive-btn" id="openBillsButton" type="button">
+                            <span>📁 Saved Bills</span>
+                        </button>
+                        <button class="order-copy-btn" id="orderCopyButton" type="button" onclick="downloadOrderCopy()" hidden>
+                            <span>📥 Order Copy</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
     </div>
-</div>
-        </div>
 </aside>
 
 <dialog class="bill-archive-dialog" id="billArchiveDialog" aria-labelledby="billArchiveTitle">
