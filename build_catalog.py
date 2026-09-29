@@ -164,8 +164,64 @@ def find_image(image_ref, images_dir):
 
 
 def group_by_category(items, images_dir):
-    """Group items by category and attach image info."""
+    """Group items by category and attach image info according to list Sr No."""
     categories = OrderedDict()
+    
+    # Index available images by numeric group and item number
+    group_images = {}
+    for p in images_dir.glob('*.*'):
+        stem = p.stem
+        parts = stem.split('.')
+        if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
+            rel_path = p.relative_to(images_dir.parent).as_posix()
+            group_images.setdefault(int(parts[0]), []).append((int(parts[1]), rel_path))
+
+    for grp in group_images:
+        group_images[grp].sort()
+
+    def find_image_for_sr(sr, fallback_cat_img):
+        parts = sr.split('.')
+        try:
+            grp = int(parts[0])
+            num = int(parts[1]) if len(parts) > 1 else 1
+        except ValueError:
+            grp = 1
+            num = 1
+            
+        if grp in group_images and group_images[grp]:
+            imgs = group_images[grp]
+            cand = None
+            for n_img, path in imgs:
+                if n_img <= num:
+                    cand = path
+                else:
+                    break
+            if cand is None:
+                cand = imgs[0][1]
+            return cand
+            
+        if fallback_cat_img:
+            return fallback_cat_img
+            
+        # Fallbacks by Sr No proximity
+        if grp == 35:
+            cand = find_image('36.1', images_dir)
+            if cand:
+                return cand
+        if grp == 64:
+            cand = find_image('63.6', images_dir)
+            if cand:
+                return cand
+        if grp == 65:
+            cand = find_image('56.1', images_dir)
+            if cand:
+                return cand
+            
+        all_grps = sorted(group_images.keys())
+        if all_grps:
+            closest_grp = min(all_grps, key=lambda g: abs(g - grp))
+            return group_images[closest_grp][0][1]
+        return None
     
     for item in items:
         cat_name = item.get('category', 'Uncategorized')
@@ -193,10 +249,17 @@ def group_by_category(items, images_dir):
                     category['image_path'] = img
                     category['image_ref'] = p.get('image_ref', '')
                     break
+            if not category['image_path'] and category['products']:
+                first_sr = category['products'][0]['sr_number']
+                category['image_path'] = find_image_for_sr(first_sr, None)
 
         for item in category['products']:
-            item['display_image_path'] = item.get('image_path') or category['image_path']
-            item['image_is_representative'] = not bool(item.get('image_path')) and bool(category['image_path'])
+            if item.get('image_path'):
+                item['display_image_path'] = item['image_path']
+                item['image_is_representative'] = False
+            else:
+                item['display_image_path'] = find_image_for_sr(item['sr_number'], category['image_path']) or category['image_path']
+                item['image_is_representative'] = not bool(item.get('image_path')) and bool(item['display_image_path'])
     
     return list(categories.values())
 
