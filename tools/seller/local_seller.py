@@ -335,6 +335,12 @@ class SellerHandler(SimpleHTTPRequestHandler):
             self.send_error(403, "Seller tools are available only over the local loopback server.")
             return
             
+        if self.path == '/':
+            self.send_response(301)
+            self.send_header('Location', '/search_catalog.html')
+            self.end_headers()
+            return
+
         if self.path == "/api/bills":
             self.send_json(200, {"bills": read_bills()})
             return
