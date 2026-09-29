@@ -81,8 +81,22 @@ def append_bill(order):
     
     fieldnames = ['id', 'createdAt', 'buyer_name', 'buyer_phone', 'subTotal', 'grandTotal', 'order_json']
     
+    file_exists = csv_file.exists()
+    
+    assigned_id = order.get('id', '')
+    if not assigned_id or 'PI-' in assigned_id or 'SK-' in assigned_id:
+        count = 0
+        if file_exists:
+            with csv_file.open(encoding="utf-8-sig", newline="") as f:
+                reader = csv.DictReader(f)
+                for existing_row in reader:
+                    count += 1
+        
+        assigned_id = f"SK-{month.replace('-', '')}-{count + 1:04d}"
+        order['id'] = assigned_id
+
     row = {
-        'id': order.get('id', ''),
+        'id': assigned_id,
         'createdAt': created_at,
         'buyer_name': order.get('buyer', {}).get('name', ''),
         'buyer_phone': order.get('buyer', {}).get('phone', ''),
@@ -91,7 +105,6 @@ def append_bill(order):
         'order_json': json.dumps(order)
     }
     
-    file_exists = csv_file.exists()
     
     # Read existing to prevent duplicates
     if file_exists:

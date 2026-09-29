@@ -11,6 +11,13 @@
 </head>
 <body data-catalog-version="{{ catalog_version }}">
 
+<nav style="background: #fff; padding: 10px; text-align: center; border-bottom: 1px solid #ccc; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;" class="global-nav">
+    <a href="search_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #102a43; font-weight: bold; border-radius: 4px; background: #eef2f6; border: 1px solid #d9e2ec; font-size: 14px;">?? POS & Search</a>
+    <a href="print_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #102a43; font-weight: bold; border-radius: 4px; background: #eef2f6; border: 1px solid #d9e2ec; font-size: 14px;">?? Price List</a>
+    <a href="photo_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #102a43; font-weight: bold; border-radius: 4px; background: #eef2f6; border: 1px solid #d9e2ec; font-size: 14px;">??? Photo Gallery</a>
+</nav>
+
+
 <script>
 // Check if we are running locally (which enables edit mode capabilities)
 var isLocal = (location.hostname === '127.0.0.1' || location.hostname === 'localhost');
@@ -306,8 +313,11 @@ if (isEditMode) {
                 </div>
 
                 <div class="checkout-actions-group">
-                    <button class="print-btn" type="button" onclick="generateBill()">
-                        <span>🖨️ Print Proforma Invoice</span>
+                    <button class="print-btn" type="button" onclick="saveBillRequest()">
+                        <span>💾 Save Proforma Bill</span>
+                    </button>
+                    <button class="print-btn" id="printBillBtn" type="button" onclick="generateBill()" style="display: none; background: #627d98; margin-top: 8px;">
+                        <span>🖨️ Print Current Bill</span>
                     </button>
 
                     <div class="secondary-btn-row">

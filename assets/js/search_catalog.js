@@ -184,6 +184,8 @@ document.getElementById('billArchiveList').addEventListener('click', event => {
                 if (buyer.gstin) document.getElementById('buyerGstin').value = buyer.gstin;
                 
                 renderCart();
+                document.getElementById('pInvNo').innerText = order.id || entry.reference || '';
+                document.getElementById('printBillBtn').style.display = 'block';
                 document.getElementById('billArchiveDialog').close();
                 showToast("Order restored to cart!");
             } catch (e) {
@@ -1314,7 +1316,59 @@ function fuzzyScore(text, query) {
         return billArchive.saveBill({ date, reference, html });
     }
 
-        function generateBill() {
+        async function saveBillRequest() {
+        if (Object.keys(cart).length === 0) {
+            alert("Cart is empty! Please add items before saving a bill.");
+            return;
+        }
+        const taxRates = getTaxRates();
+        if (!taxRates) {
+            const invalidInput = [document.getElementById('cgstRate'), document.getElementById('sgstRate')]
+                .find(input => !input.checkValidity());
+            if (invalidInput) invalidInput.reportValidity();
+            return;
+        }
+        const now = new Date();
+        // Determine ID to use (empty string allows server to auto-generate SK-YYYYMM-0001)
+        const reference = document.getElementById('pInvNo').innerText.trim() || '';
+        
+        const order = CommerceCore.createOrder({
+            id: reference,
+            createdAt: now.toISOString(),
+            buyer: readBuyerDetails(),
+            items: cart,
+            totals: {
+                subTotal: getSubTotal(),
+                grandTotal: getSubTotal() + Object.values(getTaxBreakdown(getSubTotal())).reduce((a, b) => a + b, 0)
+            }
+        });
+        
+        try {
+            if (isLocalEnv) {
+                const response = await fetch('/api/bills/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(order)
+                });
+                const res = await response.json();
+                if (res.success && res.added) {
+                    showToast(`Bill saved as ${res.added.id}!`);
+                    document.getElementById('pInvNo').innerText = res.added.id;
+                    document.getElementById('printBillBtn').style.display = 'block';
+                    refreshSavedBills();
+                } else {
+                    showToast("Failed to save bill.");
+                }
+            } else {
+                showToast("Save only works on the local seller server.");
+            }
+        } catch (e) {
+            console.error(e);
+            showToast("Network error saving bill.");
+        }
+    }
+
+    function generateBill() {
         if (Object.keys(cart).length === 0) {
             alert("Cart is empty! Please add items before printing a bill.");
             return;

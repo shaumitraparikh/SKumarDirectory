@@ -121,9 +121,17 @@
         .item-img { max-height: 30px; max-width: 40px; }
         .price-reference { line-height: 1.4; overflow-wrap: anywhere; }
     }
-</style>
+    @media print { .global-nav { display: none !important; } }
+    </style>
 </head>
 <body>
+
+<nav style="background: #fff; padding: 10px; text-align: center; border-bottom: 1px solid #ccc; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;" class="global-nav">
+    <a href="search_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #102a43; font-weight: bold; border-radius: 4px; background: #eef2f6; border: 1px solid #d9e2ec; font-size: 14px;">?? POS & Search</a>
+    <a href="print_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #102a43; font-weight: bold; border-radius: 4px; background: #eef2f6; border: 1px solid #d9e2ec; font-size: 14px;">?? Price List</a>
+    <a href="photo_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #102a43; font-weight: bold; border-radius: 4px; background: #eef2f6; border: 1px solid #d9e2ec; font-size: 14px;">??? Photo Gallery</a>
+</nav>
+
 
 <div class="header">
     <div class="contact-grid">
