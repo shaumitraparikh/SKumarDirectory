@@ -106,10 +106,11 @@ images.
 │   ├── sr_0004_group_0001_item_0004_art_silk_tube_sleeves_4mm.png
 │   ├── group_0002_sr_9-20_fibreglass_yellow_tube.png
 │   └── ...
-├── templates/
+│   ├── templates/
 │   ├── print_template.html      <- Print catalog template
 │   └── search_template.html     <- Search catalog template
-├── assets/
+├── app/
+│   ├── assets/
 │   ├── css/search_catalog.css   <- Storefront and cart styling
 │   └── js/
 │       ├── bill_archive.js      <- Local monthly bill archive and viewer
