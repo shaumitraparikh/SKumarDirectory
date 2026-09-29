@@ -5,10 +5,22 @@ Digital Product Directory, Interactive POS/Ordering, Photo Catalog & Print Price
 
 ---
 
-> ### 📌 TL;DR
-> * **Browse Catalogs**: Open `index.html` (search & POS), `photo_catalog.html` (photos), or `print_catalog.html` (PDF print) directly in any browser. **100% static & offline — zero server needed.**
-> * **Update Catalog**: Edit `data/catalog_data.csv` in Excel → Double-click `update.bat`. It validates, rebuilds, tests, and auto-pushes to GitHub Pages.
-> * **Generate Invoices**: Create orders in `index.html` and click **Save Bill** to archive CSVs and invoices directly into `data/` on your PC.
+> ### 📌 TL;DR & Quick Instructions
+>
+> 🛒 **1. Find Products & Take Orders (`index.html`)**
+> * **Search**: Start typing any name, size, category, or HSN (e.g. `teflon 1mm`, `soldron 25w`, `hsn 3917`).
+> * **Add Items**: Click **Add** (for priced items) or **Add to Quote** (enter custom quote rate directly in cart).
+> * **Save / Print Bill**: Open the Cart → enter customer details → click **Save Bill** (select your `data` folder once to auto-save CSV/PDF invoices directly to your PC) or **Print Proforma Bill**.
+> * **WhatsApp**: Click **Send WhatsApp Order** to forward the formatted itemized order directly to sales.
+>
+> 🖼️ **2. Visual Photo Catalog (`photo_catalog.html`)**
+> * Click category pill filters at the top or click any product photo to open a high-res lightbox preview.
+>
+> 📄 **3. Print Price List (`print_catalog.html`)**
+> * Press **`Ctrl + P`** → Choose **Save as PDF** to export an up-to-date physical or digital price catalog.
+>
+> ✏️ **4. Update Prices or Products (Admin)**
+> * Open **`data/catalog_data.csv`** in Excel → Edit prices or add items → Save → Double-click **`update.bat`**. It validates, rebuilds, and auto-pushes to GitHub Pages!
 
 ---
 
