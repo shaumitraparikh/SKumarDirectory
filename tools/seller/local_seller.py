@@ -21,7 +21,7 @@ PORT = 8766
 MAX_HISTORY = 50
 
 sys.path.insert(0, str(ROOT))
-import build_catalog
+from tools import build_catalog
 
 
 
@@ -272,7 +272,7 @@ def run_updater():
     if os.name != "nt":
         command = [
             sys.executable,
-            str(ROOT / "build_catalog.py"),
+            str(ROOT / "tools" / "build_catalog.py"),
         ]
         subprocess.run(command, cwd=ROOT, check=True)
         subprocess.run(

@@ -21,7 +21,7 @@ from decimal import Decimal, InvalidOperation
 CATALOG_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(CATALOG_ROOT))
 
-import build_catalog
+from tools import build_catalog
 
 
 class EmbeddedCatalogParser(HTMLParser):
@@ -66,7 +66,7 @@ class CatalogEndToEndTests(unittest.TestCase):
             environment = os.environ.copy()
             environment["CATALOG_NO_BROWSER"] = "1"
             result = subprocess.run(
-                [sys.executable, str(CATALOG_ROOT / "build_catalog.py")],
+                [sys.executable, str(CATALOG_ROOT / "tools" / "build_catalog.py")],
                 cwd=working_dir,
                 env=environment,
                 capture_output=True,

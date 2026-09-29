@@ -7,7 +7,7 @@ from pathlib import Path
 CATALOG_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(CATALOG_ROOT))
 
-import build_catalog
+from tools import build_catalog
 
 
 class CatalogDataTests(unittest.TestCase):

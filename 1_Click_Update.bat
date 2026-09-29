@@ -34,7 +34,7 @@ if exist ".venv\Scripts\python.exe" (
     set "PYTHON_EXE=python"
 )
 
-"%PYTHON_EXE%" build_catalog.py
+"%PYTHON_EXE%" tools\build_catalog.py
 if errorlevel 1 goto :error
 
 "%PYTHON_EXE%" -m unittest discover -s tests -p "test_*.py"

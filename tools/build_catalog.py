@@ -3,7 +3,7 @@
 Build Catalog - Generates HTML catalogs from CSV data and images.
 
 Usage:
-    python build_catalog.py
+    python tools/build_catalog.py
 
 Reads:
     - data/config.json  : Company info and settings
@@ -40,7 +40,7 @@ except ImportError:
 # ============================================================
 # Paths
 # ============================================================
-SCRIPT_DIR = Path(__file__).parent
+SCRIPT_DIR = Path(__file__).parent.parent
 CONFIG_FILE = SCRIPT_DIR / "data" / "config.json"
 DATA_FILE = SCRIPT_DIR / "data" / "catalog_data.csv"
 DATA_NOTES_FILE = SCRIPT_DIR / "data" / "catalog_data_notes.json"

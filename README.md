@@ -7,7 +7,7 @@ Price List & Product Catalog Generator
 
 ```bash
 # From this directory: validate the data and rebuild customer and seller pages
-python build_catalog.py
+python tools/build_catalog.py
 
 # Run the catalog and commerce tests
 python -m unittest discover -s tests -p "test_*.py"
@@ -88,7 +88,7 @@ images.
 ├── customer_catalog.html        <- GENERATED customer-facing search catalog
 ├── print_catalog.html           <- GENERATED print catalog
 ├── 1_Click_Update.bat           <- Rebuild, test, ask before commit/push
-├── build_catalog.py             <- Catalog generator for local and Pages builds
+├── tools/build_catalog.py             <- Catalog generator for local and Pages builds
 ├── generated_bills/             <- Local, git-ignored bill archive
 │   └── YYYY-MM/                 <- Monthly standalone proforma bills
 ├── docs 2025/                   <- Original source price list and photo documents
