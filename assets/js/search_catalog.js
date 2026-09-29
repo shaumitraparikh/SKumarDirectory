@@ -9,24 +9,33 @@ let cart = Object.create(null);
 let lastOrder = null;
 let clientRecords = [];
 let visibleBills = new Map();
-const catalogDataElement = document.getElementById('catalogData');
-const rawCatalog = catalogDataElement ? JSON.parse(catalogDataElement.textContent) : [];
-const catalogSearchIndex = rawCatalog.map(item => ({
-    item,
-    searchableText: normalizeSearchText([
-        item.item_name, item.category, item.hsn_code, item.sr_number,
-        item.size,
-        item.id_size, item.od_size, item.lf_size
-    ].join(' '))
-}));
-
 function normalizeSearchText(value) {
-    return String(value)
+    return String(value || '')
         .normalize('NFKD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLocaleLowerCase()
         .trim();
 }
+
+function parseNumericPrice(listPrice) {
+    if (!listPrice) return null;
+    const cleaned = String(listPrice).trim().replace(/,/g, '');
+    const num = Number(cleaned);
+    return (Number.isFinite(num) && num >= 0) ? num : null;
+}
+
+const catalogDataElement = document.getElementById('catalogData');
+const rawCatalog = catalogDataElement ? JSON.parse(catalogDataElement.textContent) : [];
+const catalogSearchIndex = rawCatalog.map((item, index) => ({
+    item,
+    originalIndex: index,
+    numericPrice: parseNumericPrice(item.list_price),
+    searchableText: item.search_text || normalizeSearchText([
+        item.item_name, item.category, item.hsn_code, item.sr_number,
+        item.size,
+        item.id_size, item.od_size, item.lf_size
+    ].join(' '))
+}));
 
 billArchive.restoreDirectory().catch(error => {
     console.error('Unable to restore the generated-bills folder.', error);
@@ -423,8 +432,156 @@ function fuzzyScore(text, query) {
     return totalScore / tokens.length;
 }
 
+    function initCategoryPicker() {
+        const wrap = document.getElementById('categoryPickerWrap');
+        const btn = document.getElementById('categoryPickerBtn');
+        const label = document.getElementById('categoryPickerLabel');
+        const panel = document.getElementById('categoryDropdownPanel');
+        const searchInput = document.getElementById('categorySearchInput');
+        const list = document.getElementById('categoryOptionsList');
+        const nativeSelect = document.getElementById('categoryFilter');
+
+        if (!wrap || !btn || !panel || !list) return;
+
+        function closePanel() {
+            panel.hidden = true;
+            btn.setAttribute('aria-expanded', 'false');
+            if (searchInput) searchInput.value = '';
+            filterCategoryOptions('');
+        }
+
+        function openPanel() {
+            panel.hidden = false;
+            btn.setAttribute('aria-expanded', 'true');
+            if (searchInput) {
+                searchInput.value = '';
+                filterCategoryOptions('');
+                setTimeout(() => searchInput.focus(), 60);
+            }
+        }
+
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (panel.hidden) {
+                openPanel();
+            } else {
+                closePanel();
+            }
+        });
+
+        panel.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!wrap.contains(e.target)) {
+                closePanel();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !panel.hidden) {
+                closePanel();
+                btn.focus();
+            }
+        });
+
+        function filterCategoryOptions(query) {
+            const q = normalizeSearchText(query);
+            const items = list.querySelectorAll('.category-opt-item');
+            items.forEach(el => {
+                const cat = el.dataset.category || '';
+                const nameEl = el.querySelector('.opt-name');
+                const name = nameEl ? nameEl.textContent : cat;
+                const fullText = normalizeSearchText(cat + ' ' + name);
+                const isMatch = !q || fullText.includes(q);
+                el.style.display = isMatch ? 'flex' : 'none';
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                filterCategoryOptions(e.target.value);
+            });
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const firstVisible = Array.from(list.querySelectorAll('.category-opt-item')).find(el => el.style.display !== 'none');
+                    if (firstVisible) {
+                        firstVisible.click();
+                        e.preventDefault();
+                    }
+                }
+            });
+        }
+
+        list.addEventListener('click', (e) => {
+            const itemBtn = e.target.closest('.category-opt-item');
+            if (!itemBtn) return;
+            const catVal = itemBtn.dataset.category || '';
+            selectCategory(catVal);
+            closePanel();
+        });
+
+        window.selectCategory = function(catVal) {
+            if (nativeSelect) nativeSelect.value = catVal;
+            const items = list.querySelectorAll('.category-opt-item');
+            let selectedName = 'All Categories';
+            items.forEach(el => {
+                const isMatch = (el.dataset.category || '') === catVal;
+                el.classList.toggle('active', isMatch);
+                el.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+                if (isMatch) {
+                    const nameEl = el.querySelector('.opt-name');
+                    if (nameEl) selectedName = nameEl.textContent;
+                }
+            });
+            if (label) label.textContent = selectedName;
+            filterCatalog();
+        };
+
+        if (nativeSelect) {
+            nativeSelect.addEventListener('change', () => {
+                selectCategory(nativeSelect.value);
+            });
+        }
+    }
+
+    function initCatalogCacheAndPrefs() {
+        const currentVersion = document.body.dataset.catalogVersion || 'v1';
+        const storedVersion = localStorage.getItem('skumar_catalog_version');
+
+        if (storedVersion && storedVersion !== currentVersion) {
+            console.log(`[Cache] Catalog update detected: ${storedVersion} -> ${currentVersion}. Refreshing cache.`);
+            localStorage.removeItem('skumar_sort_pref');
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        if (name.startsWith('skumar-catalog-') && !name.includes(currentVersion)) {
+                            caches.delete(name);
+                        }
+                    });
+                });
+            }
+        }
+        localStorage.setItem('skumar_catalog_version', currentVersion);
+
+        const sortSelect = document.getElementById('sortBy');
+        if (sortSelect) {
+            const savedSort = localStorage.getItem('skumar_sort_pref');
+            if (savedSort && ['default', 'price-asc', 'price-desc', 'name-asc'].includes(savedSort)) {
+                sortSelect.value = savedSort;
+            }
+            sortSelect.addEventListener('change', () => {
+                localStorage.setItem('skumar_sort_pref', sortSelect.value);
+            });
+        }
+    }
+
     function filterCatalog() {
         const grid = document.getElementById('catalogGrid');
+        if (!grid) return;
+
         if (catalogSearchIndex.length > 0 && !catalogSearchIndex[0].card) {
             const fragment = document.createDocumentFragment();
             catalogSearchIndex.forEach(entry => {
@@ -433,63 +590,84 @@ function fuzzyScore(text, query) {
             });
             grid.appendChild(fragment);
         }
-        const input = normalizeSearchText(document.getElementById('searchInput').value);
+
+        const searchInputEl = document.getElementById('searchInput');
+        const input = normalizeSearchText(searchInputEl ? searchInputEl.value : '');
         const categoryFilter = document.getElementById('categoryFilter');
         const selectedCategory = categoryFilter ? categoryFilter.value : '';
+        const sortBySelect = document.getElementById('sortBy');
+        const sortBy = sortBySelect ? sortBySelect.value : 'default';
 
         let matchCount = 0;
+        const matchingEntries = [];
+
         catalogSearchIndex.forEach(entry => {
             const matchesCategory = !selectedCategory || entry.item.category === selectedCategory;
             if (!matchesCategory) {
                 entry.score = 0;
-            } else {
-                entry.score = fuzzyScore(entry.searchableText, input);
+                entry.card.style.display = 'none';
+                return;
             }
-if (entry.score >= 0.4) {
+
+            if (input) {
+                entry.score = fuzzyScore(entry.searchableText, input);
+            } else {
+                entry.score = 1;
+            }
+
+            if (entry.score >= 0.4) {
                 matchCount++;
                 entry.card.style.display = 'flex';
+                matchingEntries.push(entry);
             } else {
                 entry.card.style.display = 'none';
             }
         });
 
-        // Re-order the DOM based on match score if there is a search query
-        if (input) {
-            // Create a sorted copy
-            const sorted = [...catalogSearchIndex].sort((a, b) => b.score - a.score);
-            const fragment = document.createDocumentFragment();
-            sorted.forEach(entry => {
-                if (entry.score >= 0.4) {
-                    fragment.appendChild(entry.card);
-                }
+        // Apply sorting to matching items
+        if (sortBy === 'price-asc') {
+            matchingEntries.sort((a, b) => {
+                if (a.numericPrice === null && b.numericPrice === null) return a.originalIndex - b.originalIndex;
+                if (a.numericPrice === null) return 1;
+                if (b.numericPrice === null) return -1;
+                if (a.numericPrice !== b.numericPrice) return a.numericPrice - b.numericPrice;
+                return a.originalIndex - b.originalIndex;
             });
-            grid.appendChild(fragment); // Append re-ordered matching items to the end
+        } else if (sortBy === 'price-desc') {
+            matchingEntries.sort((a, b) => {
+                if (a.numericPrice === null && b.numericPrice === null) return a.originalIndex - b.originalIndex;
+                if (a.numericPrice === null) return 1;
+                if (b.numericPrice === null) return -1;
+                if (a.numericPrice !== b.numericPrice) return b.numericPrice - a.numericPrice;
+                return a.originalIndex - b.originalIndex;
+            });
+        } else if (sortBy === 'name-asc') {
+            matchingEntries.sort((a, b) => (a.item.item_name || '').localeCompare(b.item.item_name || ''));
         } else {
-            // Restore original order if search is empty
-            const fragment = document.createDocumentFragment();
-            catalogSearchIndex.forEach(entry => {
-                if (entry.score >= 0.4) {
-                    fragment.appendChild(entry.card);
-                }
-            });
-            grid.appendChild(fragment);
+            // Default: relevance score when search query is entered, else original catalog order
+            if (input) {
+                matchingEntries.sort((a, b) => b.score - a.score);
+            } else {
+                matchingEntries.sort((a, b) => a.originalIndex - b.originalIndex);
+            }
         }
 
-        if (input) {
-            catalogSearchIndex.sort((a, b) => b.score - a.score);
-        } else {
-            catalogSearchIndex.sort((a, b) => a.originalIndex - b.originalIndex);
-        }
-
+        // Single DOM update using DocumentFragment
         const fragment = document.createDocumentFragment();
-        catalogSearchIndex.forEach(entry => {
-            if (entry.score >= 0.4) fragment.appendChild(entry.card);
+        matchingEntries.forEach(entry => {
+            fragment.appendChild(entry.card);
         });
         grid.appendChild(fragment);
 
         const countIndicator = document.getElementById('searchResultCount');
         if (countIndicator) {
-            countIndicator.textContent = 'Showing ' + matchCount + ' of ' + catalogSearchIndex.length + ' products';
+            let sortLabel = '';
+            if (sortBy === 'price-asc') sortLabel = ' · Sorted: Price Low to High';
+            else if (sortBy === 'price-desc') sortLabel = ' · Sorted: Price High to Low';
+            else if (sortBy === 'name-asc') sortLabel = ' · Sorted: Name A to Z';
+
+            let catLabel = selectedCategory ? ` in "${selectedCategory}"` : ' in All Categories';
+            countIndicator.textContent = `Showing ${matchCount} of ${catalogSearchIndex.length} products${catLabel}${sortLabel}`;
         }
     }
 
@@ -794,7 +972,10 @@ if (entry.score >= 0.4) {
         subTotal = roundCurrency(subTotal);
         document.getElementById('cartCountBadge').innerText = totalItems;
 
-        document.getElementById('itemsSubtotal').innerText = formatAmount(itemsSubtotal);
+        const itemsSubtotalEl = document.getElementById('itemsSubtotal');
+        if (itemsSubtotalEl) itemsSubtotalEl.innerText = formatAmount(itemsSubtotal);
+        const itemsSubtotalSummaryEl = document.getElementById('itemsSubtotalSummary');
+        if (itemsSubtotalSummaryEl) itemsSubtotalSummaryEl.innerText = formatAmount(itemsSubtotal);
         document.getElementById('discountTotal').innerText = formatAmount(discountTotal);
         document.getElementById('subTotal').innerText = formatAmount(subTotal);
         displayTaxBreakdown(getTaxBreakdown(subTotal), subTotal);
@@ -1140,6 +1321,8 @@ if (entry.score >= 0.4) {
         }
     }
 
+    initCatalogCacheAndPrefs();
+    initCategoryPicker();
     restoreCart();
     renderCart();
     filterCatalog();

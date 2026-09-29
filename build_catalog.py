@@ -18,6 +18,7 @@ Produces:
 """
 
 import csv
+import hashlib
 import json
 import os
 import sys
@@ -352,29 +353,46 @@ def prepare_search_catalog_data(items):
     return processed
 
 
+def clean_cat_sort_key(name):
+    return str(name).strip().lstrip('“"\'\u201c\u201d\u2018\u2019-–— ').lower()
+
+
+def compute_catalog_version():
+    hasher = hashlib.sha256()
+    if DATA_FILE.exists():
+        hasher.update(DATA_FILE.read_bytes())
+    if CONFIG_FILE.exists():
+        hasher.update(CONFIG_FILE.read_bytes())
+    return hasher.hexdigest()[:10]
+
+
 def build_search_catalog(config, categories, items, env):
     """Generate a customer or local seller searchable catalog."""
     template = env.get_template('search_template.html')
     catalog_data = prepare_search_catalog_data(items)
     
-    # Get unique category names
+    # Get unique category names sorted alphabetically
     category_names = list(OrderedDict.fromkeys(
         item.get('category', '') for item in items if item.get('category')
     ))
+    sorted_categories = sorted(categories, key=lambda c: clean_cat_sort_key(c['name']))
+    catalog_version = compute_catalog_version()
     
     html = template.render(
         company=config['company'],
         billing=config,
         categories=categories,
+        sorted_categories=sorted_categories,
         catalog_data=catalog_data,
-        category_names=sorted(category_names),
+        catalog_version=catalog_version,
+        category_names=sorted(category_names, key=clean_cat_sort_key),
         generation_date=datetime.now().strftime('%Y-%m-%d %H:%M'),
         images_base='images'
     )
     output_path = OUTPUT_DIR / 'search_catalog.html'
     write_html_output(output_path, html)
     
-    print(f"  [OK] Search catalog: {output_path}")
+    print(f"  [OK] Search catalog: {output_path} (v={catalog_version})")
     return output_path
 
 

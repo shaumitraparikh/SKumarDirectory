@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="assets/css/search_catalog.css">
 <link rel="stylesheet" href="tools/seller/seller_editor.css" id="sellerCss" disabled>
 </head>
-<body>
+<body data-catalog-version="{{ catalog_version }}">
 
 <script>
 // Check if we are running locally (which enables edit mode capabilities)
@@ -81,11 +81,45 @@ if (isEditMode) {
             }
         }
     </script>
-    <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" style="padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; min-width: 200px; flex: 1 1 auto; max-width: 300px; background: #fff;">
-        <option value="">All Categories</option>
-        {% for cat in categories %}
-        <option value="{{ cat.name }}">{{ cat.name }}</option>
-        {% endfor %}
+    <!-- Searchable Category Selector with Search Inside -->
+    <div class="category-picker-wrap" id="categoryPickerWrap">
+        <button type="button" class="category-picker-btn" id="categoryPickerBtn" aria-haspopup="listbox" aria-expanded="false" title="Filter by category">
+            <span class="cat-icon">📂</span>
+            <span class="cat-label" id="categoryPickerLabel">All Categories</span>
+            <span class="cat-arrow">▾</span>
+        </button>
+        <div class="category-dropdown-panel" id="categoryDropdownPanel" hidden>
+            <div class="category-search-box">
+                <input type="search" id="categorySearchInput" class="category-search-input" placeholder="🔍 Search inside categories..." autocomplete="off">
+            </div>
+            <div class="category-list-scroll" id="categoryOptionsList" role="listbox">
+                <button type="button" class="category-opt-item active" data-category="" role="option" aria-selected="true">
+                    <span class="opt-name">All Categories</span>
+                    <span class="opt-count">{{ catalog_data|length }}</span>
+                </button>
+                {% for cat in sorted_categories %}
+                <button type="button" class="category-opt-item" data-category="{{ cat.name }}" role="option" aria-selected="false">
+                    <span class="opt-name">{{ cat.name }}</span>
+                    <span class="opt-count">{{ cat.products|length }}</span>
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- Standard select maintained for full compatibility with scripts -->
+        <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" style="display: none;">
+            <option value="">All Categories</option>
+            {% for cat in sorted_categories %}
+            <option value="{{ cat.name }}">{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Sort by Price / Default -->
+    <select id="sortBy" class="sort-select" aria-label="Sort products" onchange="filterCatalog()">
+        <option value="default">Sort: Default</option>
+        <option value="price-asc">Price: Low to High (₹ ↑)</option>
+        <option value="price-desc">Price: High to Low (₹ ↓)</option>
+        <option value="name-asc">Name: A to Z</option>
     </select>
     <input type="search" id="searchInput" aria-label="Search products" placeholder="Search by part, size, category, HSN, or serial number..." oninput="filterCatalog()" style="flex: 2 1 auto; min-width: 200px;">
     <button class="cart-toggle-btn" onclick="toggleCart()" aria-controls="cartDropdown" aria-expanded="false" style="flex: 0 0 auto;">
@@ -223,7 +257,7 @@ if (isEditMode) {
                 <div class="summary-calc-box">
                     <div class="calc-row subtotal-row">
                         <span>Items Subtotal</span>
-                        <strong>₹<span id="itemsSubtotal">0.00</span></strong>
+                        <strong>₹<span id="itemsSubtotalSummary">0.00</span></strong>
                     </div>
 
                     <details class="price-breakdown" id="priceBreakdown">
@@ -231,6 +265,10 @@ if (isEditMode) {
                             <span>Taxes &amp; Discounts</span>
                         </summary>
                         <div class="price-breakdown-content">
+                            <div class="summary-row summary-items-subtotal">
+                                <span>Priced items subtotal</span>
+                                <span>₹<span id="itemsSubtotal">0.00</span></span>
+                            </div>
                             <div class="summary-row summary-discount">
                                 <span>Item discounts</span>
                                 <span>−₹<span id="discountTotal">0.00</span></span>
@@ -394,7 +432,7 @@ if (isEditMode) {
     if (isEditMode) {
         document.getElementById('sellerTools').style.display = 'block';
         var script = document.createElement('script');
-        script.src = 'tools/seller/seller_editor.js?v=8';
+        script.src = 'tools/seller/seller_editor.js?v={{ catalog_version }}';
         document.body.appendChild(script);
         
         // Hide cart button in edit mode
@@ -402,8 +440,28 @@ if (isEditMode) {
         if (cartBtn) cartBtn.style.display = 'none';
     } else {
         var script = document.createElement('script');
-        script.src = 'assets/js/search_catalog.js?v=8';
+        script.src = 'assets/js/search_catalog.js?v={{ catalog_version }}';
         document.body.appendChild(script);
+    }
+</script>
+<script>
+    if ('serviceWorker' in navigator && !isEditMode && location.protocol.startsWith('http')) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('sw.js?v={{ catalog_version }}').then(function(reg) {
+                reg.onupdatefound = function() {
+                    var installing = reg.installing;
+                    if (installing) {
+                        installing.onstatechange = function() {
+                            if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('S. Kumar Catalog updated to latest version.');
+                            }
+                        };
+                    }
+                };
+            }).catch(function(err) {
+                console.log('SW registration note:', err);
+            });
+        });
     }
 </script>
 </body>

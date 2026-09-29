@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="assets/css/search_catalog.css">
 <link rel="stylesheet" href="tools/seller/seller_editor.css" id="sellerCss" disabled>
 </head>
-<body>
+<body data-catalog-version="241a2bbe18">
 
 <script>
 // Check if we are running locally (which enables edit mode capabilities)
@@ -83,129 +83,458 @@ if (isEditMode) {
             }
         }
     </script>
-    <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" style="padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; min-width: 200px; flex: 1 1 auto; max-width: 300px; background: #fff;">
-        <option value="">All Categories</option>
+    <!-- Searchable Category Selector with Search Inside -->
+    <div class="category-picker-wrap" id="categoryPickerWrap">
+        <button type="button" class="category-picker-btn" id="categoryPickerBtn" aria-haspopup="listbox" aria-expanded="false" title="Filter by category">
+            <span class="cat-icon">📂</span>
+            <span class="cat-label" id="categoryPickerLabel">All Categories</span>
+            <span class="cat-arrow">▾</span>
+        </button>
+        <div class="category-dropdown-panel" id="categoryDropdownPanel" hidden>
+            <div class="category-search-box">
+                <input type="search" id="categorySearchInput" class="category-search-input" placeholder="🔍 Search inside categories..." autocomplete="off">
+            </div>
+            <div class="category-list-scroll" id="categoryOptionsList" role="listbox">
+                <button type="button" class="category-opt-item active" data-category="" role="option" aria-selected="true">
+                    <span class="opt-name">All Categories</span>
+                    <span class="opt-count">1412</span>
+                </button>
 
-        <option value="ART SILK TUBE / Sleeves">ART SILK TUBE / Sleeves</option>
+                <button type="button" class="category-opt-item" data-category="Adaptors &amp; Power Supplies" role="option" aria-selected="false">
+                    <span class="opt-name">Adaptors &amp; Power Supplies</span>
+                    <span class="opt-count">14</span>
+                </button>
 
-        <option value="FIBREGLASS “B” CLASS YELLOW TUBE">FIBREGLASS “B” CLASS YELLOW TUBE</option>
+                <button type="button" class="category-opt-item" data-category="ART SILK TUBE / Sleeves" role="option" aria-selected="false">
+                    <span class="opt-name">ART SILK TUBE / Sleeves</span>
+                    <span class="opt-count">8</span>
+                </button>
 
-        <option value="FIBREGLASS “B” CLASS WHITE SPECIAL TUBE">FIBREGLASS “B” CLASS WHITE SPECIAL TUBE</option>
+                <button type="button" class="category-opt-item" data-category="Audio Video &amp; HDMI Cords" role="option" aria-selected="false">
+                    <span class="opt-name">Audio Video &amp; HDMI Cords</span>
+                    <span class="opt-count">19</span>
+                </button>
 
-        <option value="FIBREGLASS “F” CLASS TUBE">FIBREGLASS “F” CLASS TUBE</option>
+                <button type="button" class="category-opt-item" data-category="Battery &amp; Accessaries" role="option" aria-selected="false">
+                    <span class="opt-name">Battery &amp; Accessaries</span>
+                    <span class="opt-count">11</span>
+                </button>
 
-        <option value="FIBREGLASS PVC COATED CHINA TUBE">FIBREGLASS PVC COATED CHINA TUBE</option>
+                <button type="button" class="category-opt-item" data-category="Battery Terminal, Lugs &amp; Clips" role="option" aria-selected="false">
+                    <span class="opt-name">Battery Terminal, Lugs &amp; Clips</span>
+                    <span class="opt-count">40</span>
+                </button>
 
-        <option value="FIBREGLASS SILICON “H” CLASS CHINA TUBE">FIBREGLASS SILICON “H” CLASS CHINA TUBE</option>
+                <button type="button" class="category-opt-item" data-category="Bulb &amp; Indicator &amp; LED Resistance" role="option" aria-selected="false">
+                    <span class="opt-name">Bulb &amp; Indicator &amp; LED Resistance</span>
+                    <span class="opt-count">19</span>
+                </button>
 
-        <option value="PVC CORD AND PIPES">PVC CORD AND PIPES</option>
+                <button type="button" class="category-opt-item" data-category="Bulbs &amp; Holders" role="option" aria-selected="false">
+                    <span class="opt-name">Bulbs &amp; Holders</span>
+                    <span class="opt-count">20</span>
+                </button>
 
-        <option value="PVC Heat Shrinkable Tube">PVC Heat Shrinkable Tube</option>
+                <button type="button" class="category-opt-item" data-category="Capacitors" role="option" aria-selected="false">
+                    <span class="opt-name">Capacitors</span>
+                    <span class="opt-count">36</span>
+                </button>
 
-        <option value="Silicon Rubber Tube">Silicon Rubber Tube</option>
+                <button type="button" class="category-opt-item" data-category="Ceramic Sonyee Mony/Beads" role="option" aria-selected="false">
+                    <span class="opt-name">Ceramic Sonyee Mony/Beads</span>
+                    <span class="opt-count">55</span>
+                </button>
 
-        <option value="TEFLON TUBE">TEFLON TUBE</option>
+                <button type="button" class="category-opt-item" data-category="Computer Power Cords &amp; Prods" role="option" aria-selected="false">
+                    <span class="opt-name">Computer Power Cords &amp; Prods</span>
+                    <span class="opt-count">18</span>
+                </button>
 
-        <option value="PVC Flexible Pipe">PVC Flexible Pipe</option>
+                <button type="button" class="category-opt-item" data-category="Cutter &amp; Blades" role="option" aria-selected="false">
+                    <span class="opt-name">Cutter &amp; Blades</span>
+                    <span class="opt-count">6</span>
+                </button>
 
-        <option value="PVC Flexible Pipe Adaptor">PVC Flexible Pipe Adaptor</option>
+                <button type="button" class="category-opt-item" data-category="Danger Plates" role="option" aria-selected="false">
+                    <span class="opt-name">Danger Plates</span>
+                    <span class="opt-count">4</span>
+                </button>
 
-        <option value="Galvanised Flexible Pipe">Galvanised Flexible Pipe</option>
+                <button type="button" class="category-opt-item" data-category="DC Locks &amp; Keys" role="option" aria-selected="false">
+                    <span class="opt-name">DC Locks &amp; Keys</span>
+                    <span class="opt-count">3</span>
+                </button>
 
-        <option value="Rubber Type Heat Shrinkable Tubing">Rubber Type Heat Shrinkable Tubing</option>
+                <button type="button" class="category-opt-item" data-category="Fan Canopy" role="option" aria-selected="false">
+                    <span class="opt-name">Fan Canopy</span>
+                    <span class="opt-count">4</span>
+                </button>
 
-        <option value="Marking Printing Sleeve / Tubing">Marking Printing Sleeve / Tubing</option>
+                <button type="button" class="category-opt-item" data-category="FIBREGLASS PVC COATED CHINA TUBE" role="option" aria-selected="false">
+                    <span class="opt-name">FIBREGLASS PVC COATED CHINA TUBE</span>
+                    <span class="opt-count">13</span>
+                </button>
 
-        <option value="PVC Channel Box">PVC Channel Box</option>
+                <button type="button" class="category-opt-item" data-category="FIBREGLASS SILICON “H” CLASS CHINA TUBE" role="option" aria-selected="false">
+                    <span class="opt-name">FIBREGLASS SILICON “H” CLASS CHINA TUBE</span>
+                    <span class="opt-count">13</span>
+                </button>
 
-        <option value="TEFLON CABLE">TEFLON CABLE</option>
+                <button type="button" class="category-opt-item" data-category="FIBREGLASS “B” CLASS WHITE SPECIAL TUBE" role="option" aria-selected="false">
+                    <span class="opt-name">FIBREGLASS “B” CLASS WHITE SPECIAL TUBE</span>
+                    <span class="opt-count">12</span>
+                </button>
 
-        <option value="Capacitors">Capacitors</option>
+                <button type="button" class="category-opt-item" data-category="FIBREGLASS “B” CLASS YELLOW TUBE" role="option" aria-selected="false">
+                    <span class="opt-name">FIBREGLASS “B” CLASS YELLOW TUBE</span>
+                    <span class="opt-count">12</span>
+                </button>
 
-        <option value="Fan Canopy">Fan Canopy</option>
+                <button type="button" class="category-opt-item" data-category="FIBREGLASS “F” CLASS TUBE" role="option" aria-selected="false">
+                    <span class="opt-name">FIBREGLASS “F” CLASS TUBE</span>
+                    <span class="opt-count">12</span>
+                </button>
 
-        <option value="Telephone Products &amp; Accessories">Telephone Products &amp; Accessories</option>
+                <button type="button" class="category-opt-item" data-category="Galvanised Flexible Pipe" role="option" aria-selected="false">
+                    <span class="opt-name">Galvanised Flexible Pipe</span>
+                    <span class="opt-count">9</span>
+                </button>
 
-        <option value="PVC Sealer Automatic Machine &amp; Parts">PVC Sealer Automatic Machine &amp; Parts</option>
+                <button type="button" class="category-opt-item" data-category="Glass &amp; Ceramics Fuses" role="option" aria-selected="false">
+                    <span class="opt-name">Glass &amp; Ceramics Fuses</span>
+                    <span class="opt-count">7</span>
+                </button>
 
-        <option value="Battery &amp; Accessaries">Battery &amp; Accessaries</option>
+                <button type="button" class="category-opt-item" data-category="Hand Gloves" role="option" aria-selected="false">
+                    <span class="opt-name">Hand Gloves</span>
+                    <span class="opt-count">6</span>
+                </button>
 
-        <option value="Battery Terminal, Lugs &amp; Clips">Battery Terminal, Lugs &amp; Clips</option>
+                <button type="button" class="category-opt-item" data-category="Heat Sink Compound" role="option" aria-selected="false">
+                    <span class="opt-name">Heat Sink Compound</span>
+                    <span class="opt-count">4</span>
+                </button>
 
-        <option value="Cutter &amp; Blades">Cutter &amp; Blades</option>
+                <button type="button" class="category-opt-item" data-category="Joint Solder Wire in 18, 22swg" role="option" aria-selected="false">
+                    <span class="opt-name">Joint Solder Wire in 18, 22swg</span>
+                    <span class="opt-count">3</span>
+                </button>
 
-        <option value="Plier Stripper &amp; Cutter">Plier Stripper &amp; Cutter</option>
+                <button type="button" class="category-opt-item" data-category="“Khosla” Solder Wire in 14,16,18,22swg" role="option" aria-selected="false">
+                    <span class="opt-name">“Khosla” Solder Wire in 14,16,18,22swg</span>
+                    <span class="opt-count">6</span>
+                </button>
 
-        <option value="Kundip Items">Kundip Items</option>
+                <button type="button" class="category-opt-item" data-category="“KUMAR” Solder Wire in 14,16,18,22swg" role="option" aria-selected="false">
+                    <span class="opt-name">“KUMAR” Solder Wire in 14,16,18,22swg</span>
+                    <span class="opt-count">10</span>
+                </button>
 
-        <option value="Ceramic Sonyee Mony/Beads">Ceramic Sonyee Mony/Beads</option>
+                <button type="button" class="category-opt-item" data-category="Kundip Items" role="option" aria-selected="false">
+                    <span class="opt-name">Kundip Items</span>
+                    <span class="opt-count">77</span>
+                </button>
 
-        <option value="“Soldron” Items">“Soldron” Items</option>
+                <button type="button" class="category-opt-item" data-category="Marking Printing Sleeve / Tubing" role="option" aria-selected="false">
+                    <span class="opt-name">Marking Printing Sleeve / Tubing</span>
+                    <span class="opt-count">28</span>
+                </button>
 
-        <option value="“RedPlus” “MALA” Soldering Items">“RedPlus” “MALA” Soldering Items</option>
+                <button type="button" class="category-opt-item" data-category="MCB Links" role="option" aria-selected="false">
+                    <span class="opt-name">MCB Links</span>
+                    <span class="opt-count">4</span>
+                </button>
 
-        <option value="“Toni” Soldering Items">“Toni” Soldering Items</option>
+                <button type="button" class="category-opt-item" data-category="Nylon Cable Tie In White &amp; Black Colour" role="option" aria-selected="false">
+                    <span class="opt-name">Nylon Cable Tie In White &amp; Black Colour</span>
+                    <span class="opt-count">35</span>
+                </button>
 
-        <option value="SOLDER STICK">SOLDER STICK</option>
+                <button type="button" class="category-opt-item" data-category="Plier Stripper &amp; Cutter" role="option" aria-selected="false">
+                    <span class="opt-name">Plier Stripper &amp; Cutter</span>
+                    <span class="opt-count">93</span>
+                </button>
 
-        <option value="Joint Solder Wire in 18, 22swg">Joint Solder Wire in 18, 22swg</option>
+                <button type="button" class="category-opt-item" data-category="Puller Metal Wire" role="option" aria-selected="false">
+                    <span class="opt-name">Puller Metal Wire</span>
+                    <span class="opt-count">19</span>
+                </button>
 
-        <option value="“Khosla” Solder Wire in 14,16,18,22swg">“Khosla” Solder Wire in 14,16,18,22swg</option>
+                <button type="button" class="category-opt-item" data-category="Push Button Switch &amp; Box" role="option" aria-selected="false">
+                    <span class="opt-name">Push Button Switch &amp; Box</span>
+                    <span class="opt-count">43</span>
+                </button>
 
-        <option value="“KUMAR” Solder Wire in 14,16,18,22swg">“KUMAR” Solder Wire in 14,16,18,22swg</option>
+                <button type="button" class="category-opt-item" data-category="PVC &amp; Cotton Cords" role="option" aria-selected="false">
+                    <span class="opt-name">PVC &amp; Cotton Cords</span>
+                    <span class="opt-count">64</span>
+                </button>
 
-        <option value="Soldering Paste &amp; Liquied">Soldering Paste &amp; Liquied</option>
+                <button type="button" class="category-opt-item" data-category="PVC Channel Box" role="option" aria-selected="false">
+                    <span class="opt-name">PVC Channel Box</span>
+                    <span class="opt-count">35</span>
+                </button>
 
-        <option value="Solder Pot">Solder Pot</option>
+                <button type="button" class="category-opt-item" data-category="PVC CORD AND PIPES" role="option" aria-selected="false">
+                    <span class="opt-name">PVC CORD AND PIPES</span>
+                    <span class="opt-count">25</span>
+                </button>
 
-        <option value="Heat Sink Compound">Heat Sink Compound</option>
+                <button type="button" class="category-opt-item" data-category="PVC Ferrules Marking" role="option" aria-selected="false">
+                    <span class="opt-name">PVC Ferrules Marking</span>
+                    <span class="opt-count">62</span>
+                </button>
 
-        <option value="Puller Metal Wire">Puller Metal Wire</option>
+                <button type="button" class="category-opt-item" data-category="PVC Flexible Pipe" role="option" aria-selected="false">
+                    <span class="opt-name">PVC Flexible Pipe</span>
+                    <span class="opt-count">7</span>
+                </button>
 
-        <option value="Nylon Cable Tie In White &amp; Black Colour">Nylon Cable Tie In White &amp; Black Colour</option>
+                <button type="button" class="category-opt-item" data-category="PVC Flexible Pipe Adaptor" role="option" aria-selected="false">
+                    <span class="opt-name">PVC Flexible Pipe Adaptor</span>
+                    <span class="opt-count">6</span>
+                </button>
 
-        <option value="PVC Ferrules Marking">PVC Ferrules Marking</option>
+                <button type="button" class="category-opt-item" data-category="PVC Heat Shrinkable Tube" role="option" aria-selected="false">
+                    <span class="opt-name">PVC Heat Shrinkable Tube</span>
+                    <span class="opt-count">21</span>
+                </button>
 
-        <option value="Bulb &amp; Indicator &amp; LED Resistance">Bulb &amp; Indicator &amp; LED Resistance</option>
+                <button type="button" class="category-opt-item" data-category="PVC Sealer Automatic Machine &amp; Parts" role="option" aria-selected="false">
+                    <span class="opt-name">PVC Sealer Automatic Machine &amp; Parts</span>
+                    <span class="opt-count">129</span>
+                </button>
 
-        <option value="Glass &amp; Ceramics Fuses">Glass &amp; Ceramics Fuses</option>
+                <button type="button" class="category-opt-item" data-category="“RedPlus” “MALA” Soldering Items" role="option" aria-selected="false">
+                    <span class="opt-name">“RedPlus” “MALA” Soldering Items</span>
+                    <span class="opt-count">22</span>
+                </button>
 
-        <option value="Push Button Switch &amp; Box">Push Button Switch &amp; Box</option>
+                <button type="button" class="category-opt-item" data-category="Regulators &amp; Knobs" role="option" aria-selected="false">
+                    <span class="opt-name">Regulators &amp; Knobs</span>
+                    <span class="opt-count">18</span>
+                </button>
 
-        <option value="Computer Power Cords &amp; Prods">Computer Power Cords &amp; Prods</option>
+                <button type="button" class="category-opt-item" data-category="Rubber Border Biding Patti" role="option" aria-selected="false">
+                    <span class="opt-name">Rubber Border Biding Patti</span>
+                    <span class="opt-count">1</span>
+                </button>
 
-        <option value="PVC &amp; Cotton Cords">PVC &amp; Cotton Cords</option>
+                <button type="button" class="category-opt-item" data-category="Rubber Gromet" role="option" aria-selected="false">
+                    <span class="opt-name">Rubber Gromet</span>
+                    <span class="opt-count">8</span>
+                </button>
 
-        <option value="SATO / Imported Rocker Switch">SATO / Imported Rocker Switch</option>
+                <button type="button" class="category-opt-item" data-category="Rubber Type Heat Shrinkable Tubing" role="option" aria-selected="false">
+                    <span class="opt-name">Rubber Type Heat Shrinkable Tubing</span>
+                    <span class="opt-count">39</span>
+                </button>
 
-        <option value="SATO &amp; SURAJ Toggle Switches">SATO &amp; SURAJ Toggle Switches</option>
+                <button type="button" class="category-opt-item" data-category="SATO &amp; SURAJ Toggle Switches" role="option" aria-selected="false">
+                    <span class="opt-name">SATO &amp; SURAJ Toggle Switches</span>
+                    <span class="opt-count">26</span>
+                </button>
 
-        <option value="Regulators &amp; Knobs">Regulators &amp; Knobs</option>
+                <button type="button" class="category-opt-item" data-category="SATO / Imported Rocker Switch" role="option" aria-selected="false">
+                    <span class="opt-name">SATO / Imported Rocker Switch</span>
+                    <span class="opt-count">25</span>
+                </button>
 
-        <option value="Adaptors &amp; Power Supplies">Adaptors &amp; Power Supplies</option>
+                <button type="button" class="category-opt-item" data-category="Silicon Rubber Tube" role="option" aria-selected="false">
+                    <span class="opt-name">Silicon Rubber Tube</span>
+                    <span class="opt-count">7</span>
+                </button>
 
-        <option value="Toy Motors &amp; Accessories">Toy Motors &amp; Accessories</option>
+                <button type="button" class="category-opt-item" data-category="Solder Pot" role="option" aria-selected="false">
+                    <span class="opt-name">Solder Pot</span>
+                    <span class="opt-count">12</span>
+                </button>
 
-        <option value="Water Seals &amp; Pipes">Water Seals &amp; Pipes</option>
+                <button type="button" class="category-opt-item" data-category="SOLDER STICK" role="option" aria-selected="false">
+                    <span class="opt-name">SOLDER STICK</span>
+                    <span class="opt-count">4</span>
+                </button>
 
-        <option value="Bulbs &amp; Holders">Bulbs &amp; Holders</option>
+                <button type="button" class="category-opt-item" data-category="Soldering Paste &amp; Liquied" role="option" aria-selected="false">
+                    <span class="opt-name">Soldering Paste &amp; Liquied</span>
+                    <span class="opt-count">12</span>
+                </button>
 
-        <option value="Audio Video &amp; HDMI Cords">Audio Video &amp; HDMI Cords</option>
+                <button type="button" class="category-opt-item" data-category="“Soldron” Items" role="option" aria-selected="false">
+                    <span class="opt-name">“Soldron” Items</span>
+                    <span class="opt-count">30</span>
+                </button>
 
-        <option value="Step-Down Voltage Converters">Step-Down Voltage Converters</option>
+                <button type="button" class="category-opt-item" data-category="Step-Down Voltage Converters" role="option" aria-selected="false">
+                    <span class="opt-name">Step-Down Voltage Converters</span>
+                    <span class="opt-count">6</span>
+                </button>
 
-        <option value="Hand Gloves">Hand Gloves</option>
+                <button type="button" class="category-opt-item" data-category="TEFLON CABLE" role="option" aria-selected="false">
+                    <span class="opt-name">TEFLON CABLE</span>
+                    <span class="opt-count">86</span>
+                </button>
 
-        <option value="Danger Plates">Danger Plates</option>
+                <button type="button" class="category-opt-item" data-category="TEFLON TUBE" role="option" aria-selected="false">
+                    <span class="opt-name">TEFLON TUBE</span>
+                    <span class="opt-count">23</span>
+                </button>
 
-        <option value="MCB Links">MCB Links</option>
+                <button type="button" class="category-opt-item" data-category="Telephone Products &amp; Accessories" role="option" aria-selected="false">
+                    <span class="opt-name">Telephone Products &amp; Accessories</span>
+                    <span class="opt-count">32</span>
+                </button>
 
-        <option value="DC Locks &amp; Keys">DC Locks &amp; Keys</option>
+                <button type="button" class="category-opt-item" data-category="“Toni” Soldering Items" role="option" aria-selected="false">
+                    <span class="opt-name">“Toni” Soldering Items</span>
+                    <span class="opt-count">23</span>
+                </button>
 
-        <option value="Rubber Gromet">Rubber Gromet</option>
+                <button type="button" class="category-opt-item" data-category="Toy Motors &amp; Accessories" role="option" aria-selected="false">
+                    <span class="opt-name">Toy Motors &amp; Accessories</span>
+                    <span class="opt-count">9</span>
+                </button>
 
-        <option value="Rubber Border Biding Patti">Rubber Border Biding Patti</option>
+                <button type="button" class="category-opt-item" data-category="Water Seals &amp; Pipes" role="option" aria-selected="false">
+                    <span class="opt-name">Water Seals &amp; Pipes</span>
+                    <span class="opt-count">17</span>
+                </button>
 
+            </div>
+        </div>
+        <!-- Standard select maintained for full compatibility with scripts -->
+        <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" style="display: none;">
+            <option value="">All Categories</option>
+
+            <option value="Adaptors &amp; Power Supplies">Adaptors &amp; Power Supplies</option>
+
+            <option value="ART SILK TUBE / Sleeves">ART SILK TUBE / Sleeves</option>
+
+            <option value="Audio Video &amp; HDMI Cords">Audio Video &amp; HDMI Cords</option>
+
+            <option value="Battery &amp; Accessaries">Battery &amp; Accessaries</option>
+
+            <option value="Battery Terminal, Lugs &amp; Clips">Battery Terminal, Lugs &amp; Clips</option>
+
+            <option value="Bulb &amp; Indicator &amp; LED Resistance">Bulb &amp; Indicator &amp; LED Resistance</option>
+
+            <option value="Bulbs &amp; Holders">Bulbs &amp; Holders</option>
+
+            <option value="Capacitors">Capacitors</option>
+
+            <option value="Ceramic Sonyee Mony/Beads">Ceramic Sonyee Mony/Beads</option>
+
+            <option value="Computer Power Cords &amp; Prods">Computer Power Cords &amp; Prods</option>
+
+            <option value="Cutter &amp; Blades">Cutter &amp; Blades</option>
+
+            <option value="Danger Plates">Danger Plates</option>
+
+            <option value="DC Locks &amp; Keys">DC Locks &amp; Keys</option>
+
+            <option value="Fan Canopy">Fan Canopy</option>
+
+            <option value="FIBREGLASS PVC COATED CHINA TUBE">FIBREGLASS PVC COATED CHINA TUBE</option>
+
+            <option value="FIBREGLASS SILICON “H” CLASS CHINA TUBE">FIBREGLASS SILICON “H” CLASS CHINA TUBE</option>
+
+            <option value="FIBREGLASS “B” CLASS WHITE SPECIAL TUBE">FIBREGLASS “B” CLASS WHITE SPECIAL TUBE</option>
+
+            <option value="FIBREGLASS “B” CLASS YELLOW TUBE">FIBREGLASS “B” CLASS YELLOW TUBE</option>
+
+            <option value="FIBREGLASS “F” CLASS TUBE">FIBREGLASS “F” CLASS TUBE</option>
+
+            <option value="Galvanised Flexible Pipe">Galvanised Flexible Pipe</option>
+
+            <option value="Glass &amp; Ceramics Fuses">Glass &amp; Ceramics Fuses</option>
+
+            <option value="Hand Gloves">Hand Gloves</option>
+
+            <option value="Heat Sink Compound">Heat Sink Compound</option>
+
+            <option value="Joint Solder Wire in 18, 22swg">Joint Solder Wire in 18, 22swg</option>
+
+            <option value="“Khosla” Solder Wire in 14,16,18,22swg">“Khosla” Solder Wire in 14,16,18,22swg</option>
+
+            <option value="“KUMAR” Solder Wire in 14,16,18,22swg">“KUMAR” Solder Wire in 14,16,18,22swg</option>
+
+            <option value="Kundip Items">Kundip Items</option>
+
+            <option value="Marking Printing Sleeve / Tubing">Marking Printing Sleeve / Tubing</option>
+
+            <option value="MCB Links">MCB Links</option>
+
+            <option value="Nylon Cable Tie In White &amp; Black Colour">Nylon Cable Tie In White &amp; Black Colour</option>
+
+            <option value="Plier Stripper &amp; Cutter">Plier Stripper &amp; Cutter</option>
+
+            <option value="Puller Metal Wire">Puller Metal Wire</option>
+
+            <option value="Push Button Switch &amp; Box">Push Button Switch &amp; Box</option>
+
+            <option value="PVC &amp; Cotton Cords">PVC &amp; Cotton Cords</option>
+
+            <option value="PVC Channel Box">PVC Channel Box</option>
+
+            <option value="PVC CORD AND PIPES">PVC CORD AND PIPES</option>
+
+            <option value="PVC Ferrules Marking">PVC Ferrules Marking</option>
+
+            <option value="PVC Flexible Pipe">PVC Flexible Pipe</option>
+
+            <option value="PVC Flexible Pipe Adaptor">PVC Flexible Pipe Adaptor</option>
+
+            <option value="PVC Heat Shrinkable Tube">PVC Heat Shrinkable Tube</option>
+
+            <option value="PVC Sealer Automatic Machine &amp; Parts">PVC Sealer Automatic Machine &amp; Parts</option>
+
+            <option value="“RedPlus” “MALA” Soldering Items">“RedPlus” “MALA” Soldering Items</option>
+
+            <option value="Regulators &amp; Knobs">Regulators &amp; Knobs</option>
+
+            <option value="Rubber Border Biding Patti">Rubber Border Biding Patti</option>
+
+            <option value="Rubber Gromet">Rubber Gromet</option>
+
+            <option value="Rubber Type Heat Shrinkable Tubing">Rubber Type Heat Shrinkable Tubing</option>
+
+            <option value="SATO &amp; SURAJ Toggle Switches">SATO &amp; SURAJ Toggle Switches</option>
+
+            <option value="SATO / Imported Rocker Switch">SATO / Imported Rocker Switch</option>
+
+            <option value="Silicon Rubber Tube">Silicon Rubber Tube</option>
+
+            <option value="Solder Pot">Solder Pot</option>
+
+            <option value="SOLDER STICK">SOLDER STICK</option>
+
+            <option value="Soldering Paste &amp; Liquied">Soldering Paste &amp; Liquied</option>
+
+            <option value="“Soldron” Items">“Soldron” Items</option>
+
+            <option value="Step-Down Voltage Converters">Step-Down Voltage Converters</option>
+
+            <option value="TEFLON CABLE">TEFLON CABLE</option>
+
+            <option value="TEFLON TUBE">TEFLON TUBE</option>
+
+            <option value="Telephone Products &amp; Accessories">Telephone Products &amp; Accessories</option>
+
+            <option value="“Toni” Soldering Items">“Toni” Soldering Items</option>
+
+            <option value="Toy Motors &amp; Accessories">Toy Motors &amp; Accessories</option>
+
+            <option value="Water Seals &amp; Pipes">Water Seals &amp; Pipes</option>
+
+        </select>
+    </div>
+
+    <!-- Sort by Price / Default -->
+    <select id="sortBy" class="sort-select" aria-label="Sort products" onchange="filterCatalog()">
+        <option value="default">Sort: Default</option>
+        <option value="price-asc">Price: Low to High (₹ ↑)</option>
+        <option value="price-desc">Price: High to Low (₹ ↓)</option>
+        <option value="name-asc">Name: A to Z</option>
     </select>
     <input type="search" id="searchInput" aria-label="Search products" placeholder="Search by part, size, category, HSN, or serial number..." oninput="filterCatalog()" style="flex: 2 1 auto; min-width: 200px;">
     <button class="cart-toggle-btn" onclick="toggleCart()" aria-controls="cartDropdown" aria-expanded="false" style="flex: 0 0 auto;">
@@ -343,7 +672,7 @@ if (isEditMode) {
                 <div class="summary-calc-box">
                     <div class="calc-row subtotal-row">
                         <span>Items Subtotal</span>
-                        <strong>₹<span id="itemsSubtotal">0.00</span></strong>
+                        <strong>₹<span id="itemsSubtotalSummary">0.00</span></strong>
                     </div>
 
                     <details class="price-breakdown" id="priceBreakdown">
@@ -351,6 +680,10 @@ if (isEditMode) {
                             <span>Taxes &amp; Discounts</span>
                         </summary>
                         <div class="price-breakdown-content">
+                            <div class="summary-row summary-items-subtotal">
+                                <span>Priced items subtotal</span>
+                                <span>₹<span id="itemsSubtotal">0.00</span></span>
+                            </div>
                             <div class="summary-row summary-discount">
                                 <span>Item discounts</span>
                                 <span>−₹<span id="discountTotal">0.00</span></span>
@@ -516,7 +849,7 @@ if (isEditMode) {
     if (isEditMode) {
         document.getElementById('sellerTools').style.display = 'block';
         var script = document.createElement('script');
-        script.src = 'tools/seller/seller_editor.js?v=8';
+        script.src = 'tools/seller/seller_editor.js?v=241a2bbe18';
         document.body.appendChild(script);
 
         // Hide cart button in edit mode
@@ -524,8 +857,28 @@ if (isEditMode) {
         if (cartBtn) cartBtn.style.display = 'none';
     } else {
         var script = document.createElement('script');
-        script.src = 'assets/js/search_catalog.js?v=8';
+        script.src = 'assets/js/search_catalog.js?v=241a2bbe18';
         document.body.appendChild(script);
+    }
+</script>
+<script>
+    if ('serviceWorker' in navigator && !isEditMode && location.protocol.startsWith('http')) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('sw.js?v=241a2bbe18').then(function(reg) {
+                reg.onupdatefound = function() {
+                    var installing = reg.installing;
+                    if (installing) {
+                        installing.onstatechange = function() {
+                            if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('S. Kumar Catalog updated to latest version.');
+                            }
+                        };
+                    }
+                };
+            }).catch(function(err) {
+                console.log('SW registration note:', err);
+            });
+        });
     }
 </script>
 </body>
