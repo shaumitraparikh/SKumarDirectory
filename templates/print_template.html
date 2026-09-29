@@ -162,26 +162,42 @@
 
 
 
-<div class="header">
-    <div class="contact-grid">
-{% for contact in company.sales_contacts %}
-        <div class="contact">
-            <div class="contact-name">{{ contact.name }}</div>
-            <div class="contact-details">
-                <span>Mobile: {{ contact.mobile }}</span>
-                <span>Phone: {{ contact.phone }}</span>
-            </div>
-            <div>GSTIN: {{ contact.gstin }}</div>
+
+<div class="unified-header" style="text-align: center; border-bottom: 2px solid #102a43; padding-bottom: 15px; margin-bottom: 20px; font-family: 'Segoe UI', system-ui, sans-serif; break-inside: avoid;">
+    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; font-size: 11px; margin-bottom: 10px; opacity: 0.9; text-align: left; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+        <div>
+            <strong>Amit G. Parikh</strong> | Mobile: 9869905779 &middot; 45242910 | GSTIN: 27ACJPP2955J1Z4<br>
+            Office Phone: 49233982
         </div>
-{% endfor %}
+        <div style="text-align: right;">
+            <strong>Shaumitra G. Parikh</strong> | Mobile: 9821361314, 8369398586 &middot; 35989674 | GSTIN: 27AAGPP1621C1Z5
+        </div>
     </div>
-    <div class="legal-name">{{ company.legal_name }}</div>
-    <h1 class="company-name">{{ company.name }}</h1>
-    <p class="company-address">{{ company.address }}</p>
-    <p class="company-tagline">{{ company.price_list_tagline }}</p>
-    <p class="product-range">{{ company.product_range }}</p>
-    <p class="product-details">{{ company.product_details }}</p>
-    <p class="price-reference">Phone: - {{ company.phone_display }} &nbsp; | &nbsp; Price Lists: GSC/2025 (Estd. {{ company.estd_gsc }}) &amp; SK/2025 (Estd. {{ company.estd_sk }}) &nbsp; | &nbsp; Effective {{ company.date }}</p>
+    
+    <div style="margin: 15px 0;">
+        <select id="businessNameSelect" onchange="updateBusinessName(this.value)" style="font-size: 28px; font-weight: bold; color: #102a43; border: 1px dashed #cbd5e1; background: transparent; text-align: center; font-family: inherit; margin: 0 auto; display: block; cursor: pointer; padding: 4px 10px; border-radius: 4px; appearance: none; -webkit-appearance: none;">
+            <option value="S. Kumar & Bros.">S. Kumar & Bros.</option>
+            <option value="General Supply Corporation">General Supply Corporation</option>
+        </select>
+        <div style="font-size: 13px; margin-top: 8px; font-weight: 500;">
+            3rd Central Building, Grd. Flr., 11, Bomanji Master Road, Mumbai - 400 002.
+        </div>
+    </div>
+
+    <div style="font-weight: bold; font-size: 13px; color: #b91c1c; margin-bottom: 8px; letter-spacing: 0.5px;">
+        INSULATING -:- ELECTRICALS -:- ELECTRONIC -:- HARDWARE -:- MATERIALS
+    </div>
+    <div style="font-size: 11px; max-width: 800px; margin: 0 auto; opacity: 0.8; line-height: 1.4;">
+        <strong>Scope of Supply:</strong> Empire, Fibreglass, Cotton, Silicon, Teflon, P.V.C., Heatshrinkable, etc. TUBE, CABLE, WIRE, CLOTH, TAPE &middot; Solder Items, Paste, Tester, Fuse Wire, All Cord Wires, Iron Element, T.V. & Cable Plug, Socket, Pin, & Splitter.
+    </div>
+    <script>
+        function updateBusinessName(name) {
+            const printH1 = document.querySelector('.company-name');
+            if (printH1) {
+                printH1.textContent = name;
+            }
+        }
+    </script>
 </div>
 
 <div class="page-content">
