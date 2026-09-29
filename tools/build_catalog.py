@@ -407,7 +407,7 @@ def build_search_catalog(config, categories, items, env):
     return output_path
 
 
-PHOTO_DOC_FILE = SCRIPT_DIR / "docs 2025" / "GSC - SK Catlog Photo.docx"
+PHOTO_DOC_FILE = SCRIPT_DIR / "data" / "docs 2025" / "GSC - SK Catlog Photo.docx"
 
 
 def extract_photo_catalog_rows():

@@ -17,7 +17,7 @@ from docx import Document
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "data"
 IMAGES_DIR = ROOT / "images"
-DOCS_DIR = ROOT / "docs 2025"
+DOCS_DIR = ROOT / "data" / "docs 2025"
 CATALOG_PATH = DATA_DIR / "catalog_data.csv"
 IMAGE_MAP_PATH = DATA_DIR / "image_serial_map.json"
 SOURCE_LIST = DOCS_DIR / "List 2025.docx"

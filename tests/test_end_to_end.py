@@ -249,7 +249,7 @@ class CatalogEndToEndTests(unittest.TestCase):
 
     def test_source_documents_are_backups_and_numbered_products_are_accounted_for(self):
         return
-        docs_dir = CATALOG_ROOT / "docs 2025"
+        docs_dir = CATALOG_ROOT / "data" / "docs 2025"
         source_path = docs_dir / "List 2025.docx"
         photo_path = docs_dir / "GSC - SK Catlog Photo.docx"
         self.assertTrue(source_path.is_file())
@@ -411,7 +411,7 @@ class CatalogEndToEndTests(unittest.TestCase):
         return
         from docx import Document
 
-        photo_document = Document(CATALOG_ROOT / "docs 2025" / "GSC - SK Catlog Photo.docx")
+        photo_document = Document(CATALOG_ROOT / "data" / "docs 2025" / "GSC - SK Catlog Photo.docx")
         image_map = json.loads(
             (CATALOG_ROOT / "data" / "image_serial_map.json").read_text(encoding="utf-8")
         )

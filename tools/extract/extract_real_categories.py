@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 
 repo_dir = Path(__file__).resolve().parents[2]
-doc = Document(repo_dir / 'docs 2025' / 'List 2025.docx')
+doc = Document(repo_dir / 'data' / 'docs 2025' / 'List 2025.docx')
 
 categories = []
 current_cat = "Unknown"

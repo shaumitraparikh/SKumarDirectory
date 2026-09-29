@@ -12,7 +12,7 @@ def clean_filename(text):
 
 def extract_and_map_images():
     repo_dir = Path(__file__).resolve().parents[2]
-    photo_doc_path = repo_dir / "docs 2025" / "GSC - SK Catlog Photo.docx"
+    photo_doc_path = repo_dir / "data" / "docs 2025" / "GSC - SK Catlog Photo.docx"
     out_dir = repo_dir / "images"
     out_dir.mkdir(parents=True, exist_ok=True)
     

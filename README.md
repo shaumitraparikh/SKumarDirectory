@@ -91,7 +91,7 @@ images.
 ├── tools/build_catalog.py             <- Catalog generator for local and Pages builds
 ├── generated_bills/             <- Local, git-ignored bill archive
 │   └── YYYY-MM/                 <- Monthly standalone proforma bills
-├── docs 2025/                   <- Original source price list and photo documents
+├── data/docs 2025/                   <- Original source price list and photo documents
 │   └── source images without serial/ <- Source images lacking a product serial
 ├── data/
 │   ├── config.json              <- Company and checkout configuration
@@ -132,7 +132,7 @@ images.
 └── README.md                    <- This file
 ```
 
-The DOCX files in `docs 2025/` are retained as source backups. Edit and maintain
+The DOCX files in `data/docs 2025/` are retained as source backups. Edit and maintain
 the canonical product data in `data/catalog_data.csv`; the document extractors
 write separate draft CSVs under `data/` so an import cannot silently replace
 reviewed data. Source serials 1350-1360 have no product particulars and are

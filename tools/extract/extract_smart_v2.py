@@ -508,7 +508,7 @@ class TableParser:
 
 if __name__ == "__main__":
     repo_dir = Path(__file__).resolve().parents[2]
-    doc_path = repo_dir / "docs 2025" / "List 2025.docx"
+    doc_path = repo_dir / "data" / "docs 2025" / "List 2025.docx"
     parser = TableParser(doc_path)
     parser.process()
     
