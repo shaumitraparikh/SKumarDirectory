@@ -49,17 +49,11 @@ if errorlevel 1 goto :error
 node tests/bill_archive.test.js
 if errorlevel 1 goto :error
 
-if "%LOCAL_MODE%"=="1" goto :check_budget
+if "%LOCAL_MODE%"=="1" goto :local_success
 
 cd /d "%REPO_DIR%" || goto :error
 echo.
-if "%LOCAL_MODE%"=="1" goto :check_budget
 echo Committing and pushing catalog changes to origin/main...
-
-:check_budget
-echo Checking the monthly GitHub Actions run allowance...
-"%PYTHON_EXE%" tools\seller\actions_budget.py
-if errorlevel 1 goto :action_budget_reached
 
 git add -A
 if errorlevel 1 goto :error
@@ -71,7 +65,7 @@ echo No catalog changes to commit. GitHub Pages is already up to date.
 goto :finish
 
 :commit_changes
-git commit -m "Update generated catalogs" -m "Rebuild GitHub Pages output from tested catalog sources." -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+git commit -m "Update generated catalogs" -m "Rebuild GitHub Pages output from tested catalog sources."
 if errorlevel 1 goto :error
 
 echo.
@@ -86,6 +80,11 @@ echo =======================================================
 echo.
 goto :finish
 
+:local_success
+echo.
+echo Catalogs were rebuilt and tested locally ^(not committed or pushed^).
+goto :finish
+
 :wrong_branch
 echo ERROR: Run this updater from the main branch so Pages can be updated.
 set "EXIT_CODE=1"
@@ -96,16 +95,6 @@ echo ERROR: Local main is not exactly synchronized with origin/main.
 echo Sync or resolve the branch first, then rerun this updater.
 echo No catalog changes were built, committed, or pushed.
 set "EXIT_CODE=1"
-goto :finish
-
-:action_budget_reached
-echo ERROR: Monthly GitHub Pages workflow allowance reached or cannot be verified.
-echo No files were staged, committed, or pushed. Check the Actions budget or retry later.
-set "EXIT_CODE=1"
-goto :finish
-
-:declined
-echo Catalogs were rebuilt and tested, but not committed or pushed.
 goto :finish
 
 :error

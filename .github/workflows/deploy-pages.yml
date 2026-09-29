@@ -60,11 +60,16 @@ jobs:
         run: |
           mkdir -p _site
           cp index.html _site/index.html
+          cp photo_catalog.html _site/photo_catalog.html
           cp print_catalog.html _site/print_catalog.html
-          cp customer_catalog.html _site/customer_catalog.html
-          cp customer_catalog.html _site/search_catalog.html
-          cp -R assets _site/assets
+          cp index.html _site/search_catalog.html
+          cp index.html _site/customer_catalog.html
+          [ -f Google_Review_QR.pdf ] && cp Google_Review_QR.pdf _site/Google_Review_QR.pdf || true
+          cp -R app _site/app
           cp -R images _site/images
+          mkdir -p _site/data
+          cp data/config.json _site/data/
+          cp data/catalog_data.csv _site/data/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -108,7 +113,7 @@ jobs:
       - name: Install catalog and source audit dependencies
         run: python -m pip install jinja2 python-docx Pillow
 
-      - name: Run one-click update without publishing
+      - name: Run update smoke test
         shell: pwsh
         run: |
           git switch -C main $env:GITHUB_SHA
