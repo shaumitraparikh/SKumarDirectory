@@ -1318,30 +1318,6 @@ function fuzzyScore(text, query) {
         const reference = document.getElementById('pInvNo').innerText.trim();
         const html = standaloneBillHtml();
         
-        if (isLocalEnv) {
-            const order = CommerceCore.createOrder({
-                id: reference,
-                createdAt: date.toISOString(),
-                buyer: readBuyerDetails(),
-                items: cart,
-                totals: {
-                    subTotal: getSubTotal(),
-                    grandTotal: getSubTotal() + Object.values(getTaxBreakdown(getSubTotal())).reduce((a, b) => a + b, 0)
-                }
-            });
-            order.html = html; // include HTML for the server to save as PDF backup
-            return fetch('/api/bills/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(order)
-            }).then(r => r.json()).then(res => {
-                if (res.success) {
-                    return { storage: 'server', entry: { fileName: res.added.id + '.html', month: res.added.createdAt.substring(0, 7) } };
-                }
-                return billArchive.saveBill({ date, reference, html });
-            }).catch(() => billArchive.saveBill({ date, reference, html }));
-        }
-        
         return billArchive.saveBill({ date, reference, html });
     }
 
