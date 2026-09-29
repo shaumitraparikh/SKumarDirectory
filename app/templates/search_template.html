@@ -17,6 +17,7 @@
         <a href="photo_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🖼️ Photo Gallery</a>
     </div>
 </nav>
+
 <style>
 .unified-header { text-align: center; border-bottom: 2px solid #102a43; padding: 12px 15px; margin-bottom: 15px; background: #fff; font-family: 'Segoe UI', system-ui, sans-serif; }
 .biz-group { line-height: 1.15; margin-bottom: 8px; }
@@ -60,7 +61,154 @@
 
 
 
+
+
+
+
+
+
+
+<div id="checkoutConfig" hidden
+     data-provider="{{ billing.get('checkout', {}).get('provider', 'whatsapp') }}"
+     data-whatsapp-number="{{ billing.get('checkout', {}).get('whatsapp_number', '') }}"
+     data-api-base-url="{{ billing.get('checkout', {}).get('api_base_url', '') }}"></div>
+
+<div class="sticky-bar" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+        
+    <!-- Searchable Category Selector with Search Inside -->
+    <div class="category-picker-wrap" id="categoryPickerWrap">
+        <button type="button" class="category-picker-btn" id="categoryPickerBtn" aria-haspopup="listbox" aria-expanded="false" title="Filter by category">
+            <span class="cat-icon">📂</span>
+            <span class="cat-label" id="categoryPickerLabel">All Categories</span>
+            <span class="cat-arrow">▾</span>
+        </button>
+        <div class="category-dropdown-panel" id="categoryDropdownPanel" hidden>
+            <div class="category-search-box">
+                <input type="search" id="categorySearchInput" class="category-search-input" placeholder="🔍 Search inside categories..." autocomplete="off">
+            </div>
+            <div class="category-list-scroll" id="categoryOptionsList" role="listbox">
+                <button type="button" class="category-opt-item active" data-category="" role="option" aria-selected="true">
+                    <span class="opt-name">All Categories</span>
+                    <span class="opt-count">{{ catalog_data|length }}</span>
+                </button>
+                {% for cat in sorted_categories %}
+                <button type="button" class="category-opt-item" data-category="{{ cat.name }}" role="option" aria-selected="false">
+                    <span class="opt-name">{{ cat.name }}</span>
+                    <span class="opt-count">{{ cat.products|length }}</span>
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- Standard select maintained for full compatibility with scripts -->
+        <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" class="search-dropdown" style="display: none;">
+            <option value="">All Categories</option>
+            {% for cat in sorted_categories %}
+            <option value="{{ cat.name }}">{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Sort by Price / Default -->
+    <select id="sortBy" aria-label="Sort products" onchange="filterCatalog()" class="search-dropdown">
+        <option value="default">Sort: Default</option>
+        <option value="price-asc">Price: Low to High (₹ ↑)</option>
+        <option value="price-desc">Price: High to Low (₹ ↓)</option>
+        <option value="name-asc">Name: A to Z</option>
+    </select>
+    <input type="search" id="searchInput" aria-label="Search products" placeholder="Search by part, size, category, HSN..." oninput="filterCatalog()" class="search-input-main">
+    <button class="cart-toggle-btn" onclick="toggleCart()" aria-controls="cartDropdown" aria-expanded="false" style="flex: 0 0 auto;">
+        Cart <span class="cart-badge" id="cartCountBadge">0</span>
+    </button>
 </div>
+<div style="text-align: center; margin-top: 10px; font-size: 12px; color: #627d98;" id="searchResultCount"></div>
+
+<div class="cart-backdrop" id="cartBackdrop" onclick="toggleCart(false)" aria-hidden="true"></div>
+<aside class="cart-drawer" id="cartDropdown" role="dialog" aria-modal="true" aria-labelledby="cartTitle" aria-hidden="true">
+    <div class="cart-header">
+        <div class="cart-header-title">
+            <h2 class="cart-heading" id="cartTitle">🛒 Checkout &amp; Order Request</h2>
+            <div class="cart-subtitle">Review items, enter customer details, or print a proforma bill</div>
+        </div>
+        <button class="close-cart" onclick="toggleCart(false)" aria-label="Close cart">✕</button>
+    </div>
+
+    <div class="cart-layout">
+        <!-- Left Column: Customer details & Cart Items -->
+        <div class="cart-main-col">
+            <!-- Customer Details Card -->
+            <div class="checkout-card" id="buyerDetailsCard">
+                <details class="buyer-info" id="buyerDetails" open>
+                    <summary class="buyer-summary">
+                        <div class="summary-title-wrap">
+                            <span class="summary-icon">👤</span>
+                            <div>
+                                <span class="summary-main-title">Customer &amp; Delivery Details</span>
+                                <span class="disclosure-hint">Choose an existing customer or enter details manually</span>
+                            </div>
+                        </div>
+                    </summary>
+                    <div class="buyer-fields-wrap">
+                        <!-- Quick Customer Lookup Bar -->
+                        <div class="customer-lookup-box">
+                            <label for="customerLookup" class="lookup-label">🔍 Find existing customer (optional)</label>
+                            <div class="lookup-input-row">
+                                <input type="search" id="customerLookup" list="clientSuggestions" autocomplete="off" placeholder="Search by name, business, phone, or GSTIN to auto-fill...">
+                                <datalist id="clientSuggestions"></datalist>
+                                <button type="button" class="load-clients-btn" id="saveClientButton" title="Save this customer to database">💾 Save / Update</button>
+                            </div>
+                            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Saved customers auto-fill your order details instantly.</span>
+                        </div>
+
+                        <!-- 2-Column Form Fields -->
+                        <div class="buyer-form-grid">
+                            <div class="form-group span-2">
+                                <label for="buyerName">Name / Business Name <span class="required-star">*</span></label>
+                                <input type="text" id="buyerName" autocomplete="name" maxlength="120" placeholder="Customer or company name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buyerPhone">Indian Mobile / WhatsApp</label>
+                                <input type="tel" id="buyerPhone" autocomplete="tel-national" inputmode="tel" maxlength="20" placeholder="10-digit mobile number">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buyerEmail">Email Address (optional)</label>
+                                <input type="email" id="buyerEmail" autocomplete="email" maxlength="254" placeholder="name@example.com">
+                            </div>
+
+                            <div class="form-group span-2">
+                                <label for="buyerAddress">Delivery Address</label>
+                                <textarea id="buyerAddress" autocomplete="street-address" maxlength="400" placeholder="Building, street, area, city" rows="2"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buyerState">State / Union Territory</label>
+                                <select id="buyerState" autocomplete="address-level1">
+                                    <option value="">Select state / UT</option>
+                                    <option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
+                                    <option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option>
+                                    <option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option>
+                                    <option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option>
+                                    <option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option>
+                                    <option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
+                                    <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option>
+                                    <option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option>
+                                    <option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option>
+                                    <option>Uttarakhand</option><option>West Bengal</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buyerPincode">PIN Code</label>
+                                <input type="text" id="buyerPincode" autocomplete="postal-code" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="6-digit PIN">
+                            </div>
+
+                            <div class="form-group span-2">
+                                <label for="buyerGstin">Customer GSTIN (optional)</label>
+                                <input type="text" id="buyerGstin" maxlength="15" autocapitalize="characters" placeholder="15-character GSTIN">
+                            </div>
+                        </div>
+                    </div>
                 </details>
             </div>
 
@@ -272,20 +420,10 @@
 <script src="app/assets/js/commerce_core.js"></script>
 <script src="app/assets/js/bill_archive.js"></script>
 <script>
-    if (isEditMode) {
-        document.getElementById('sellerTools').style.display = 'block';
-        var script = document.createElement('script');
-        script.src = 'tools/seller/seller_editor.js?v={{ catalog_version }}';
-        document.body.appendChild(script);
-        
-        // Hide cart button in edit mode
-        var cartBtn = document.querySelector('.cart-toggle-btn');
-        if (cartBtn) cartBtn.style.display = 'none';
-    }
-</script>
+    </script>
 <script src="app/assets/js/search_catalog.js?v={{ catalog_version }}"></script>
 <script>
-    if ('serviceWorker' in navigator && !isEditMode && location.protocol.startsWith('http')) {
+    if ('serviceWorker' in navigator  && location.protocol.startsWith('http')) {
         window.addEventListener('load', function() {
             navigator.serviceWorker.register('app/sw.js?v={{ catalog_version }}').then(function(reg) {
                 reg.onupdatefound = function() {

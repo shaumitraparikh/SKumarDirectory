@@ -17,6 +17,7 @@
         <a href="photo_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🖼️ Photo Gallery</a>
     </div>
 </nav>
+
 <style>
 .unified-header { text-align: center; border-bottom: 2px solid #102a43; padding: 12px 15px; margin-bottom: 15px; background: #fff; font-family: 'Segoe UI', system-ui, sans-serif; }
 .biz-group { line-height: 1.15; margin-bottom: 8px; }
@@ -60,7 +61,567 @@
 
 
 
+
+
+
+
+
+
+
+<div id="checkoutConfig" hidden
+     data-provider="whatsapp"
+     data-whatsapp-number="919869905779"
+     data-api-base-url=""></div>
+
+<div class="sticky-bar" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+
+    <!-- Searchable Category Selector with Search Inside -->
+    <div class="category-picker-wrap" id="categoryPickerWrap">
+        <button type="button" class="category-picker-btn" id="categoryPickerBtn" aria-haspopup="listbox" aria-expanded="false" title="Filter by category">
+            <span class="cat-icon">📂</span>
+            <span class="cat-label" id="categoryPickerLabel">All Categories</span>
+            <span class="cat-arrow">▾</span>
+        </button>
+        <div class="category-dropdown-panel" id="categoryDropdownPanel" hidden>
+            <div class="category-search-box">
+                <input type="search" id="categorySearchInput" class="category-search-input" placeholder="🔍 Search inside categories..." autocomplete="off">
+            </div>
+            <div class="category-list-scroll" id="categoryOptionsList" role="listbox">
+                <button type="button" class="category-opt-item active" data-category="" role="option" aria-selected="true">
+                    <span class="opt-name">All Categories</span>
+                    <span class="opt-count">1412</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Adaptors &amp; Power Supplies" role="option" aria-selected="false">
+                    <span class="opt-name">Adaptors &amp; Power Supplies</span>
+                    <span class="opt-count">14</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="ART SILK TUBE / Sleeves" role="option" aria-selected="false">
+                    <span class="opt-name">ART SILK TUBE / Sleeves</span>
+                    <span class="opt-count">8</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Audio Video &amp; HDMI Cords" role="option" aria-selected="false">
+                    <span class="opt-name">Audio Video &amp; HDMI Cords</span>
+                    <span class="opt-count">19</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Battery &amp; Accessaries" role="option" aria-selected="false">
+                    <span class="opt-name">Battery &amp; Accessaries</span>
+                    <span class="opt-count">11</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Battery Terminal, Lugs &amp; Clips" role="option" aria-selected="false">
+                    <span class="opt-name">Battery Terminal, Lugs &amp; Clips</span>
+                    <span class="opt-count">40</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Bulb &amp; Indicator &amp; LED Resistance" role="option" aria-selected="false">
+                    <span class="opt-name">Bulb &amp; Indicator &amp; LED Resistance</span>
+                    <span class="opt-count">19</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Bulbs &amp; Holders" role="option" aria-selected="false">
+                    <span class="opt-name">Bulbs &amp; Holders</span>
+                    <span class="opt-count">20</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Capacitors" role="option" aria-selected="false">
+                    <span class="opt-name">Capacitors</span>
+                    <span class="opt-count">36</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Ceramic Sonyee Mony/Beads" role="option" aria-selected="false">
+                    <span class="opt-name">Ceramic Sonyee Mony/Beads</span>
+                    <span class="opt-count">55</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Computer Power Cords &amp; Prods" role="option" aria-selected="false">
+                    <span class="opt-name">Computer Power Cords &amp; Prods</span>
+                    <span class="opt-count">18</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Cutter &amp; Blades" role="option" aria-selected="false">
+                    <span class="opt-name">Cutter &amp; Blades</span>
+                    <span class="opt-count">6</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Danger Plates" role="option" aria-selected="false">
+                    <span class="opt-name">Danger Plates</span>
+                    <span class="opt-count">4</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="DC Locks &amp; Keys" role="option" aria-selected="false">
+                    <span class="opt-name">DC Locks &amp; Keys</span>
+                    <span class="opt-count">3</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Fan Canopy" role="option" aria-selected="false">
+                    <span class="opt-name">Fan Canopy</span>
+                    <span class="opt-count">4</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="FIBREGLASS PVC COATED CHINA TUBE" role="option" aria-selected="false">
+                    <span class="opt-name">FIBREGLASS PVC COATED CHINA TUBE</span>
+                    <span class="opt-count">13</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="FIBREGLASS SILICON “H” CLASS CHINA TUBE" role="option" aria-selected="false">
+                    <span class="opt-name">FIBREGLASS SILICON “H” CLASS CHINA TUBE</span>
+                    <span class="opt-count">13</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="FIBREGLASS “B” CLASS WHITE SPECIAL TUBE" role="option" aria-selected="false">
+                    <span class="opt-name">FIBREGLASS “B” CLASS WHITE SPECIAL TUBE</span>
+                    <span class="opt-count">12</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="FIBREGLASS “B” CLASS YELLOW TUBE" role="option" aria-selected="false">
+                    <span class="opt-name">FIBREGLASS “B” CLASS YELLOW TUBE</span>
+                    <span class="opt-count">12</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="FIBREGLASS “F” CLASS TUBE" role="option" aria-selected="false">
+                    <span class="opt-name">FIBREGLASS “F” CLASS TUBE</span>
+                    <span class="opt-count">12</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Galvanised Flexible Pipe" role="option" aria-selected="false">
+                    <span class="opt-name">Galvanised Flexible Pipe</span>
+                    <span class="opt-count">9</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Glass &amp; Ceramics Fuses" role="option" aria-selected="false">
+                    <span class="opt-name">Glass &amp; Ceramics Fuses</span>
+                    <span class="opt-count">7</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Hand Gloves" role="option" aria-selected="false">
+                    <span class="opt-name">Hand Gloves</span>
+                    <span class="opt-count">6</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Heat Sink Compound" role="option" aria-selected="false">
+                    <span class="opt-name">Heat Sink Compound</span>
+                    <span class="opt-count">4</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Joint Solder Wire in 18, 22swg" role="option" aria-selected="false">
+                    <span class="opt-name">Joint Solder Wire in 18, 22swg</span>
+                    <span class="opt-count">3</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="“Khosla” Solder Wire in 14,16,18,22swg" role="option" aria-selected="false">
+                    <span class="opt-name">“Khosla” Solder Wire in 14,16,18,22swg</span>
+                    <span class="opt-count">6</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="“KUMAR” Solder Wire in 14,16,18,22swg" role="option" aria-selected="false">
+                    <span class="opt-name">“KUMAR” Solder Wire in 14,16,18,22swg</span>
+                    <span class="opt-count">10</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Kundip Items" role="option" aria-selected="false">
+                    <span class="opt-name">Kundip Items</span>
+                    <span class="opt-count">77</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Marking Printing Sleeve / Tubing" role="option" aria-selected="false">
+                    <span class="opt-name">Marking Printing Sleeve / Tubing</span>
+                    <span class="opt-count">28</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="MCB Links" role="option" aria-selected="false">
+                    <span class="opt-name">MCB Links</span>
+                    <span class="opt-count">4</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Nylon Cable Tie In White &amp; Black Colour" role="option" aria-selected="false">
+                    <span class="opt-name">Nylon Cable Tie In White &amp; Black Colour</span>
+                    <span class="opt-count">35</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Plier Stripper &amp; Cutter" role="option" aria-selected="false">
+                    <span class="opt-name">Plier Stripper &amp; Cutter</span>
+                    <span class="opt-count">93</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Puller Metal Wire" role="option" aria-selected="false">
+                    <span class="opt-name">Puller Metal Wire</span>
+                    <span class="opt-count">19</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Push Button Switch &amp; Box" role="option" aria-selected="false">
+                    <span class="opt-name">Push Button Switch &amp; Box</span>
+                    <span class="opt-count">43</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="PVC &amp; Cotton Cords" role="option" aria-selected="false">
+                    <span class="opt-name">PVC &amp; Cotton Cords</span>
+                    <span class="opt-count">64</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="PVC Channel Box" role="option" aria-selected="false">
+                    <span class="opt-name">PVC Channel Box</span>
+                    <span class="opt-count">35</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="PVC CORD AND PIPES" role="option" aria-selected="false">
+                    <span class="opt-name">PVC CORD AND PIPES</span>
+                    <span class="opt-count">25</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="PVC Ferrules Marking" role="option" aria-selected="false">
+                    <span class="opt-name">PVC Ferrules Marking</span>
+                    <span class="opt-count">62</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="PVC Flexible Pipe" role="option" aria-selected="false">
+                    <span class="opt-name">PVC Flexible Pipe</span>
+                    <span class="opt-count">7</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="PVC Flexible Pipe Adaptor" role="option" aria-selected="false">
+                    <span class="opt-name">PVC Flexible Pipe Adaptor</span>
+                    <span class="opt-count">6</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="PVC Heat Shrinkable Tube" role="option" aria-selected="false">
+                    <span class="opt-name">PVC Heat Shrinkable Tube</span>
+                    <span class="opt-count">21</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="PVC Sealer Automatic Machine &amp; Parts" role="option" aria-selected="false">
+                    <span class="opt-name">PVC Sealer Automatic Machine &amp; Parts</span>
+                    <span class="opt-count">129</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="“RedPlus” “MALA” Soldering Items" role="option" aria-selected="false">
+                    <span class="opt-name">“RedPlus” “MALA” Soldering Items</span>
+                    <span class="opt-count">22</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Regulators &amp; Knobs" role="option" aria-selected="false">
+                    <span class="opt-name">Regulators &amp; Knobs</span>
+                    <span class="opt-count">18</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Rubber Border Biding Patti" role="option" aria-selected="false">
+                    <span class="opt-name">Rubber Border Biding Patti</span>
+                    <span class="opt-count">1</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Rubber Gromet" role="option" aria-selected="false">
+                    <span class="opt-name">Rubber Gromet</span>
+                    <span class="opt-count">8</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Rubber Type Heat Shrinkable Tubing" role="option" aria-selected="false">
+                    <span class="opt-name">Rubber Type Heat Shrinkable Tubing</span>
+                    <span class="opt-count">39</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="SATO &amp; SURAJ Toggle Switches" role="option" aria-selected="false">
+                    <span class="opt-name">SATO &amp; SURAJ Toggle Switches</span>
+                    <span class="opt-count">26</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="SATO / Imported Rocker Switch" role="option" aria-selected="false">
+                    <span class="opt-name">SATO / Imported Rocker Switch</span>
+                    <span class="opt-count">25</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Silicon Rubber Tube" role="option" aria-selected="false">
+                    <span class="opt-name">Silicon Rubber Tube</span>
+                    <span class="opt-count">7</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Solder Pot" role="option" aria-selected="false">
+                    <span class="opt-name">Solder Pot</span>
+                    <span class="opt-count">12</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="SOLDER STICK" role="option" aria-selected="false">
+                    <span class="opt-name">SOLDER STICK</span>
+                    <span class="opt-count">4</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Soldering Paste &amp; Liquied" role="option" aria-selected="false">
+                    <span class="opt-name">Soldering Paste &amp; Liquied</span>
+                    <span class="opt-count">12</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="“Soldron” Items" role="option" aria-selected="false">
+                    <span class="opt-name">“Soldron” Items</span>
+                    <span class="opt-count">30</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Step-Down Voltage Converters" role="option" aria-selected="false">
+                    <span class="opt-name">Step-Down Voltage Converters</span>
+                    <span class="opt-count">6</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="TEFLON CABLE" role="option" aria-selected="false">
+                    <span class="opt-name">TEFLON CABLE</span>
+                    <span class="opt-count">86</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="TEFLON TUBE" role="option" aria-selected="false">
+                    <span class="opt-name">TEFLON TUBE</span>
+                    <span class="opt-count">23</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Telephone Products &amp; Accessories" role="option" aria-selected="false">
+                    <span class="opt-name">Telephone Products &amp; Accessories</span>
+                    <span class="opt-count">32</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="“Toni” Soldering Items" role="option" aria-selected="false">
+                    <span class="opt-name">“Toni” Soldering Items</span>
+                    <span class="opt-count">23</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Toy Motors &amp; Accessories" role="option" aria-selected="false">
+                    <span class="opt-name">Toy Motors &amp; Accessories</span>
+                    <span class="opt-count">9</span>
+                </button>
+
+                <button type="button" class="category-opt-item" data-category="Water Seals &amp; Pipes" role="option" aria-selected="false">
+                    <span class="opt-name">Water Seals &amp; Pipes</span>
+                    <span class="opt-count">17</span>
+                </button>
+
+            </div>
+        </div>
+        <!-- Standard select maintained for full compatibility with scripts -->
+        <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" class="search-dropdown" style="display: none;">
+            <option value="">All Categories</option>
+
+            <option value="Adaptors &amp; Power Supplies">Adaptors &amp; Power Supplies</option>
+
+            <option value="ART SILK TUBE / Sleeves">ART SILK TUBE / Sleeves</option>
+
+            <option value="Audio Video &amp; HDMI Cords">Audio Video &amp; HDMI Cords</option>
+
+            <option value="Battery &amp; Accessaries">Battery &amp; Accessaries</option>
+
+            <option value="Battery Terminal, Lugs &amp; Clips">Battery Terminal, Lugs &amp; Clips</option>
+
+            <option value="Bulb &amp; Indicator &amp; LED Resistance">Bulb &amp; Indicator &amp; LED Resistance</option>
+
+            <option value="Bulbs &amp; Holders">Bulbs &amp; Holders</option>
+
+            <option value="Capacitors">Capacitors</option>
+
+            <option value="Ceramic Sonyee Mony/Beads">Ceramic Sonyee Mony/Beads</option>
+
+            <option value="Computer Power Cords &amp; Prods">Computer Power Cords &amp; Prods</option>
+
+            <option value="Cutter &amp; Blades">Cutter &amp; Blades</option>
+
+            <option value="Danger Plates">Danger Plates</option>
+
+            <option value="DC Locks &amp; Keys">DC Locks &amp; Keys</option>
+
+            <option value="Fan Canopy">Fan Canopy</option>
+
+            <option value="FIBREGLASS PVC COATED CHINA TUBE">FIBREGLASS PVC COATED CHINA TUBE</option>
+
+            <option value="FIBREGLASS SILICON “H” CLASS CHINA TUBE">FIBREGLASS SILICON “H” CLASS CHINA TUBE</option>
+
+            <option value="FIBREGLASS “B” CLASS WHITE SPECIAL TUBE">FIBREGLASS “B” CLASS WHITE SPECIAL TUBE</option>
+
+            <option value="FIBREGLASS “B” CLASS YELLOW TUBE">FIBREGLASS “B” CLASS YELLOW TUBE</option>
+
+            <option value="FIBREGLASS “F” CLASS TUBE">FIBREGLASS “F” CLASS TUBE</option>
+
+            <option value="Galvanised Flexible Pipe">Galvanised Flexible Pipe</option>
+
+            <option value="Glass &amp; Ceramics Fuses">Glass &amp; Ceramics Fuses</option>
+
+            <option value="Hand Gloves">Hand Gloves</option>
+
+            <option value="Heat Sink Compound">Heat Sink Compound</option>
+
+            <option value="Joint Solder Wire in 18, 22swg">Joint Solder Wire in 18, 22swg</option>
+
+            <option value="“Khosla” Solder Wire in 14,16,18,22swg">“Khosla” Solder Wire in 14,16,18,22swg</option>
+
+            <option value="“KUMAR” Solder Wire in 14,16,18,22swg">“KUMAR” Solder Wire in 14,16,18,22swg</option>
+
+            <option value="Kundip Items">Kundip Items</option>
+
+            <option value="Marking Printing Sleeve / Tubing">Marking Printing Sleeve / Tubing</option>
+
+            <option value="MCB Links">MCB Links</option>
+
+            <option value="Nylon Cable Tie In White &amp; Black Colour">Nylon Cable Tie In White &amp; Black Colour</option>
+
+            <option value="Plier Stripper &amp; Cutter">Plier Stripper &amp; Cutter</option>
+
+            <option value="Puller Metal Wire">Puller Metal Wire</option>
+
+            <option value="Push Button Switch &amp; Box">Push Button Switch &amp; Box</option>
+
+            <option value="PVC &amp; Cotton Cords">PVC &amp; Cotton Cords</option>
+
+            <option value="PVC Channel Box">PVC Channel Box</option>
+
+            <option value="PVC CORD AND PIPES">PVC CORD AND PIPES</option>
+
+            <option value="PVC Ferrules Marking">PVC Ferrules Marking</option>
+
+            <option value="PVC Flexible Pipe">PVC Flexible Pipe</option>
+
+            <option value="PVC Flexible Pipe Adaptor">PVC Flexible Pipe Adaptor</option>
+
+            <option value="PVC Heat Shrinkable Tube">PVC Heat Shrinkable Tube</option>
+
+            <option value="PVC Sealer Automatic Machine &amp; Parts">PVC Sealer Automatic Machine &amp; Parts</option>
+
+            <option value="“RedPlus” “MALA” Soldering Items">“RedPlus” “MALA” Soldering Items</option>
+
+            <option value="Regulators &amp; Knobs">Regulators &amp; Knobs</option>
+
+            <option value="Rubber Border Biding Patti">Rubber Border Biding Patti</option>
+
+            <option value="Rubber Gromet">Rubber Gromet</option>
+
+            <option value="Rubber Type Heat Shrinkable Tubing">Rubber Type Heat Shrinkable Tubing</option>
+
+            <option value="SATO &amp; SURAJ Toggle Switches">SATO &amp; SURAJ Toggle Switches</option>
+
+            <option value="SATO / Imported Rocker Switch">SATO / Imported Rocker Switch</option>
+
+            <option value="Silicon Rubber Tube">Silicon Rubber Tube</option>
+
+            <option value="Solder Pot">Solder Pot</option>
+
+            <option value="SOLDER STICK">SOLDER STICK</option>
+
+            <option value="Soldering Paste &amp; Liquied">Soldering Paste &amp; Liquied</option>
+
+            <option value="“Soldron” Items">“Soldron” Items</option>
+
+            <option value="Step-Down Voltage Converters">Step-Down Voltage Converters</option>
+
+            <option value="TEFLON CABLE">TEFLON CABLE</option>
+
+            <option value="TEFLON TUBE">TEFLON TUBE</option>
+
+            <option value="Telephone Products &amp; Accessories">Telephone Products &amp; Accessories</option>
+
+            <option value="“Toni” Soldering Items">“Toni” Soldering Items</option>
+
+            <option value="Toy Motors &amp; Accessories">Toy Motors &amp; Accessories</option>
+
+            <option value="Water Seals &amp; Pipes">Water Seals &amp; Pipes</option>
+
+        </select>
+    </div>
+
+    <!-- Sort by Price / Default -->
+    <select id="sortBy" aria-label="Sort products" onchange="filterCatalog()" class="search-dropdown">
+        <option value="default">Sort: Default</option>
+        <option value="price-asc">Price: Low to High (₹ ↑)</option>
+        <option value="price-desc">Price: High to Low (₹ ↓)</option>
+        <option value="name-asc">Name: A to Z</option>
+    </select>
+    <input type="search" id="searchInput" aria-label="Search products" placeholder="Search by part, size, category, HSN..." oninput="filterCatalog()" class="search-input-main">
+    <button class="cart-toggle-btn" onclick="toggleCart()" aria-controls="cartDropdown" aria-expanded="false" style="flex: 0 0 auto;">
+        Cart <span class="cart-badge" id="cartCountBadge">0</span>
+    </button>
 </div>
+<div style="text-align: center; margin-top: 10px; font-size: 12px; color: #627d98;" id="searchResultCount"></div>
+
+<div class="cart-backdrop" id="cartBackdrop" onclick="toggleCart(false)" aria-hidden="true"></div>
+<aside class="cart-drawer" id="cartDropdown" role="dialog" aria-modal="true" aria-labelledby="cartTitle" aria-hidden="true">
+    <div class="cart-header">
+        <div class="cart-header-title">
+            <h2 class="cart-heading" id="cartTitle">🛒 Checkout &amp; Order Request</h2>
+            <div class="cart-subtitle">Review items, enter customer details, or print a proforma bill</div>
+        </div>
+        <button class="close-cart" onclick="toggleCart(false)" aria-label="Close cart">✕</button>
+    </div>
+
+    <div class="cart-layout">
+        <!-- Left Column: Customer details & Cart Items -->
+        <div class="cart-main-col">
+            <!-- Customer Details Card -->
+            <div class="checkout-card" id="buyerDetailsCard">
+                <details class="buyer-info" id="buyerDetails" open>
+                    <summary class="buyer-summary">
+                        <div class="summary-title-wrap">
+                            <span class="summary-icon">👤</span>
+                            <div>
+                                <span class="summary-main-title">Customer &amp; Delivery Details</span>
+                                <span class="disclosure-hint">Choose an existing customer or enter details manually</span>
+                            </div>
+                        </div>
+                    </summary>
+                    <div class="buyer-fields-wrap">
+                        <!-- Quick Customer Lookup Bar -->
+                        <div class="customer-lookup-box">
+                            <label for="customerLookup" class="lookup-label">🔍 Find existing customer (optional)</label>
+                            <div class="lookup-input-row">
+                                <input type="search" id="customerLookup" list="clientSuggestions" autocomplete="off" placeholder="Search by name, business, phone, or GSTIN to auto-fill...">
+                                <datalist id="clientSuggestions"></datalist>
+                                <button type="button" class="load-clients-btn" id="saveClientButton" title="Save this customer to database">💾 Save / Update</button>
+                            </div>
+                            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Saved customers auto-fill your order details instantly.</span>
+                        </div>
+
+                        <!-- 2-Column Form Fields -->
+                        <div class="buyer-form-grid">
+                            <div class="form-group span-2">
+                                <label for="buyerName">Name / Business Name <span class="required-star">*</span></label>
+                                <input type="text" id="buyerName" autocomplete="name" maxlength="120" placeholder="Customer or company name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buyerPhone">Indian Mobile / WhatsApp</label>
+                                <input type="tel" id="buyerPhone" autocomplete="tel-national" inputmode="tel" maxlength="20" placeholder="10-digit mobile number">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buyerEmail">Email Address (optional)</label>
+                                <input type="email" id="buyerEmail" autocomplete="email" maxlength="254" placeholder="name@example.com">
+                            </div>
+
+                            <div class="form-group span-2">
+                                <label for="buyerAddress">Delivery Address</label>
+                                <textarea id="buyerAddress" autocomplete="street-address" maxlength="400" placeholder="Building, street, area, city" rows="2"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buyerState">State / Union Territory</label>
+                                <select id="buyerState" autocomplete="address-level1">
+                                    <option value="">Select state / UT</option>
+                                    <option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
+                                    <option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option>
+                                    <option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option>
+                                    <option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option>
+                                    <option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option>
+                                    <option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
+                                    <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option>
+                                    <option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option>
+                                    <option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option>
+                                    <option>Uttarakhand</option><option>West Bengal</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buyerPincode">PIN Code</label>
+                                <input type="text" id="buyerPincode" autocomplete="postal-code" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="6-digit PIN">
+                            </div>
+
+                            <div class="form-group span-2">
+                                <label for="buyerGstin">Customer GSTIN (optional)</label>
+                                <input type="text" id="buyerGstin" maxlength="15" autocapitalize="characters" placeholder="15-character GSTIN">
+                            </div>
+                        </div>
+                    </div>
                 </details>
             </div>
 
@@ -274,20 +835,10 @@
 <script src="app/assets/js/commerce_core.js"></script>
 <script src="app/assets/js/bill_archive.js"></script>
 <script>
-    if (isEditMode) {
-        document.getElementById('sellerTools').style.display = 'block';
-        var script = document.createElement('script');
-        script.src = 'tools/seller/seller_editor.js?v=cd912f2967';
-        document.body.appendChild(script);
-
-        // Hide cart button in edit mode
-        var cartBtn = document.querySelector('.cart-toggle-btn');
-        if (cartBtn) cartBtn.style.display = 'none';
-    }
-</script>
+    </script>
 <script src="app/assets/js/search_catalog.js?v=cd912f2967"></script>
 <script>
-    if ('serviceWorker' in navigator && !isEditMode && location.protocol.startsWith('http')) {
+    if ('serviceWorker' in navigator  && location.protocol.startsWith('http')) {
         window.addEventListener('load', function() {
             navigator.serviceWorker.register('app/sw.js?v=cd912f2967').then(function(reg) {
                 reg.onupdatefound = function() {

@@ -17,6 +17,7 @@
         <a href="photo_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🖼️ Photo Gallery</a>
     </div>
 </nav>
+
 <style>
 .unified-header { text-align: center; border-bottom: 2px solid #102a43; padding: 12px 15px; margin-bottom: 15px; background: #fff; font-family: 'Segoe UI', system-ui, sans-serif; }
 .biz-group { line-height: 1.15; margin-bottom: 8px; }
@@ -60,6 +61,143 @@
 
 
 
+
+
+
+
+<!-- Authentic Document Header directly from GSC - SK Catlog Photo.docx -->
+<header class="doc-header">
+    
+
+</header>
+
+<!-- Sticky Navigation & Quick Jump Controls -->
+<nav class="sticky-nav-bar" aria-label="Catalog Navigation">
+    <div class="sticky-nav-inner">
+
+        <div class="search-box-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="search" id="categorySearch" class="search-input" placeholder="Search photos, categories or materials..." oninput="filterPhotoCards()" autocomplete="off">
+        </div>
+    </div>
+
+    <div class="quick-chips-bar" id="categoryChips">
+        <button type="button" class="chip-btn active" onclick="filterByChip('all', this)">🌍 All Categories</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('tube', this)">🧫 Tubes &amp; Sleeves</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('pipe', this)">🚿 Pipes &amp; Cords</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('cable', this)">🔌 Cables &amp; Wires</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('capacitor', this)">🔋 Capacitors</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('tape', this)">🎗️ Industrial Tapes</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('sealer', this)">⚙️ Sealer Machine &amp; Part</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('complete', this)">📋 All 60 Categories</button>
+    </div>
+</nav>
+
+<main class="catalog-content">
+
+    <!-- Section 1: Organized Categories from GSC - SK Catlog Photo.docx -->
+    <section id="featuredDocxSection">
+        <div class="section-title-wrap">
+            <h2 class="section-title">
+                <span>📁</span> Category Visual Catalog
+            </h2>
+            <span class="section-tag">{{ docx_total_items }} Categories from GSC Photo Catalog</span>
+        </div>
+
+        {% for row in docx_rows %}
+        <div class="docx-row-grid docx-row-{{ row|length }}" data-row-index="{{ loop.index }}">
+            {% for cell in row %}
+            <article class="photo-card" data-category-title="{{ cell.title | lower }} {{ cell.sub | lower }}">
+                <div class="card-title-header">
+                    <h3 class="card-category-name">{{ cell.title }}</h3>
+                    {% if cell.sub %}
+                    <p class="card-subtitle-text">{{ cell.sub }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="card-media-gallery">
+                    {% if cell.images|length == 1 %}
+                    <div class="gallery-layout-1">
+                        <img src="{{ cell.images[0] }}" alt="{{ cell.title }}" loading="lazy" onclick="openPhotoLightbox(this.src, '{{ cell.title }}')">
+                    </div>
+                    {% elif cell.images|length == 2 %}
+                    <div class="gallery-layout-2">
+                        {% for img in cell.images %}
+                        <img src="{{ img }}" alt="{{ cell.title }} {{ loop.index }}" loading="lazy" onclick="openPhotoLightbox(this.src, '{{ cell.title }} (Image {{ loop.index }})')">
+                        {% endfor %}
+                    </div>
+                    {% elif cell.images|length in [3, 4] %}
+                    <div class="gallery-layout-3">
+                        {% for img in cell.images %}
+                        <img src="{{ img }}" alt="{{ cell.title }} {{ loop.index }}" loading="lazy" onclick="openPhotoLightbox(this.src, '{{ cell.title }} (Image {{ loop.index }})')">
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="gallery-layout-multi">
+                        {% for img in cell.images %}
+                        <img src="{{ img }}" alt="{{ cell.title }} {{ loop.index }}" loading="lazy" onclick="openPhotoLightbox(this.src, '{{ cell.title }} (Part {{ loop.index }})')">
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="card-action-footer">
+                    <a href="index.html?search={{ cell.title | urlencode }}" class="order-link-btn" title="View sizes, rates and order">
+                        View Products &amp; Order 🛒
+                    </a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </section>
+
+    <!-- Section 2: Complete 60 Categories Directory -->
+    <section id="allCategoriesSection" style="margin-top: 40px;">
+        <div class="section-title-wrap">
+            <h2 class="section-title">
+                <span>📦</span> Complete Product Directory (All 60 Categories)
+            </h2>
+            <span class="section-tag">{{ categories|length }} Categories · 1,412 Items</span>
+        </div>
+
+        <div class="all-cats-grid" id="allCategoriesGrid">
+            {% for cat in categories %}
+            <div class="cat-overview-card" data-category-title="{{ cat.name | lower }}">
+                <div class="cat-overview-img-wrap">
+                    {% if cat.image_path %}
+                    <img src="{{ cat.image_path }}" alt="{{ cat.name }}" loading="lazy" onclick="openPhotoLightbox(this.src, '{{ cat.name }}')">
+                    {% else %}
+                    <span style="color: #94a3b8; font-size: 12px; font-style: italic;">Photo available on request</span>
+                    {% endif %}
+                </div>
+                <div class="cat-overview-info">
+                    <div>
+                        <h3 class="cat-overview-title">{{ cat.name }}</h3>
+                        <div class="cat-overview-meta">{{ cat.products|length }} product variations</div>
+                    </div>
+                    <a href="index.html?category={{ cat.name | urlencode }}" class="order-link-btn">
+                        Browse Category 🛒
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+</main>
+
+<!-- Lightbox Modal -->
+<div class="lightbox-modal" id="photoLightbox" role="dialog" aria-modal="true" aria-hidden="true" onclick="closePhotoLightbox(event)">
+    <div class="lightbox-card" onclick="event.stopPropagation()">
+        <div class="lightbox-header">
+            <h3 class="lightbox-title" id="lightboxTitle">Product Preview</h3>
+            <button type="button" class="lightbox-close-btn" onclick="closePhotoLightbox()" aria-label="Close">✕</button>
+        </div>
+        <div class="lightbox-img-area">
+            <img id="lightboxImg" src="" alt="Enlarged preview">
+        </div>
+    </div>
 </div>
 
 <script>
