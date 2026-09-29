@@ -1,7 +1,7 @@
 :root {
-        --primary: #000080;
+        --primary: #1e3a8a;
         --secondary: #f5f7fa;
-        --accent: #28a745;
+        --accent: #10b981;
         --danger: #dc3545;
     }
     body {
@@ -272,11 +272,12 @@
 
     /* Cards */
     .card {
-        background: white; border-radius: 8px; overflow: hidden;
+        background: white;
+    transition: transform 0.2s, box-shadow 0.2s; border-radius: 8px; overflow: hidden;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex;
         padding: 12px; align-items: center; gap: 12px; border: 1px solid #eee;
     }
-    .card:hover { border-color: #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px rgba(0,0,0,0.08); }
 
     .card-img-container {
         width: 60px; height: 60px; background: #fff; display: flex;

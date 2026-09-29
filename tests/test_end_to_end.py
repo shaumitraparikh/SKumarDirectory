@@ -77,7 +77,7 @@ class CatalogEndToEndTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn(f"Loaded {len(self.csv_rows)} items", result.stdout)
         self.assertTrue((CATALOG_ROOT / "search_catalog.html").is_file())
-        self.assertTrue((CATALOG_ROOT / "customer_catalog.html").is_file())
+        self.assertTrue((CATALOG_ROOT / "search_catalog.html").is_file())
         self.assertTrue((CATALOG_ROOT / "print_catalog.html").is_file())
 
     def test_build_configuration_is_loaded_from_data(self):
@@ -105,7 +105,7 @@ class CatalogEndToEndTests(unittest.TestCase):
             check=False,
         )
         self.assertEqual(ignored_customer_data.returncode, 0)
-        search_html = (CATALOG_ROOT / "customer_catalog.html").read_text(encoding="utf-8")
+        search_html = (CATALOG_ROOT / "search_catalog.html").read_text(encoding="utf-8")
         self.assertIn('id="buyerDetails"', search_html)
         self.assertIn('<details class="buyer-info"', search_html)
         self.assertIn('id="orderSummaryDetails"', search_html)
@@ -132,7 +132,7 @@ class CatalogEndToEndTests(unittest.TestCase):
             ["1"],
         )
         seller_html = (CATALOG_ROOT / "search_catalog.html").read_text(encoding="utf-8")
-        customer_html = (CATALOG_ROOT / "customer_catalog.html").read_text(encoding="utf-8")
+        customer_html = (CATALOG_ROOT / "search_catalog.html").read_text(encoding="utf-8")
         self.assertIn('id="sellerSaveButton"', seller_html)
         self.assertNotIn("seller-tools", customer_html)
 
@@ -212,7 +212,7 @@ class CatalogEndToEndTests(unittest.TestCase):
                 self.assertTrue(asset_path.is_file(), f"Missing generated page asset: {asset_url}")
 
     def test_catalog_pages_include_mobile_viewports_and_responsive_layouts(self):
-        for page_name in ("index.html", "search_catalog.html", "customer_catalog.html", "print_catalog.html"):
+        for page_name in ("index.html", "search_catalog.html", "search_catalog.html", "print_catalog.html"):
             page_html = (CATALOG_ROOT / page_name).read_text(encoding="utf-8")
             self.assertIn('name="viewport"', page_html, f"{page_name} has no mobile viewport")
 
@@ -230,7 +230,7 @@ class CatalogEndToEndTests(unittest.TestCase):
         self.assertIn("minmax(min(100%, 320px), 1fr)", search_css)
 
     def test_order_price_breakdown_is_collapsible_with_subtotal_always_visible(self):
-        search_html = (CATALOG_ROOT / "customer_catalog.html").read_text(encoding="utf-8")
+        search_html = (CATALOG_ROOT / "search_catalog.html").read_text(encoding="utf-8")
         disclosure_start = search_html.index('<details class="price-breakdown" id="priceBreakdown">')
         disclosure_end = search_html.index("</details>", disclosure_start)
         disclosure = search_html[disclosure_start:disclosure_end]

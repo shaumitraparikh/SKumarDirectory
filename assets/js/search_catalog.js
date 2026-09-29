@@ -283,7 +283,7 @@ function toggleCart(forceOpen) {
             img.alt = item.image_is_representative ? 'Representative image for ' + item.category : item.item_name;
             img.loading = 'lazy';
             img.style.cursor = 'zoom-in';
-            img.onclick = () => openLightbox(img.src);
+            img.onclick = () => openLightbox(item.sr_number);
             imgContainer.appendChild(img);
         } else {
             const noImg = document.createElement('div');
@@ -1133,15 +1133,44 @@ if (!lightboxDialog) {
     lightboxDialog = document.createElement('dialog');
     lightboxDialog.id = 'imageLightbox';
     lightboxDialog.style.cssText = 'padding:0; border:none; border-radius:8px; background:transparent; max-width:90vw; max-height:90vh; overflow:visible;';
-    lightboxDialog.innerHTML = `<form method=\"dialog\" style="display:flex; flex-direction:column; align-items:center; position:relative;"><button type="button" onclick=\"this.closest('dialog').close()\" style="position:absolute; top:-15px; right:-15px; width:30px; height:30px; border-radius:50%; background:#102a43; color:white; border:2px solid white; cursor:pointer; font-weight:bold; font-size:14px; z-index:10;">X</button><img id="lightboxImg" style="max-width:90vw; max-height:85vh; border-radius:8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); object-fit:contain; background:white; padding:10px;" src="" alt="Large"></form>`;
+    lightboxDialog.innerHTML = `
+        <form method="dialog" style="display:flex; flex-direction:column; align-items:center; position:relative; background:white; border-radius:12px; overflow:hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <button type="button" onclick="this.closest('dialog').close()" style="position:absolute; top:15px; right:15px; width:36px; height:36px; border-radius:50%; background:#f1f5f9; color:#0f172a; border:none; cursor:pointer; font-weight:bold; font-size:16px; z-index:10; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">✕</button>
+            <div style="background:#f8fafc; width:100%; text-align:center; padding: 20px; border-bottom:1px solid #e2e8f0;">
+                <img id="lightboxImg" style="max-width:90vw; max-height:60vh; object-fit:contain; border-radius:8px;" src="" alt="Large">
+            </div>
+            <div style="padding: 20px; width:100%; text-align:left; box-sizing:border-box;">
+                <h3 id="lightboxTitle" style="margin:0 0 10px 0; font-size:20px; color:#1e293b;"></h3>
+                <p id="lightboxPrice" style="margin:0 0 15px 0; font-size:18px; color:#10b981; font-weight:bold;"></p>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="number" id="lightboxQty" value="1" min="1" max="9999" style="width:70px; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-size:16px;">
+                    <button type="button" id="lightboxAddBtn" style="flex:1; background:#2563eb; color:white; border:none; padding:12px 20px; border-radius:6px; font-size:16px; font-weight:bold; cursor:pointer; transition: background 0.2s;">Add to Cart</button>
+                </div>
+            </div>
+        </form>
+    `;
     lightboxDialog.addEventListener('click', (e) => {
         if(e.target === lightboxDialog) lightboxDialog.close();
     });
     document.body.appendChild(lightboxDialog);
 }
 
-function openLightbox(src) {
-    if (!src) return;
-    document.getElementById('lightboxImg').src = src;
+function openLightbox(item.sr_number) {
+    const entry = catalogSearchIndex.find(e => e.item.sr_number === srNumber);
+    if (!entry) return;
+    const item = entry.item;
+    
+    document.getElementById('lightboxImg').src = item.display_image_path || 'assets/placeholder.png';
+    document.getElementById('lightboxTitle').textContent = item.item_name;
+    document.getElementById('lightboxPrice').textContent = item.list_price ? `₹${item.list_price}` : 'Price on request';
+    document.getElementById('lightboxQty').value = document.getElementById('qty-' + srNumber) ? document.getElementById('qty-' + srNumber).value : 1;
+    
+    const addBtn = document.getElementById('lightboxAddBtn');
+    addBtn.onclick = () => {
+        const qty = parseInt(document.getElementById('lightboxQty').value) || 1;
+        addToCart(item, qty);
+        lightboxDialog.close();
+    };
+    
     lightboxDialog.showModal();
 }

@@ -39,10 +39,8 @@
                 if (!response.ok) {
                     throw new Error(data && data.error ? data.error : ('Local seller API failed (' + response.status + '). Ensure start_seller.bat is running.'));
                 }
-                if (!data) throw new Error('Received an invalid response from the seller server.');
+                                if (!data) throw new Error('Received an invalid response from the seller server.');
                 return data;
-            });
-        });
             });
         });
     }
