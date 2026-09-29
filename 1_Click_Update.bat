@@ -53,8 +53,8 @@ if "%LOCAL_MODE%"=="1" goto :check_budget
 
 cd /d "%REPO_DIR%" || goto :error
 echo.
-set /p "PUBLISH_CHANGES=Commit and push these catalog changes to origin/main? (Y/N): "
-if /I not "%PUBLISH_CHANGES%"=="Y" goto :declined
+if "%LOCAL_MODE%"=="1" goto :check_budget
+echo Committing and pushing catalog changes to origin/main...
 
 :check_budget
 echo Checking the monthly GitHub Actions run allowance...
