@@ -396,6 +396,84 @@ def build_search_catalog(config, categories, items, env):
     return output_path
 
 
+PHOTO_DOC_FILE = SCRIPT_DIR / "docs 2025" / "GSC - SK Catlog Photo.docx"
+
+
+def extract_photo_catalog_rows():
+    """Extract category panels and mapped 0.x images from GSC - SK Catlog Photo.docx."""
+    if not PHOTO_DOC_FILE.exists():
+        return []
+    
+    try:
+        from docx import Document
+        doc = Document(PHOTO_DOC_FILE)
+        tbl = doc.tables[0]._tbl
+        trs = tbl.xpath('./w:tr')
+        
+        rows = []
+        img_idx = 0
+        for r_idx in range(8, len(trs)):
+            tr = trs[r_idx]
+            row_cells = []
+            for tc in tr.xpath('./w:tc'):
+                texts = [p.text.strip() for p in tc.xpath('.//w:p') if p.text and p.text.strip()]
+                if not texts or 'Office Phone' in texts[0]:
+                    continue
+                title = texts[0].replace('\ufffd', '"').strip()
+                sub = ' '.join(texts[1:]).replace('\ufffd', '"').strip() if len(texts) > 1 else ''
+                
+                blips = tc.xpath('.//a:blip')
+                image_paths = []
+                for b in blips:
+                    img_idx += 1
+                    cand_png = IMAGES_DIR / f"0.{img_idx}.png"
+                    cand_jpg = IMAGES_DIR / f"0.{img_idx}.jpg"
+                    if cand_png.exists():
+                        image_paths.append(f"images/0.{img_idx}.png")
+                    elif cand_jpg.exists():
+                        image_paths.append(f"images/0.{img_idx}.jpg")
+                    else:
+                        image_paths.append(f"images/0.{img_idx}.png")
+                        
+                row_cells.append({
+                    'title': title,
+                    'sub': sub,
+                    'images': image_paths,
+                    'col_count': len(tr.xpath('./w:tc'))
+                })
+            if row_cells:
+                rows.append(row_cells)
+        return rows
+    except Exception as e:
+        print(f"  [WARN] Photo catalog extraction note: {e}")
+        return []
+
+
+def build_photo_catalog(config, categories, env):
+    """Generate the 3rd HTML Visual Photo Catalog based on GSC - SK Catlog Photo.docx."""
+    template = env.get_template('photo_template.html')
+    docx_rows = extract_photo_catalog_rows()
+    catalog_version = compute_catalog_version()
+    
+    total_docx_items = sum(len(r) for r in docx_rows)
+    
+    html = template.render(
+        company=config['company'],
+        billing=config,
+        docx_rows=docx_rows,
+        docx_total_items=total_docx_items,
+        categories=categories,
+        catalog_version=catalog_version,
+        generation_date=datetime.now().strftime('%Y-%m-%d %H:%M'),
+        images_base='images'
+    )
+    output_path = OUTPUT_DIR / 'photo_catalog.html'
+    write_html_output(output_path, html)
+    
+    print(f"  [OK] Photo catalog: {output_path} (v={catalog_version})")
+    return output_path
+
+
 def main():
     print("=" * 60)
     print("  GSC / S.Kumar Catalog Builder")
@@ -436,6 +514,7 @@ def main():
     print_path = build_print_catalog(config, categories, env)
     seller_categories = group_by_category(items, IMAGES_DIR)
     customer_path = build_search_catalog(config, seller_categories, items, env)
+    photo_path = build_photo_catalog(config, categories, env)
     
     # Summary
     print("\n" + "=" * 60)
@@ -444,8 +523,9 @@ def main():
     print(f"\n  Items: {len(items)}")
     print(f"  Categories: {len(categories)}")
     print(f"\n  Output files:")
-    print(f"    Print catalog:  {print_path}")
+    print(f"    Print catalog:       {print_path}")
     print(f"    Interactive catalog: {customer_path}")
+    print(f"    Photo catalog:       {photo_path}")
     print(f"\n  Open the HTML files in a browser to view!")
     print(f"  Print catalog -> Ctrl+P -> Save as PDF for sharing")
     

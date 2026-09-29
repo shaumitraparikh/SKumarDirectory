@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Visual Photo Catalog & Category Gallery for General Supply Corporation / S. Kumar & Bros insulating materials and electrical products.">
+<meta name="theme-color" content="#102a43">
+<title>Visual Photo Catalog - General Supply Corporation / S. Kumar &amp; Bros</title>
+<link rel="stylesheet" href="assets/css/photo_catalog.css?v={{ catalog_version }}">
+</head>
+<body>
+
+<!-- Authentic Document Header directly from GSC - SK Catlog Photo.docx -->
+<header class="doc-header">
+    <div class="doc-header-inner">
+        <div class="contacts-top-bar">
+            <div class="contact-person">
+                <strong>Amit G. Parikh</strong> &nbsp;|&nbsp;
+                <span>Mobile: 9869905779 · 45242910</span> &nbsp;|&nbsp;
+                <span>GSTIN: 27ACJPP2955J1Z4</span>
+            </div>
+            <div class="contact-person">
+                <strong>Office Phone:</strong> <span>49233982</span>
+            </div>
+            <div class="contact-person">
+                <strong>Shaumitra G. Parikh</strong> &nbsp;|&nbsp;
+                <span>Mobile: 9821361314, 8369398586 · 35989674</span> &nbsp;|&nbsp;
+                <span>GSTIN: 27AAGPP1621C1Z5</span>
+            </div>
+        </div>
+
+        <div class="brand-showcase">
+            <h1>General Supply Corporation</h1>
+            <div class="sub-brand">S. Kumar &amp; Bros.</div>
+            <p class="company-address">3rd Central Building, Grd. Flr., 11, Bomanji Master Road, Mumbai - 400 002.</p>
+            <div class="company-tagline">INSULATING &nbsp;-:-&nbsp; ELECTRICALS &nbsp;-:-&nbsp; ELECTRONIC &nbsp;-:-&nbsp; HARDWARE &nbsp;-:-&nbsp; MATERIALS</div>
+            <div class="products-scope-summary">
+                <strong>Scope of Supply:</strong> Empire, Fibreglass, Cotton, Silicon, Teflon, P.V.C., Heatshrinkable, etc. TUBE, CABLE, WIRE, CLOTH, TAPE · Solder Items, Paste, Tester, Fuse Wire, All Cord Wires, Iron Element, T.V. &amp; Cable Plug, Socket, Pin, &amp; Splitter.
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Sticky Navigation & Quick Jump Controls -->
+<nav class="sticky-nav-bar" aria-label="Catalog Navigation">
+    <div class="sticky-nav-inner">
+        <div class="nav-mode-buttons">
+            <a href="search_catalog.html" class="mode-btn">🛒 Interactive POS</a>
+            <a href="print_catalog.html" class="mode-btn">📄 Price List</a>
+            <a href="photo_catalog.html" class="mode-btn active">🖼️ Photo Catalog</a>
+        </div>
+
+        <div class="search-box-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="search" id="categorySearch" class="search-input" placeholder="Search photos, categories or materials..." oninput="filterPhotoCards()" autocomplete="off">
+        </div>
+    </div>
+
+    <div class="quick-chips-bar" id="categoryChips">
+        <button type="button" class="chip-btn active" onclick="filterByChip('all', this)">All Categories</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('tube', this)">Tubes &amp; Sleeves</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('pipe', this)">Pipes &amp; Cords</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('cable', this)">Cables &amp; Wires</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('capacitor', this)">Capacitors</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('tape', this)">Industrial Tapes</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('sealer', this)">Sealer Machine &amp; Parts</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('complete', this)">All 60 Product Categories</button>
+    </div>
+</nav>
+
+<main class="catalog-content">
+
+    <!-- Section 1: Organized Categories from GSC - SK Catlog Photo.docx -->
+    <section id="featuredDocxSection">
+        <div class="section-title-wrap">
+            <h2 class="section-title">
+                <span>📁</span> Category Visual Catalog
+            </h2>
+            <span class="section-tag">{{ docx_total_items }} Categories from GSC Photo Catalog</span>
+        </div>
+
+        {% for row in docx_rows %}
+        <div class="docx-row-grid docx-row-{{ row|length }}" data-row-index="{{ loop.index }}">
+            {% for cell in row %}
+            <article class="photo-card" data-category-title="{{ cell.title | lower }} {{ cell.sub | lower }}">
+                <div class="card-title-header">
+                    <h3 class="card-category-name">{{ cell.title }}</h3>
+                    {% if cell.sub %}
+                    <p class="card-subtitle-text">{{ cell.sub }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="card-media-gallery">
+                    {% if cell.images|length == 1 %}
+                    <div class="gallery-layout-1">
+                        <img src="{{ cell.images[0] }}" alt="{{ cell.title }}" loading="lazy" onclick="openPhotoLightbox(this.src, '{{ cell.title }}')">
+                    </div>
+                    {% elif cell.images|length == 2 %}
+                    <div class="gallery-layout-2">
+                        {% for img in cell.images %}
+                        <img src="{{ img }}" alt="{{ cell.title }} {{ loop.index }}" loading="lazy" onclick="openPhotoLightbox(this.src, '{{ cell.title }} (Image {{ loop.index }})')">
+                        {% endfor %}
+                    </div>
+                    {% elif cell.images|length in [3, 4] %}
+                    <div class="gallery-layout-3">
+                        {% for img in cell.images %}
+                        <img src="{{ img }}" alt="{{ cell.title }} {{ loop.index }}" loading="lazy" onclick="openPhotoLightbox(this.src, '{{ cell.title }} (Image {{ loop.index }})')">
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="gallery-layout-multi">
+                        {% for img in cell.images %}
+                        <img src="{{ img }}" alt="{{ cell.title }} {{ loop.index }}" loading="lazy" onclick="openPhotoLightbox(this.src, '{{ cell.title }} (Part {{ loop.index }})')">
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="card-action-footer">
+                    <a href="search_catalog.html?search={{ cell.title | urlencode }}" class="order-link-btn" title="View sizes, rates and order">
+                        View Products &amp; Order 🛒
+                    </a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </section>
+
+    <!-- Section 2: Complete 60 Categories Directory -->
+    <section id="allCategoriesSection" style="margin-top: 40px;">
+        <div class="section-title-wrap">
+            <h2 class="section-title">
+                <span>📦</span> Complete Product Directory (All 60 Categories)
+            </h2>
+            <span class="section-tag">{{ categories|length }} Categories · 1,412 Items</span>
+        </div>
+
+        <div class="all-cats-grid" id="allCategoriesGrid">
+            {% for cat in categories %}
+            <div class="cat-overview-card" data-category-title="{{ cat.name | lower }}">
+                <div class="cat-overview-img-wrap">
+                    {% if cat.image_path %}
+                    <img src="{{ cat.image_path }}" alt="{{ cat.name }}" loading="lazy" onclick="openPhotoLightbox(this.src, '{{ cat.name }}')">
+                    {% else %}
+                    <span style="color: #94a3b8; font-size: 12px; font-style: italic;">Photo available on request</span>
+                    {% endif %}
+                </div>
+                <div class="cat-overview-info">
+                    <div>
+                        <h3 class="cat-overview-title">{{ cat.name }}</h3>
+                        <div class="cat-overview-meta">{{ cat.products|length }} product variations</div>
+                    </div>
+                    <a href="search_catalog.html?category={{ cat.name | urlencode }}" class="order-link-btn">
+                        Browse Category 🛒
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+</main>
+
+<!-- Lightbox Modal -->
+<div class="lightbox-modal" id="photoLightbox" role="dialog" aria-modal="true" aria-hidden="true" onclick="closePhotoLightbox(event)">
+    <div class="lightbox-card" onclick="event.stopPropagation()">
+        <div class="lightbox-header">
+            <h3 class="lightbox-title" id="lightboxTitle">Product Preview</h3>
+            <button type="button" class="lightbox-close-btn" onclick="closePhotoLightbox()" aria-label="Close">✕</button>
+        </div>
+        <div class="lightbox-img-area">
+            <img id="lightboxImg" src="" alt="Enlarged preview">
+        </div>
+    </div>
+</div>
+
+<script>
+function openPhotoLightbox(src, title) {
+    const modal = document.getElementById('photoLightbox');
+    const img = document.getElementById('lightboxImg');
+    const titleEl = document.getElementById('lightboxTitle');
+    if (!modal || !img) return;
+    img.src = src;
+    if (titleEl) titleEl.textContent = title || 'Product Photo';
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePhotoLightbox(event) {
+    if (event && event.target !== event.currentTarget) return;
+    const modal = document.getElementById('photoLightbox');
+    if (!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePhotoLightbox();
+});
+
+function filterPhotoCards() {
+    const q = (document.getElementById('categorySearch').value || '').toLowerCase().trim();
+    const cards = document.querySelectorAll('.photo-card, .cat-overview-card');
+    cards.forEach(card => {
+        const text = card.dataset.categoryTitle || '';
+        const match = !q || text.includes(q);
+        card.style.display = match ? '' : 'none';
+    });
+}
+
+function filterByChip(type, btn) {
+    document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    const searchInput = document.getElementById('categorySearch');
+    if (type === 'all') {
+        if (searchInput) searchInput.value = '';
+        filterPhotoCards();
+        document.getElementById('featuredDocxSection').style.display = '';
+        document.getElementById('allCategoriesSection').style.display = '';
+    } else if (type === 'complete') {
+        if (searchInput) searchInput.value = '';
+        filterPhotoCards();
+        document.getElementById('featuredDocxSection').style.display = 'none';
+        document.getElementById('allCategoriesSection').style.display = '';
+        document.getElementById('allCategoriesSection').scrollIntoView({ behavior: 'smooth' });
+    } else {
+        document.getElementById('featuredDocxSection').style.display = '';
+        if (searchInput) searchInput.value = type;
+        filterPhotoCards();
+    }
+}
+</script>
+
+</body>
+</html>
