@@ -84,12 +84,26 @@ function renderSavedBills(entries) {
                 ? `generated_bills/${entry.month}/${entry.fileName}`
                 : 'Saved in this browser archive';
             label.appendChild(meta);
+            const btns = document.createElement('div');
+            btns.className = 'bill-entry-actions';
+            btns.style.display = 'flex';
+            btns.style.gap = '8px';
             const open = document.createElement('button');
             open.className = 'bill-open-btn';
             open.type = 'button';
             open.textContent = 'Open';
             open.dataset.billId = entry.id;
-            row.append(label, open);
+            open.dataset.action = 'open';
+            
+            const printBtn = document.createElement('button');
+            printBtn.className = 'bill-open-btn';
+            printBtn.type = 'button';
+            printBtn.textContent = 'Print';
+            printBtn.dataset.billId = entry.id;
+            printBtn.dataset.action = 'print';
+            
+            btns.append(open, printBtn);
+            row.append(label, btns);
             monthList.appendChild(row);
         });
         section.appendChild(monthList);
@@ -168,6 +182,7 @@ document.getElementById('chooseBillsFolderButton').addEventListener('click', () 
 document.getElementById('billArchiveList').addEventListener('click', event => {
     const button = event.target.closest('button[data-bill-id]');
     if (!button) return;
+    const action = button.dataset.action;
     const entry = visibleBills.get(button.dataset.billId);
     if (entry) {
         if (entry.storage === "server") {
@@ -186,8 +201,12 @@ document.getElementById('billArchiveList').addEventListener('click', event => {
                 renderCart();
                 document.getElementById('pInvNo').innerText = order.id || entry.reference || '';
                 document.getElementById('printBillBtn').style.display = 'block';
-                document.getElementById('billArchiveDialog').close();
-                showToast("Order restored to cart!");
+                if (action === 'print') {
+                    generateBill();
+                } else {
+                    document.getElementById('billArchiveDialog').close();
+                    showToast("Order restored to cart!");
+                }
             } catch (e) {
                 console.error("Failed to restore bill", e);
                 showToast("Failed to restore order from server data.");
