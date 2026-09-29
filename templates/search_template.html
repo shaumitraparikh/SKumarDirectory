@@ -160,8 +160,7 @@ if (isEditMode) {
                             <div class="lookup-input-row">
                                 <input type="search" id="customerLookup" list="clientSuggestions" autocomplete="off" placeholder="Search by name, business, phone, or GSTIN to auto-fill...">
                                 <datalist id="clientSuggestions"></datalist>
-                                <button type="button" class="load-clients-btn" id="loadClientsButton" title="Upload client CSV">📁 Import CSV</button>
-                                <input type="file" id="clientCsvFile" accept=".csv,text/csv" hidden>
+                                <button type="button" class="load-clients-btn" id="saveClientButton" title="Save this customer to database">💾 Save / Update</button>
                             </div>
                             <span class="client-directory-status" id="clientDirectoryStatus" role="status">Saved customers auto-fill your order details instantly.</span>
                         </div>
@@ -464,5 +463,5 @@ if (isEditMode) {
         });
     }
 </script>
-</body>
+<script>window.INJECTED_CLIENT_DATA = {{ client_data | tojson }};</script>`n</body>
 </html>

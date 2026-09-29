@@ -208,59 +208,81 @@ function loadCustomerCsv(file) {
 }
 
 
-// Auto-load server client data if available locally, or fallback to static CSV
+// Auto-load server client data if available locally, or fallback to injected JSON
 var isLocalEnv = (location.hostname === '127.0.0.1' || location.hostname === 'localhost') && location.protocol !== 'https:';
 
-function loadStaticClientCsv() {
-    return fetch('data/client_data.csv')
-        .then(response => {
-            if (response.ok) return response.text();
-            throw new Error('No server client data found.');
-        })
-        .then(text => {
-            const records = ClientDirectory.parseCsv ? ClientDirectory.parseCsv(text) : [];
-            clientRecords = records;
-            window.ClientDirectory.clients = records;
-            window.ClientDirectory.renderDataList();
-            var statusEl = document.getElementById('clientDirectoryStatus');
-            if (statusEl) statusEl.textContent = '✓ ' + records.length + ' saved customers ready to auto-fill.';
-            var btn = document.getElementById('loadClientsButton');
-            if (btn) btn.style.display = 'none';
-        })
-        .catch(() => { /* Silent failure */ });
+function setupClientData(records) {
+    if (!records || !Array.isArray(records)) records = [];
+    clientRecords = records;
+    if (window.ClientDirectory) {
+        window.ClientDirectory.clients = records;
+        window.ClientDirectory.renderDataList();
+    }
+    var statusEl = document.getElementById('clientDirectoryStatus');
+    if (statusEl) statusEl.textContent = '? ' + records.length + ' saved customers ready to auto-fill.';
 }
 
 if (isLocalEnv) {
-    fetch('http://127.0.0.1:8766/api/clients')
-        .then(response => response.ok ? response.json() : Promise.reject())
+    fetch('/api/clients')
+        .then(response => response.json())
         .then(data => {
-            if (data.clients && data.clients.length > 0) {
-                clientRecords = data.clients;
-                window.ClientDirectory.clients = data.clients;
-                window.ClientDirectory.renderDataList();
-                var statusEl = document.getElementById('clientDirectoryStatus');
-                if (statusEl) statusEl.textContent = '✓ ' + data.clients.length + ' saved customers ready to auto-fill.';
-                var btn = document.getElementById('loadClientsButton');
-                if (btn) btn.style.display = 'none';
+            if (data.clients) {
+                setupClientData(data.clients);
             } else {
-                loadStaticClientCsv();
+                setupClientData(window.INJECTED_CLIENT_DATA || []);
             }
         })
         .catch(() => {
-            loadStaticClientCsv();
+            setupClientData(window.INJECTED_CLIENT_DATA || []);
         });
 } else {
-    loadStaticClientCsv();
+    setupClientData(window.INJECTED_CLIENT_DATA || []);
 }
 
-document.getElementById('loadClientsButton').addEventListener('click', () => {
+document.getElementById('saveClientButton')?.addEventListener('click', () => {
+    const newClient = {
+        name: document.getElementById('buyerName').value,
+        phone: document.getElementById('buyerPhone').value,
+        email: document.getElementById('buyerEmail').value,
+        address: document.getElementById('buyerAddress').value,
+        state: document.getElementById('buyerState').value,
+        pincode: document.getElementById('buyerPincode').value,
+        gstin: document.getElementById('buyerGstin').value,
+    };
+    if (!newClient.name && !newClient.gstin) {
+        alert('Please enter a name or GSTIN to save the customer.');
+        return;
+    }
+    
+    // Attempt to save to backend (works if seller server is running)
+    fetch('http://127.0.0.1:8000/api/clients/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newClient)
+    }).then(res => res.json()).then(data => {
+        if (data.success) {
+            const statusEl = document.getElementById('clientDirectoryStatus');
+            if (statusEl) statusEl.textContent = '? Customer saved to database!';
+            
+            // Re-fetch clean list if localEnv, else append locally
+            if (isLocalEnv) {
+                fetch('/api/clients').then(r=>r.json()).then(d=>setupClientData(d.clients));
+            } else {
+                clientRecords.push(newClient);
+                setupClientData(clientRecords);
+                statusEl.textContent = '? Customer saved to database!';
+            }
+        }
+    }).catch(e => {
+        console.log('Backend not available for saving client.', e);
+        // Fallback local UI update if server is not running
+        clientRecords.push(newClient);
+        setupClientData(clientRecords);
+        const statusEl = document.getElementById('clientDirectoryStatus');
+        if (statusEl) statusEl.textContent = '? Customer saved in browser (start seller server to save to CSV).';
+    });
+});
 
-    document.getElementById('clientCsvFile').click();
-});
-document.getElementById('clientCsvFile').addEventListener('change', event => {
-    loadCustomerCsv(event.target.files[0]);
-    event.target.value = '';
-});
 document.getElementById('customerLookup').addEventListener('input', event => {
     updateCustomerSuggestions(event.target.value);
     const selectedCustomer = ClientDirectory.findCustomer(clientRecords, event.target.value);

@@ -378,7 +378,18 @@ def build_search_catalog(config, categories, items, env):
     sorted_categories = sorted(categories, key=lambda c: clean_cat_sort_key(c['name']))
     catalog_version = compute_catalog_version()
     
+    # Load client data to embed directly in the HTML for offline auto-complete
+    client_data = []
+    import csv
+    client_file = SCRIPT_DIR / "data" / "client_data.csv"
+    if client_file.exists():
+        with open(client_file, 'r', encoding='utf-8-sig', newline='') as f:
+            reader = csv.DictReader(f)
+            client_data = list(reader)
+
     html = template.render(
+        client_data=client_data,
+
         company=config['company'],
         billing=config,
         categories=categories,

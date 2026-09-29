@@ -45,7 +45,7 @@ def append_client(new_client):
             updated_existing = True
             # Update any missing fields
             for k in ['phone', 'email', 'address', 'state', 'pincode', 'gstin']:
-                if new_client.get(k) and not c.get(k):
+                if new_client.get(k):
                     c[k] = new_client.get(k)
             break
             
@@ -245,7 +245,7 @@ class SellerHandler(SimpleHTTPRequestHandler):
         if host not in allowed_hosts:
             return False
         origin = self.headers.get("Origin")
-        if origin and origin not in {
+        if origin and origin != "null" and origin not in {
             f"http://127.0.0.1:{PORT}",
             f"http://localhost:{PORT}",
         }:
