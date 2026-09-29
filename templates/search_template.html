@@ -11,37 +11,46 @@
 </head>
 <body data-catalog-version="{{ catalog_version }}">
 
-<nav class="global-nav" style="background: #102a43; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 9999; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); font-family: 'Segoe UI', system-ui, sans-serif;">
-    <div style="color: #fff; font-weight: 700; font-size: 16px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
-        <span style="background: #f0f4f8; color: #102a43; padding: 4px 8px; border-radius: 4px; font-size: 12px;">S. KUMAR & BROS</span>
-        <span style="opacity: 0.8; font-weight: 400; font-size: 14px; display: none;" class="nav-title-full">Catalog System</span>
+<nav class="global-nav" style="background: #102a43; padding: 6px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 9999; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-family: 'Segoe UI', system-ui, sans-serif;">
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 0 auto;">
+        <a href="search_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">?? POS & Search</a>
+        <a href="print_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">?? Price List</a>
+        <a href="photo_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">??? Photo Gallery</a>
     </div>
-    <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
-        <a href="search_catalog.html" style="text-decoration: none; padding: 8px 16px; color: #fff; font-weight: 600; border-radius: 6px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,0.05);" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">🛒 <span class="nav-label">POS & Search</span></a>
-        
-        <a href="print_catalog.html" style="text-decoration: none; padding: 8px 16px; color: #fff; font-weight: 600; border-radius: 6px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,0.05);" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">📄 <span class="nav-label">Price List</span></a>
-        
-        <a href="photo_catalog.html" style="text-decoration: none; padding: 8px 16px; color: #fff; font-weight: 600; border-radius: 6px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,0.05);" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">🖼️ <span class="nav-label">Photo Gallery</span></a>
-    </div>
-    <style>
-        @media (min-width: 600px) { .nav-title-full { display: inline !important; } }
-        @media (max-width: 500px) { .nav-label { display: none; } .global-nav a { padding: 8px 12px !important; } }
-        @media print { .global-nav { display: none !important; } }
-    </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const current = window.location.pathname.split('/').pop() || 'search_catalog.html';
-            document.querySelectorAll('.global-nav a').forEach(a => {
-                if (a.getAttribute('href') === current) {
-                    a.style.background = '#fff';
-                    a.style.color = '#102a43';
-                    a.onmouseout = null;
-                    a.onmouseover = null;
-                }
-            });
-        });
-    </script>
 </nav>
+
+<div class="unified-header" style="text-align: center; border-bottom: 2px solid #102a43; padding: 10px 15px; margin-bottom: 15px; font-family: 'Segoe UI', system-ui, sans-serif; background: #fff;">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 5px;">
+        <select id="businessNameSelect" onchange="updateBusinessName(this.value)" style="font-size: 24px; font-weight: bold; color: #102a43; border: none; background: transparent; cursor: pointer; appearance: none; -webkit-appearance: none; outline: none;">
+            <option value="S. Kumar &amp; Bros.">S. Kumar &amp; Bros. &#x25BE;</option>
+            <option value="General Supply Corporation">General Supply Corporation &#x25BE;</option>
+        </select>
+    </div>
+    
+    <div style="font-size: 11px; opacity: 0.85; margin-bottom: 5px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
+        <span><strong>Amit G. Parikh:</strong> 9869905779 / 45242910</span> | 
+        <span><strong>Shaumitra G. Parikh:</strong> 9821361314 / 8369398586</span> | 
+        <span><strong>Office:</strong> 49233982</span>
+    </div>
+
+    <div style="font-size: 10px; color: #666; max-width: 700px; margin: 0 auto;">
+        3rd Central Building, Grd. Flr., 11, Bomanji Master Road, Mumbai - 400 002.<br>
+        <strong>GSTIN:</strong> 27ACJPP2955J1Z4 / 27AAGPP1621C1Z5<br>
+        <strong>Scope:</strong> Empire, Fibreglass, Cotton, Silicon, Teflon, PVC, Tube, Cable, Wire, Cloth, Tape &middot; Solder Items, Tester, Fuse Wire.
+    </div>
+
+    <script>
+        function updateBusinessName(name) {
+            const legalNameElem = document.querySelector('.legal-name');
+            if (legalNameElem) legalNameElem.textContent = (name === 'S. Kumar & Bros.') ? 'General Supply Corporation' : 'S. Kumar & Bros.';
+            const printH1 = document.querySelectorAll('.company-name, .inv-brand h1');
+            printH1.forEach(el => el.textContent = name);
+        }
+    </script>
+</div>
+
+
+
 
 
 
@@ -87,48 +96,7 @@ if (isEditMode) {
     </form>
 </dialog>
 
-<div class="unified-header" style="text-align: center; border-bottom: 2px solid #102a43; padding-bottom: 15px; margin-bottom: 20px; font-family: 'Segoe UI', system-ui, sans-serif;">
-    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; font-size: 11px; margin-bottom: 10px; opacity: 0.9; text-align: left; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
-        <div>
-            <strong>Amit G. Parikh</strong> | Mobile: 9869905779 &middot; 45242910 | GSTIN: 27ACJPP2955J1Z4<br>
-            Office Phone: 49233982
-        </div>
-        <div style="text-align: right;">
-            <strong>Shaumitra G. Parikh</strong> | Mobile: 9821361314, 8369398586 &middot; 35989674 | GSTIN: 27AAGPP1621C1Z5
-        </div>
-    </div>
-    
-    <div style="margin: 15px 0;">
-        <select id="businessNameSelect" onchange="updateBusinessName(this.value)" style="font-size: 28px; font-weight: bold; color: #102a43; border: 1px dashed #cbd5e1; background: transparent; text-align: center; font-family: inherit; margin: 0 auto; display: block; cursor: pointer; padding: 4px 10px; border-radius: 4px; appearance: none; -webkit-appearance: none;">
-            <option value="S. Kumar & Bros.">S. Kumar & Bros.</option>
-            <option value="General Supply Corporation">General Supply Corporation</option>
-        </select>
-        <div style="font-size: 13px; margin-top: 8px; font-weight: 500;">
-            3rd Central Building, Grd. Flr., 11, Bomanji Master Road, Mumbai - 400 002.
-        </div>
-    </div>
 
-    <div style="font-weight: bold; font-size: 13px; color: #b91c1c; margin-bottom: 8px; letter-spacing: 0.5px;">
-        INSULATING -:- ELECTRICALS -:- ELECTRONIC -:- HARDWARE -:- MATERIALS
-    </div>
-    <div style="font-size: 11px; max-width: 800px; margin: 0 auto; opacity: 0.8; line-height: 1.4;">
-        <strong>Scope of Supply:</strong> Empire, Fibreglass, Cotton, Silicon, Teflon, P.V.C., Heatshrinkable, etc. TUBE, CABLE, WIRE, CLOTH, TAPE &middot; Solder Items, Paste, Tester, Fuse Wire, All Cord Wires, Iron Element, T.V. & Cable Plug, Socket, Pin, & Splitter.
-    </div>
-    
-    <script>
-        function updateBusinessName(name) {
-            // Check if there are invoice-specific print headers to update
-            const legalNameElem = document.querySelector('.legal-name');
-            if (legalNameElem) {
-                legalNameElem.textContent = (name === 'S. Kumar & Bros.') ? 'General Supply Corporation' : 'S. Kumar & Bros.';
-            }
-            const printH1 = document.querySelector('.inv-brand h1');
-            if (printH1) {
-                printH1.textContent = name;
-            }
-        }
-    </script>
-</div>
 <div id="checkoutConfig" hidden
      data-provider="{{ billing.get('checkout', {}).get('provider', 'whatsapp') }}"
      data-whatsapp-number="{{ billing.get('checkout', {}).get('whatsapp_number', '') }}"
