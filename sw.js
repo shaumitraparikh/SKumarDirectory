@@ -7,7 +7,7 @@ const CACHE_NAME = 'skumar-catalog-' + CACHE_VERSION;
 const CORE_ASSETS = [
     './',
     'index.html',
-    'search_catalog.html',
+    'index.html',
     'print_catalog.html',
     'photo_catalog.html',
     'assets/css/search_catalog.css',
@@ -66,7 +66,7 @@ self.addEventListener('fetch', event => {
                 return response;
             }).catch(() => {
                 return caches.match(event.request).then(cached => {
-                    return cached || caches.match('search_catalog.html');
+                    return cached || caches.match('index.html');
                 });
             })
         );

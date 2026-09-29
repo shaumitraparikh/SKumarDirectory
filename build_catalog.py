@@ -13,7 +13,7 @@ Reads:
 
 Produces:
     - print_catalog.html  : Full print-ready catalog
-    - search_catalog.html : Local seller catalog
+    - index.html : Local seller catalog
     - customer_catalog.html : Customer-facing searchable catalog
 """
 
@@ -400,7 +400,7 @@ def build_search_catalog(config, categories, items, env):
         generation_date=datetime.now().strftime('%Y-%m-%d %H:%M'),
         images_base='images'
     )
-    output_path = OUTPUT_DIR / 'search_catalog.html'
+    output_path = OUTPUT_DIR / 'index.html'
     write_html_output(output_path, html)
     
     print(f"  [OK] Search catalog: {output_path} (v={catalog_version})")
@@ -543,7 +543,7 @@ def main():
     if os.environ.get('CATALOG_NO_BROWSER') != '1':
         try:
             import webbrowser
-            webbrowser.open("http://127.0.0.1:8766/search_catalog.html")
+            webbrowser.open("http://127.0.0.1:8766/index.html")
             print("\n  [OK] Opened seller catalog (start tools/seller/start_seller.bat first)")
         except Exception:
             pass

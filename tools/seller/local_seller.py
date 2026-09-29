@@ -337,7 +337,7 @@ class SellerHandler(SimpleHTTPRequestHandler):
             
         if self.path == '/':
             self.send_response(301)
-            self.send_header('Location', '/search_catalog.html')
+            self.send_header('Location', '/index.html')
             self.end_headers()
             return
 
@@ -374,7 +374,7 @@ class SellerHandler(SimpleHTTPRequestHandler):
             self.send_json(200, {"can_undo": bool(read_history())})
             return
         if self.path == "/":
-            self.path = "/search_catalog.html"
+            self.path = "/index.html"
         super().do_GET()
 
     def do_POST(self):
@@ -445,7 +445,7 @@ def main():
         raise RuntimeError("The seller editor refuses non-loopback binding.")
     server = ThreadingHTTPServer((HOST, PORT), SellerHandler)
     server.daemon_threads = True
-    print(f"Seller editor available only on this computer: http://{HOST}:{PORT}/search_catalog.html")
+    print(f"Seller editor available only on this computer: http://{HOST}:{PORT}/index.html")
     print("Do not change the bind address or expose this local seller service to the network.")
     try:
         server.serve_forever()

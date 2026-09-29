@@ -12,7 +12,7 @@
 
 <nav class="global-nav" style="background: #102a43; padding: 6px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 9999; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-family: 'Segoe UI', system-ui, sans-serif;">
     <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 0 auto;">
-        <a href="search_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🛒 POS & Search</a>
+        <a href="index.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🛒 POS & Search</a>
         <a href="print_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">📄 Price List</a>
         <a href="photo_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🖼️ Photo Gallery</a>
     </div>
@@ -82,7 +82,7 @@
 <nav class="sticky-nav-bar" aria-label="Catalog Navigation">
     <div class="sticky-nav-inner">
         <div class="nav-mode-buttons">
-            <a href="search_catalog.html" class="mode-btn">🛒 Interactive POS</a>
+            <a href="index.html" class="mode-btn">🛒 Interactive POS</a>
             <a href="print_catalog.html" class="mode-btn">📄 Price List</a>
             <a href="photo_catalog.html" class="mode-btn active">🖼️ Photo Catalog</a>
         </div>
@@ -154,7 +154,7 @@
                 </div>
 
                 <div class="card-action-footer">
-                    <a href="search_catalog.html?search={{ cell.title | urlencode }}" class="order-link-btn" title="View sizes, rates and order">
+                    <a href="index.html?search={{ cell.title | urlencode }}" class="order-link-btn" title="View sizes, rates and order">
                         View Products &amp; Order 🛒
                     </a>
                 </div>
@@ -188,7 +188,7 @@
                         <h3 class="cat-overview-title">{{ cat.name }}</h3>
                         <div class="cat-overview-meta">{{ cat.products|length }} product variations</div>
                     </div>
-                    <a href="search_catalog.html?category={{ cat.name | urlencode }}" class="order-link-btn">
+                    <a href="index.html?category={{ cat.name | urlencode }}" class="order-link-btn">
                         Browse Category 🛒
                     </a>
                 </div>

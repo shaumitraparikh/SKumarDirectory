@@ -77,8 +77,8 @@ class CatalogEndToEndTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn(f"Loaded {len(self.csv_rows)} items", result.stdout)
-        self.assertTrue((CATALOG_ROOT / "search_catalog.html").is_file())
-        self.assertTrue((CATALOG_ROOT / "search_catalog.html").is_file())
+        self.assertTrue((CATALOG_ROOT / "index.html").is_file())
+        self.assertTrue((CATALOG_ROOT / "index.html").is_file())
         self.assertTrue((CATALOG_ROOT / "print_catalog.html").is_file())
 
     def test_build_configuration_is_loaded_from_data(self):
@@ -106,7 +106,7 @@ class CatalogEndToEndTests(unittest.TestCase):
             check=False,
         )
         self.assertEqual(ignored_customer_data.returncode, 0)
-        search_html = (CATALOG_ROOT / "search_catalog.html").read_text(encoding="utf-8")
+        search_html = (CATALOG_ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn('id="buyerDetails"', search_html)
         self.assertIn('<details class="buyer-info"', search_html)
         self.assertIn('id="orderSummaryDetails"', search_html)
@@ -117,7 +117,7 @@ class CatalogEndToEndTests(unittest.TestCase):
         self.assertIn('id="billArchiveDialog"', search_html)
         self.assertIn('id="openBillsButton"', search_html)
         self.assertNotIn("client_data.csv", search_html)
-        seller_html = (CATALOG_ROOT / "search_catalog.html").read_text(encoding="utf-8")
+        seller_html = (CATALOG_ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn('id="sellerSaveButton"', seller_html)
         self.assertIn('tools/seller/seller_editor.js', seller_html)
         self.assertNotIn('tools/seller/seller_editor.js', search_html)
@@ -133,8 +133,8 @@ class CatalogEndToEndTests(unittest.TestCase):
             [row["sr_number"] for row in build_catalog.visible_catalog_items(rows)],
             ["1"],
         )
-        seller_html = (CATALOG_ROOT / "search_catalog.html").read_text(encoding="utf-8")
-        customer_html = (CATALOG_ROOT / "search_catalog.html").read_text(encoding="utf-8")
+        seller_html = (CATALOG_ROOT / "index.html").read_text(encoding="utf-8")
+        customer_html = (CATALOG_ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn('id="sellerSaveButton"', seller_html)
         self.assertNotIn("seller-tools", customer_html)
 
@@ -163,7 +163,7 @@ class CatalogEndToEndTests(unittest.TestCase):
         self.assertNotIn("sr_no", self.csv_fields)
         self.assertNotIn("group_number", self.csv_fields)
         self.assertNotIn("item_number", self.csv_fields)
-        search_html = (CATALOG_ROOT / "search_catalog.html").read_text(encoding="utf-8")
+        search_html = (CATALOG_ROOT / "index.html").read_text(encoding="utf-8")
         parser = EmbeddedCatalogParser()
         parser.feed(search_html)
         products = json.loads(parser.catalog_data)
@@ -190,7 +190,7 @@ class CatalogEndToEndTests(unittest.TestCase):
     def test_generated_page_assets_resolve_and_every_product_is_rendered(self):
         return
         expected_ids = {str(row['sr_number']) for row in self.csv_rows}
-        search_html = (CATALOG_ROOT / "search_catalog.html").read_text(encoding="utf-8")
+        search_html = (CATALOG_ROOT / "index.html").read_text(encoding="utf-8")
         printed_html = (CATALOG_ROOT / "print_catalog.html").read_text(encoding="utf-8")
         
         # Verify JSON payload in search_catalog contains all serials
@@ -215,7 +215,7 @@ class CatalogEndToEndTests(unittest.TestCase):
                 self.assertTrue(asset_path.is_file(), f"Missing generated page asset: {asset_url}")
 
     def test_catalog_pages_include_mobile_viewports_and_responsive_layouts(self):
-        for page_name in ("index.html", "search_catalog.html", "search_catalog.html", "print_catalog.html"):
+        for page_name in ("index.html", "index.html", "index.html", "print_catalog.html"):
             page_html = (CATALOG_ROOT / page_name).read_text(encoding="utf-8")
             self.assertIn('name="viewport"', page_html, f"{page_name} has no mobile viewport")
 
@@ -233,7 +233,7 @@ class CatalogEndToEndTests(unittest.TestCase):
         self.assertIn("minmax(min(100%, 320px), 1fr)", search_css)
 
     def test_order_price_breakdown_is_collapsible_with_subtotal_always_visible(self):
-        search_html = (CATALOG_ROOT / "search_catalog.html").read_text(encoding="utf-8")
+        search_html = (CATALOG_ROOT / "index.html").read_text(encoding="utf-8")
         disclosure_start = search_html.index('<details class="price-breakdown" id="priceBreakdown">')
         disclosure_end = search_html.index("</details>", disclosure_start)
         disclosure = search_html[disclosure_start:disclosure_end]

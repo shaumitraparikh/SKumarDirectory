@@ -31,7 +31,7 @@ try {
     if ($LASTEXITCODE -ne 0 -or $headAfter -ne $headBefore) {
         throw "The no-publish smoke test unexpectedly changed the Git commit."
     }
-    foreach ($page in @("search_catalog.html", "customer_catalog.html", "print_catalog.html")) {
+    foreach ($page in @("index.html", "customer_catalog.html", "print_catalog.html")) {
         if (-not (Test-Path -LiteralPath (Join-Path $repoRoot $page) -PathType Leaf)) {
             throw "The one-click updater did not generate $page."
         }
