@@ -45,7 +45,7 @@ CONFIG_FILE = SCRIPT_DIR / "data" / "config.json"
 DATA_FILE = SCRIPT_DIR / "data" / "catalog_data.csv"
 DATA_NOTES_FILE = SCRIPT_DIR / "data" / "catalog_data_notes.json"
 IMAGES_DIR = SCRIPT_DIR / "images"
-TEMPLATES_DIR = SCRIPT_DIR / "templates"
+TEMPLATES_DIR = SCRIPT_DIR / "app" / "templates"
 OUTPUT_DIR = SCRIPT_DIR
 
 

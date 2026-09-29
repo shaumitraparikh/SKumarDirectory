@@ -10,12 +10,12 @@ const CORE_ASSETS = [
     'index.html',
     'print_catalog.html',
     'photo_catalog.html',
-    'assets/css/search_catalog.css',
-    'assets/css/photo_catalog.css',
-    'assets/js/search_catalog.js',
-    'assets/js/commerce_core.js',
-    'assets/js/client_directory_core.js',
-    'assets/js/bill_archive.js',
+    'app/assets/css/search_catalog.css',
+    'app/assets/css/photo_catalog.css',
+    'app/assets/js/search_catalog.js',
+    'app/assets/js/commerce_core.js',
+    'app/assets/js/client_directory_core.js',
+    'app/assets/js/bill_archive.js',
     'data/client_data.csv'
 ];
 

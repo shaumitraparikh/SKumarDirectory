@@ -6,7 +6,7 @@
 <meta name="description" content="Search the S. Kumar & Bros insulating materials and electrical accessories catalog and request an order.">
 <meta name="theme-color" content="#102a43">
 <title>{{ company.name }} - POS / Search Catalog</title>
-<link rel="stylesheet" href="assets/css/search_catalog.css">
+<link rel="stylesheet" href="app/assets/css/search_catalog.css">
 <link rel="stylesheet" href="tools/seller/seller_editor.css" id="sellerCss" disabled>
 </head>
 <body data-catalog-version="{{ catalog_version }}">
@@ -471,10 +471,10 @@ if (isEditMode) {
     <div class="inv-footer">Thank you for your business.</div>
 </section>
 
-<script src="assets/js/client_directory_core.js"></script>
+<script src="app/assets/js/client_directory_core.js"></script>
 <script id="catalogData" type="application/json">{{ catalog_data | tojson }}</script>
-<script src="assets/js/commerce_core.js"></script>
-<script src="assets/js/bill_archive.js"></script>
+<script src="app/assets/js/commerce_core.js"></script>
+<script src="app/assets/js/bill_archive.js"></script>
 <script>
     if (isEditMode) {
         document.getElementById('sellerTools').style.display = 'block';
@@ -487,11 +487,11 @@ if (isEditMode) {
         if (cartBtn) cartBtn.style.display = 'none';
     }
 </script>
-<script src="assets/js/search_catalog.js?v={{ catalog_version }}"></script>
+<script src="app/assets/js/search_catalog.js?v={{ catalog_version }}"></script>
 <script>
     if ('serviceWorker' in navigator && !isEditMode && location.protocol.startsWith('http')) {
         window.addEventListener('load', function() {
-            navigator.serviceWorker.register('sw.js?v={{ catalog_version }}').then(function(reg) {
+            navigator.serviceWorker.register('app/sw.js?v={{ catalog_version }}').then(function(reg) {
                 reg.onupdatefound = function() {
                     var installing = reg.installing;
                     if (installing) {

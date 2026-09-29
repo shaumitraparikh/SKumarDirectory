@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const directory = require('../assets/js/client_directory_core');
+const directory = require('../app/assets/js/client_directory_core');
 
 const csv = '\uFEFFclient_id,name,business_name,phone,email,address,state,pincode,gstin\r\n'
     + 'C001,"Asha ""Ace"" Shah",Ace Electricals,9869905779,asha@example.in,'

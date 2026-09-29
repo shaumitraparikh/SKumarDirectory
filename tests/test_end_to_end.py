@@ -150,12 +150,12 @@ class CatalogEndToEndTests(unittest.TestCase):
         )
         self.assertEqual(ignored_bill.returncode, 0)
         bill_archive_script = (
-            CATALOG_ROOT / "assets" / "js" / "bill_archive.js"
+            CATALOG_ROOT / "app" / "assets" / "js" / "bill_archive.js"
         ).read_text(encoding="utf-8")
         self.assertIn("getDirectoryHandle(month, { create: true })", bill_archive_script)
         self.assertIn("BillArchive.prototype.listBills", bill_archive_script)
         self.assertIn("assets/js/bill_archive.js", (
-            CATALOG_ROOT / "templates" / "search_template.html"
+            CATALOG_ROOT / "app" / "templates" / "search_template.html"
         ).read_text(encoding="utf-8"))
 
     def test_search_payload_retains_all_csv_and_future_fields(self):
@@ -219,13 +219,13 @@ class CatalogEndToEndTests(unittest.TestCase):
             page_html = (CATALOG_ROOT / page_name).read_text(encoding="utf-8")
             self.assertIn('name="viewport"', page_html, f"{page_name} has no mobile viewport")
 
-        search_css = (CATALOG_ROOT / "assets" / "css" / "search_catalog.css").read_text(
+        search_css = (CATALOG_ROOT / "app" / "assets" / "css" / "search_catalog.css").read_text(
             encoding="utf-8"
         )
         self.assertIn("@media (max-width: 760px)", search_css)
         self.assertIn("@media (max-width: 380px)", search_css)
 
-        print_template = (CATALOG_ROOT / "templates" / "print_template.html").read_text(
+        print_template = (CATALOG_ROOT / "app" / "templates" / "print_template.html").read_text(
             encoding="utf-8"
         )
         self.assertIn("@media screen and (max-width: 700px)", print_template)

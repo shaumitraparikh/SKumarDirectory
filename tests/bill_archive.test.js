@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const { BillArchive, monthFor, safeFileName } = require('../assets/js/bill_archive');
+const { BillArchive, monthFor, safeFileName } = require('../app/assets/js/bill_archive');
 
 class MemoryStorage {
     constructor() {

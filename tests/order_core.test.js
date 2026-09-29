@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const commerce = require('../assets/js/commerce_core');
+const commerce = require('../app/assets/js/commerce_core');
 
 const validBuyer = {
     name: 'Test Buyer',
