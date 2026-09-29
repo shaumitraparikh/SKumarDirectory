@@ -900,11 +900,12 @@ if (isEditMode) {
         // Hide cart button in edit mode
         var cartBtn = document.querySelector('.cart-toggle-btn');
         if (cartBtn) cartBtn.style.display = 'none';
-    } else {
-        var script = document.createElement('script');
-        script.src = 'assets/js/search_catalog.js?v=cd912f2967';
-        document.body.appendChild(script);
     }
+
+    // Always load search_catalog.js
+    var searchScript = document.createElement('script');
+    searchScript.src = 'assets/js/search_catalog.js?v=cd912f2967';
+    document.body.appendChild(searchScript);
 </script>
 <script>
     if ('serviceWorker' in navigator && !isEditMode && location.protocol.startsWith('http')) {
