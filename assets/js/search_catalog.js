@@ -1027,7 +1027,7 @@ function fuzzyScore(text, query) {
         document.getElementById('discountTotal').innerText = formatAmount(discountTotal);
         document.getElementById('subTotal').innerText = formatAmount(subTotal);
         displayTaxBreakdown(getTaxBreakdown(subTotal), subTotal);
-        document.getElementById('placeOrderButton').disabled = keys.length === 0;
+        const placeBtn = document.getElementById('placeOrderButton'); if (placeBtn) placeBtn.disabled = keys.length === 0;
         saveCart();
     }
 
