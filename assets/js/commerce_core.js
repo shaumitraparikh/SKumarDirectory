@@ -29,11 +29,16 @@
             throw new RangeError('Item discount must be between 0% and 100%.');
         }
 
-        if (item.price === null || item.price === undefined || item.price === '') {
-            return { isQuoted: true, gross: null, discount: null, net: null };
+        let price = item.price;
+        if (price === null || price === undefined || price === '') {
+            if (item.customPrice !== undefined && item.customPrice !== null) {
+                price = item.customPrice;
+            } else {
+                return { isQuoted: true, gross: null, discount: null, net: null };
+            }
         }
 
-        const price = Number(item.price);
+        price = Number(price);
         if (!Number.isFinite(price) || price < 0) {
             throw new RangeError('Item price must be a non-negative number or left unpriced.');
         }
@@ -147,7 +152,7 @@
                     packing: String(item.packing || '')
                 },
                 quantity: Number(item.qty),
-                unit_price: line.isQuoted ? null : roundCurrency(Number(item.price)),
+                unit_price: line.isQuoted ? null : roundCurrency(Number(item.price !== null && item.price !== undefined && item.price !== '' ? item.price : item.customPrice)),
                 discount_percent: line.isQuoted ? 0 : Number(item.discountPct || 0),
                 gross_amount: line.isQuoted ? null : line.gross,
                 discount_amount: line.isQuoted ? null : line.discount,
