@@ -486,12 +486,8 @@ if (isEditMode) {
         var cartBtn = document.querySelector('.cart-toggle-btn');
         if (cartBtn) cartBtn.style.display = 'none';
     }
-    
-    // Always load search_catalog.js
-    var searchScript = document.createElement('script');
-    searchScript.src = 'assets/js/search_catalog.js?v={{ catalog_version }}';
-    document.body.appendChild(searchScript);
 </script>
+<script src="assets/js/search_catalog.js?v={{ catalog_version }}"></script>
 <script>
     if ('serviceWorker' in navigator && !isEditMode && location.protocol.startsWith('http')) {
         window.addEventListener('load', function() {
