@@ -80,7 +80,7 @@ function renderSavedBills(entries) {
             label.textContent = entry.reference;
             const meta = document.createElement('div');
             meta.className = 'bill-entry-meta';
-            meta.textContent = entry.storage === 'folder'
+            meta.textContent = (entry.storage === 'folder' || entry.storage === 'server')
                 ? `generated_bills/${entry.month}/${entry.fileName}`
                 : 'Saved in this browser archive';
             label.appendChild(meta);
@@ -99,15 +99,35 @@ function renderSavedBills(entries) {
 
 async function refreshSavedBills() {
     const status = document.getElementById('billArchiveStatus');
-    status.textContent = 'Loading saved bills…';
+    const chooseBtn = document.getElementById('chooseBillsFolderButton');
+    status.textContent = 'Loading saved bills...';
     try {
-        const entries = await billArchive.listBills();
+        let entries = [];
+        if (isLocalEnv) {
+            try {
+                const response = await fetch('/api/bills');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.bills) entries = data.bills;
+                    if (chooseBtn) chooseBtn.style.display = 'none';
+                    status.textContent = 'Showing bills from the server archive.';
+                }
+            } catch (e) {
+                console.log('Could not fetch bills from server:', e);
+            }
+        }
+        
+        if (entries.length === 0) {
+            entries = await billArchive.listBills();
+            status.textContent = billArchive.directoryHandle
+                ? 'Showing bills from the selected folder and this browser archive.'
+                : typeof window.showDirectoryPicker === 'function'
+                    ? 'Select your generated_bills folder to save and browse its monthly folders.'
+                    : 'Folder access is unavailable here; bills are kept in this browser and downloaded.';
+            if (chooseBtn && typeof window.showDirectoryPicker === 'function') chooseBtn.style.display = '';
+        }
+        
         renderSavedBills(entries);
-        status.textContent = billArchive.directoryHandle
-            ? 'Showing bills from the selected folder and this browser archive.'
-            : typeof window.showDirectoryPicker === 'function'
-                ? 'Select your generated_bills folder to save and browse its monthly folders.'
-                : 'Folder access is unavailable here; bills are kept in this browser and downloaded.';
     } catch (error) {
         console.error('Unable to read saved bills.', error);
         status.textContent = error.message || 'Could not read saved bills.';
@@ -149,7 +169,13 @@ document.getElementById('billArchiveList').addEventListener('click', event => {
     const button = event.target.closest('button[data-bill-id]');
     if (!button) return;
     const entry = visibleBills.get(button.dataset.billId);
-    if (entry) billArchive.openBill(entry);
+    if (entry) {
+        if (entry.storage === "server") {
+            window.open('/' + entry.path, '_blank', 'noopener');
+        } else {
+            billArchive.openBill(entry);
+        }
+    }
 });
 
 function updateCustomerSuggestions(query) {
@@ -1397,3 +1423,4 @@ function openLightbox(srNumber) {
     
     lightboxDialog.showModal();
 }
+

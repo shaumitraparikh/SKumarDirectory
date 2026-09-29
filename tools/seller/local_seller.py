@@ -256,6 +256,27 @@ class SellerHandler(SimpleHTTPRequestHandler):
         if not self.authorized_local_request():
             self.send_error(403, "Seller tools are available only over the local loopback server.")
             return
+            
+        if self.path == "/api/bills":
+            bills_dir = ROOT / "generated_bills"
+            bills = []
+            if bills_dir.exists() and bills_dir.is_dir():
+                import re as regex
+                for month_dir in bills_dir.iterdir():
+                    if month_dir.is_dir() and regex.match(r"^\d{4}-\d{2}$", month_dir.name):
+                        for bill_file in month_dir.iterdir():
+                            if bill_file.suffix == ".html":
+                                bills.append({
+                                    "id": f"{month_dir.name}/{bill_file.name}",
+                                    "month": month_dir.name,
+                                    "fileName": bill_file.name,
+                                    "storage": "server",
+                                    "reference": bill_file.stem,
+                                    "path": f"generated_bills/{month_dir.name}/{bill_file.name}"
+                                })
+            self.send_json(200, {"bills": bills})
+            return
+            
         if self.path == "/api/clients":
             self.send_json(200, {"clients": read_clients()})
             return
