@@ -959,11 +959,31 @@ function fuzzyScore(text, query) {
                     item.unit && `Unit: ${item.unit}`,
                     item.packing && `Pack: ${item.packing}`
                 ].filter(Boolean).join(' · ');
-                const rate = document.createElement('div');
+                let rate = document.createElement('div');
                 rate.className = 'cart-item-rate';
-                rate.textContent = item.price === null
-                    ? 'Price on request · seller will confirm'
-                    : `Unit price · ₹${formatAmount(item.price)}`;
+                if (item.price === null) {
+                    rate.classList.add('quote-edit-container');
+                    rate.style.display = 'flex';
+                    rate.style.alignItems = 'center';
+                    rate.style.gap = '8px';
+                    rate.innerHTML = '<label style="font-size: 0.8em; margin-right: 4px;">Quote Rate (\u20B9): </label><input type="number" class="quote-price-input" min="0" step="0.01" placeholder="Enter rate" style="width: 80px; padding: 2px;">';
+                    const input = rate.querySelector('input');
+                    if (item.customPrice !== undefined) {
+                        input.value = item.customPrice;
+                    }
+                    input.addEventListener('change', (e) => {
+                        const val = parseFloat(e.target.value);
+                        if (!isNaN(val) && val >= 0) {
+                            item.customPrice = val;
+                        } else {
+                            delete item.customPrice;
+                        }
+                        saveCart();
+                        renderCart();
+                    });
+                } else {
+                    rate.textContent = `Unit price \u2022 \u20B9${formatAmount(item.price)}`;
+                }
                 const controls = document.createElement('div');
                 controls.className = 'cart-qty-controls';
                 const decrease = document.createElement('button');
