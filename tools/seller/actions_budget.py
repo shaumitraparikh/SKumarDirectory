@@ -13,7 +13,7 @@ from urllib.request import Request, urlopen
 OWNER = "shaumitraparikh"
 REPOSITORY = "SKumarDirectory"
 WORKFLOW = "deploy-pages.yml"
-DEFAULT_MONTHLY_RUN_LIMIT = 20
+DEFAULT_MONTHLY_RUN_LIMIT = 500
 GITHUB_API = "https://api.github.com"
 
 
