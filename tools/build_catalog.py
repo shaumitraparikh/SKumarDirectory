@@ -540,11 +540,10 @@ def main():
     print(f"\n  Open the HTML files in a browser to view!")
     print(f"  Print catalog -> Ctrl+P -> Save as PDF for sharing")
     
-    if os.environ.get('CATALOG_NO_BROWSER') != '1':
+    if os.environ.get('CATALOG_NO_BROWSER') != '1' and os.environ.get('CI') != 'true':
         try:
             import webbrowser
-            webbrowser.open("http://127.0.0.1:8766/index.html")
-            print("\n  [OK] Opened seller catalog (start tools/seller/start_seller.bat first)")
+            webbrowser.open(customer_path.as_uri())
         except Exception:
             pass
     
