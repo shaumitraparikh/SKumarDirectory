@@ -9,7 +9,69 @@
 <link rel="stylesheet" href="assets/css/search_catalog.css">
 <link rel="stylesheet" href="tools/seller/seller_editor.css" id="sellerCss" disabled>
 </head>
-<body data-catalog-version="241a2bbe18">
+<body data-catalog-version="cd912f2967">
+
+<nav class="global-nav" style="background: #102a43; padding: 6px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 9999; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-family: 'Segoe UI', system-ui, sans-serif;">
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 0 auto;">
+        <a href="search_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🛒 POS & Search</a>
+        <a href="print_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">📄 Price List</a>
+        <a href="photo_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🖼️ Photo Gallery</a>
+    </div>
+</nav>
+
+<div class="unified-header" style="text-align: center; border-bottom: 2px solid #102a43; padding: 10px 15px; margin-bottom: 15px; font-family: 'Segoe UI', system-ui, sans-serif; background: #fff;">
+    <div class="business-names" style="text-align: center; margin-bottom: 5px; line-height: 1.1;">
+        <div style="font-size: 15px; font-weight: 700; color: #475569; margin: 0 0 2px 0; text-transform: uppercase; letter-spacing: 1px;">General Supply Corporation</div>
+        <h1 class="company-name" style="font-size: 32px; font-weight: bold; color: #102a43; margin: 0; letter-spacing: 1px;">S. Kumar &amp; Bros.</h1>
+    </div>
+
+
+<style>
+.contact-line { font-size: 11px; opacity: 0.85; margin: 0 auto 2px auto; max-width: 800px; line-height: 1.4; text-align: center; }
+.contact-line a { color: inherit; text-decoration: none; border-bottom: 1px dotted #888; transition: color 0.2s; }
+.contact-line a:hover { color: #2563eb; border-bottom-style: solid; }
+.c-item { display: inline-block; }
+.c-pipe { margin: 0 4px; opacity: 0.6; }
+@media (max-width: 600px) {
+    .contact-line { font-size: 12px; display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+    .contact-line:last-child { border-bottom: none; padding-bottom: 0; }
+    .c-pipe { display: none; }
+    .c-item { display: block; }
+}
+</style>
+<div class="contact-line">
+    <span class="c-item"><strong>Shaumitra G. Parikh</strong></span>
+    <span class="c-pipe">|</span>
+    <span class="c-item">Mobile: <a href="tel:+919821361314">9821361314</a>, <a href="tel:+918369398586">8369398586</a> &middot; <a href="tel:35989674">35989674</a></span>
+    <span class="c-pipe">|</span>
+    <span class="c-item">GSTIN: 27AAGPP1621C1Z5</span>
+</div>
+<div class="contact-line">
+    <span class="c-item"><strong>Amit G. Parikh</strong></span>
+    <span class="c-pipe">|</span>
+    <span class="c-item">Mobile: <a href="tel:+919869905779">9869905779</a> &middot; <a href="tel:45242910">45242910</a></span>
+    <span class="c-pipe">|</span>
+    <span class="c-item">GSTIN: 27ACJPP2955J1Z4</span>
+
+</div>
+<div class="contact-line" style="margin-top: 4px;">
+    <a href="https://maps.app.goo.gl/LwzbK7p13RpRza3u8" target="_blank" style="color: inherit; text-decoration: underline; text-decoration-color: #ccc;">3rd Central Building, Grd. Flr., 11, Bomanji Master Road, Mumbai - 400 002.</a>
+</div>
+
+
+    <div style="font-size: 10px; color: #666; max-width: 700px; margin: 0 auto; line-height: 1.3;">
+        <strong>Scope:</strong> Empire, Fibreglass, Cotton, Silicon, Teflon, PVC, Tube, Cable, Wire, Cloth, Tape &middot; Solder Items, Tester, Fuse Wire.
+    </div>
+
+
+</div>
+
+
+
+
+
+
+
 
 <script>
 // Check if we are running locally (which enables edit mode capabilities)
@@ -51,21 +113,7 @@ if (isEditMode) {
     </form>
 </dialog>
 
-<div class="header">
-    <h1>S. Kumar &amp; Bros</h1>
-    <p style="margin:4px 0 8px; font-size:14px; opacity:0.8;">Digital Search Catalog & Point of Sale</p>
-    <div style="font-size: 13px; opacity: 0.9; line-height: 1.5; max-width: 600px; margin: 0 auto;">
-        <p style="margin: 2px 0;">3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.</p>
-        <p style="margin: 2px 0;">Office phone: 022-49233982 |
 
-            Sales: 9869905779 (Amit G. Parikh) |
-
-            Sales: 9821361314, 8369398586 (Shaumitra G Parikh)
-
-        </p>
-
-    </div>
-</div>
 <div id="checkoutConfig" hidden
      data-provider="whatsapp"
      data-whatsapp-number="919869905779"
@@ -403,7 +451,7 @@ if (isEditMode) {
             </div>
         </div>
         <!-- Standard select maintained for full compatibility with scripts -->
-        <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" style="display: none;">
+        <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" class="search-dropdown">
             <option value="">All Categories</option>
 
             <option value="Adaptors &amp; Power Supplies">Adaptors &amp; Power Supplies</option>
@@ -530,13 +578,13 @@ if (isEditMode) {
     </div>
 
     <!-- Sort by Price / Default -->
-    <select id="sortBy" class="sort-select" aria-label="Sort products" onchange="filterCatalog()">
+    <select id="sortBy" aria-label="Sort products" onchange="filterCatalog()" class="search-dropdown">
         <option value="default">Sort: Default</option>
         <option value="price-asc">Price: Low to High (₹ ↑)</option>
         <option value="price-desc">Price: High to Low (₹ ↓)</option>
         <option value="name-asc">Name: A to Z</option>
     </select>
-    <input type="search" id="searchInput" aria-label="Search products" placeholder="Search by part, size, category, HSN, or serial number..." oninput="filterCatalog()" style="flex: 2 1 auto; min-width: 200px;">
+    <input type="search" id="searchInput" aria-label="Search products" placeholder="Search by part, size, category, HSN..." oninput="filterCatalog()" class="search-input-main">
     <button class="cart-toggle-btn" onclick="toggleCart()" aria-controls="cartDropdown" aria-expanded="false" style="flex: 0 0 auto;">
         Cart <span class="cart-badge" id="cartCountBadge">0</span>
     </button>
@@ -721,8 +769,11 @@ if (isEditMode) {
                 </div>
 
                 <div class="checkout-actions-group">
-                    <button class="print-btn" type="button" onclick="generateBill()">
-                        <span>🖨️ Print Proforma Invoice</span>
+                    <button class="print-btn" type="button" onclick="saveBillRequest()">
+                        <span>💾 Save Proforma Bill</span>
+                    </button>
+                    <button class="print-btn" id="printBillBtn" type="button" onclick="generateBill()" style="display: none; background: #627d98; margin-top: 8px;">
+                        <span>🖨️ Print Current Bill</span>
                     </button>
 
                     <div class="secondary-btn-row">
@@ -766,7 +817,7 @@ if (isEditMode) {
     <div class="inv-topline"></div>
     <div class="inv-header">
         <div class="inv-brand">
-            <p class="legal-name">GENERAL SUPPLY CORPORATION</p>
+            <p class="legal-name">S. Kumar &amp; Bros</p>
             <h1>S. Kumar &amp; Bros</h1>
             <p class="tagline">Manufacturers, Importers &amp; Stockist of Insulating Materials &amp; Electrical Accessories</p>
             <p>3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.</p>
@@ -843,7 +894,7 @@ if (isEditMode) {
     if (isEditMode) {
         document.getElementById('sellerTools').style.display = 'block';
         var script = document.createElement('script');
-        script.src = 'tools/seller/seller_editor.js?v=241a2bbe18';
+        script.src = 'tools/seller/seller_editor.js?v=cd912f2967';
         document.body.appendChild(script);
 
         // Hide cart button in edit mode
@@ -851,14 +902,14 @@ if (isEditMode) {
         if (cartBtn) cartBtn.style.display = 'none';
     } else {
         var script = document.createElement('script');
-        script.src = 'assets/js/search_catalog.js?v=241a2bbe18';
+        script.src = 'assets/js/search_catalog.js?v=cd912f2967';
         document.body.appendChild(script);
     }
 </script>
 <script>
     if ('serviceWorker' in navigator && !isEditMode && location.protocol.startsWith('http')) {
         window.addEventListener('load', function() {
-            navigator.serviceWorker.register('sw.js?v=241a2bbe18').then(function(reg) {
+            navigator.serviceWorker.register('sw.js?v=cd912f2967').then(function(reg) {
                 reg.onupdatefound = function() {
                     var installing = reg.installing;
                     if (installing) {

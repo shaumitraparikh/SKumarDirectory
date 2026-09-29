@@ -1,0 +1,23 @@
+{
+  "name": "SKumarDirectory",
+  "version": "1.0.0",
+  "description": "**General Supply Corporation / S. Kumar & Bros.**\r Price List & Product Catalog Generator",
+  "main": "sw.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shaumitraparikh/SKumarDirectory.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shaumitraparikh/SKumarDirectory/issues"
+  },
+  "homepage": "https://github.com/shaumitraparikh/SKumarDirectory#readme"
+}

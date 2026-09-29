@@ -494,6 +494,7 @@ function characterOverlap(a, b) {
 
 function fuzzyScore(text, query) {
     if (!query) return 1;
+    if (!text) return 0;
     if (text.includes(query)) return 1;
     
     const tokens = query.split(/\s+/).filter(Boolean);
