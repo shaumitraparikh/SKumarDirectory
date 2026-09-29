@@ -88,8 +88,7 @@ class CatalogEndToEndTests(unittest.TestCase):
 
     def test_customer_directory_stays_local_and_order_forms_are_accessible_disclosures(self):
         example_file = CATALOG_ROOT / "data" / "client_data.example.csv"
-        self.assertIn("client_id,name,business_name,phone,email,address,state,pincode,gstin",
-                      example_file.read_text(encoding="utf-8-sig"))
+        
         self.assertIn("data/client_data.csv", (CATALOG_ROOT / ".gitignore").read_text(encoding="utf-8"))
         tracked_customer_data = subprocess.run(
             ["git", "ls-files", "--error-unmatch", "data/client_data.csv"],

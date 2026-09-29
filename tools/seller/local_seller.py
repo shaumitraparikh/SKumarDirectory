@@ -84,7 +84,7 @@ def append_bill(order):
     file_exists = csv_file.exists()
     
     assigned_id = order.get('id', '')
-    if not assigned_id or 'PI-' in assigned_id or 'SK-' in assigned_id:
+    if not assigned_id or len(assigned_id) > 15 or 'PI-' in assigned_id:
         count = 0
         if file_exists:
             with csv_file.open(encoding="utf-8-sig", newline="") as f:
