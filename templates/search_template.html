@@ -156,7 +156,7 @@ if (isEditMode) {
             </div>
         </div>
         <!-- Standard select maintained for full compatibility with scripts -->
-        <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" style="display: none;">
+        <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" class="search-dropdown">
             <option value="">All Categories</option>
             {% for cat in sorted_categories %}
             <option value="{{ cat.name }}">{{ cat.name }}</option>
@@ -165,13 +165,13 @@ if (isEditMode) {
     </div>
 
     <!-- Sort by Price / Default -->
-    <select id="sortBy" class="sort-select" aria-label="Sort products" onchange="filterCatalog()">
+    <select id="sortBy" aria-label="Sort products" onchange="filterCatalog()" class="search-dropdown">
         <option value="default">Sort: Default</option>
         <option value="price-asc">Price: Low to High (₹ ↑)</option>
         <option value="price-desc">Price: High to Low (₹ ↓)</option>
         <option value="name-asc">Name: A to Z</option>
     </select>
-    <input type="search" id="searchInput" aria-label="Search products" placeholder="Search by part, size, category, HSN, or serial number..." oninput="filterCatalog()" style="flex: 2 1 auto; min-width: 200px;">
+    <input type="search" id="searchInput" aria-label="Search products" placeholder="Search by part, size, category, HSN..." oninput="filterCatalog()" class="search-input-main">
     <button class="cart-toggle-btn" onclick="toggleCart()" aria-controls="cartDropdown" aria-expanded="false" style="flex: 0 0 auto;">
         Cart <span class="cart-badge" id="cartCountBadge">0</span>
     </button>
