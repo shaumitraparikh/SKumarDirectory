@@ -199,36 +199,50 @@ function loadCustomerCsv(file) {
 }
 
 
-// Auto-load server client data if available
-fetch('http://127.0.0.1:8766/api/clients')
-    .then(response => response.ok ? response.json() : Promise.reject())
-    .then(data => {
-        if (data.clients && data.clients.length > 0) {
-            clientRecords = data.clients;
-            window.ClientDirectory.clients = data.clients;
+// Auto-load server client data if available locally, or fallback to static CSV
+var isLocalEnv = (location.hostname === '127.0.0.1' || location.hostname === 'localhost') && location.protocol !== 'https:';
+
+function loadStaticClientCsv() {
+    return fetch('data/client_data.csv')
+        .then(response => {
+            if (response.ok) return response.text();
+            throw new Error('No server client data found.');
+        })
+        .then(text => {
+            const records = ClientDirectory.parseCsv ? ClientDirectory.parseCsv(text) : [];
+            clientRecords = records;
+            window.ClientDirectory.clients = records;
             window.ClientDirectory.renderDataList();
-            document.getElementById('clientDirectoryStatus').textContent = '✓ ' + data.clients.length + ' saved customers ready to auto-fill.';
+            var statusEl = document.getElementById('clientDirectoryStatus');
+            if (statusEl) statusEl.textContent = '✓ ' + records.length + ' saved customers ready to auto-fill.';
             var btn = document.getElementById('loadClientsButton');
             if (btn) btn.style.display = 'none';
-        }
-    })
-    .catch(() => {
-        return fetch('data/client_data.csv')
-            .then(response => {
-                if (response.ok) return response.text();
-                throw new Error('No server client data found.');
-            })
-            .then(text => {
-                const records = ClientDirectory.parseCsv ? ClientDirectory.parseCsv(text) : [];
-                clientRecords = records;
-                window.ClientDirectory.clients = records;
+        })
+        .catch(() => { /* Silent failure */ });
+}
+
+if (isLocalEnv) {
+    fetch('http://127.0.0.1:8766/api/clients')
+        .then(response => response.ok ? response.json() : Promise.reject())
+        .then(data => {
+            if (data.clients && data.clients.length > 0) {
+                clientRecords = data.clients;
+                window.ClientDirectory.clients = data.clients;
                 window.ClientDirectory.renderDataList();
-                document.getElementById('clientDirectoryStatus').textContent = '✓ ' + records.length + ' saved customers ready to auto-fill.';
+                var statusEl = document.getElementById('clientDirectoryStatus');
+                if (statusEl) statusEl.textContent = '✓ ' + data.clients.length + ' saved customers ready to auto-fill.';
                 var btn = document.getElementById('loadClientsButton');
                 if (btn) btn.style.display = 'none';
-            });
-    })
-    .catch(() => { /* Silent failure */ });
+            } else {
+                loadStaticClientCsv();
+            }
+        })
+        .catch(() => {
+            loadStaticClientCsv();
+        });
+} else {
+    loadStaticClientCsv();
+}
 
 document.getElementById('loadClientsButton').addEventListener('click', () => {
 
