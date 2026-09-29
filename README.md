@@ -5,6 +5,13 @@ Digital Product Directory, Interactive POS/Ordering, Photo Catalog & Print Price
 
 ---
 
+> ### 📌 TL;DR
+> * **Browse Catalogs**: Open `index.html` (search & POS), `photo_catalog.html` (photos), or `print_catalog.html` (PDF print) directly in any browser. **100% static & offline — zero server needed.**
+> * **Update Catalog**: Edit `data/catalog_data.csv` in Excel → Double-click `update.bat`. It validates, rebuilds, tests, and auto-pushes to GitHub Pages.
+> * **Generate Invoices**: Create orders in `index.html` and click **Save Bill** to archive CSVs and invoices directly into `data/` on your PC.
+
+---
+
 ## ⚡ Quickstart
 
 ### 1. View & Use the Catalogs (Customers & Staff)
