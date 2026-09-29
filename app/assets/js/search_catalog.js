@@ -689,7 +689,15 @@ function fuzzyScore(text, query) {
         let matchCount = 0;
         const matchingEntries = [];
 
+        const isInitialLanding = !input && !selectedCategory;
+        
         catalogSearchIndex.forEach(entry => {
+            if (isInitialLanding) {
+                entry.score = 0;
+                entry.card.style.display = 'none';
+                return;
+            }
+
             const matchesCategory = !selectedCategory || entry.item.category === selectedCategory;
             if (!matchesCategory) {
                 entry.score = 0;
@@ -1321,6 +1329,7 @@ function fuzzyScore(text, query) {
                     grandTotal: getSubTotal() + Object.values(getTaxBreakdown(getSubTotal())).reduce((a, b) => a + b, 0)
                 }
             });
+            order.html = html; // include HTML for the server to save as PDF backup
             return fetch('/api/bills/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

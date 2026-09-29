@@ -141,7 +141,7 @@ class CatalogEndToEndTests(unittest.TestCase):
     def test_generated_bills_are_local_only_and_monthly_archive_is_available(self):
         ignore_file = (CATALOG_ROOT / ".gitignore").read_text(encoding="utf-8")
         self.assertIn("/generated_bills/*", ignore_file)
-        self.assertTrue((CATALOG_ROOT / "generated_bills" / ".gitkeep").is_file())
+        self.assertTrue((CATALOG_ROOT / "data" / "generated_bills" / ".gitkeep").is_file())
 
         ignored_bill = subprocess.run(
             ["git", "check-ignore", "--quiet", "generated_bills/2026-09/PI-test.html"],

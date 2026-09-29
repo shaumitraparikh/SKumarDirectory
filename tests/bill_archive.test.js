@@ -26,8 +26,13 @@ function makeDirectory(name) {
         queryPermission() { return Promise.resolve('granted'); },
         requestPermission() { return Promise.resolve('granted'); },
         getDirectoryHandle(month, options) {
-            assert.strictEqual(options.create, true);
-            if (!directories.has(month)) directories.set(month, makeDirectory(month));
+            if (options) {
+                assert.strictEqual(options.create, true);
+            }
+            if (!directories.has(month)) {
+                if (!options || !options.create) return Promise.reject(new Error('Not found'));
+                directories.set(month, makeDirectory(month));
+            }
             return Promise.resolve(directories.get(month));
         },
         getFileHandle(fileName, options) {
@@ -72,7 +77,7 @@ function run() {
     assert.strictEqual(safeFileName('../invoice'), 'invoice.html');
     assert.throws(() => safeFileName('../../'), /reference is invalid/);
 
-    const root = makeDirectory('generated_bills');
+    const root = makeDirectory('data');
     const storage = new MemoryStorage();
     const archive = new BillArchive({
         storage,
@@ -90,8 +95,9 @@ function run() {
         html: '<!doctype html><p>test bill</p>'
     }).then(function (result) {
         assert.strictEqual(result.storage, 'folder');
-        assert.ok(root.directories.has('2026-09'));
-        assert.ok(root.directories.get('2026-09').files.has('PI-20260926-000001.html'));
+        assert.ok(root.directories.has('generated_bills'));
+        assert.ok(root.directories.get('generated_bills').directories.has('2026-09'));
+        assert.ok(root.directories.get('generated_bills').directories.get('2026-09').files.has('PI-20260926-000001.html'));
         assert.strictEqual(storage.directory, root);
         return archive.saveBill({
             date: new Date(2026, 9, 2, 12),
@@ -113,7 +119,7 @@ function run() {
         }).then(function () {
             throw new Error('A differently named folder should not be accepted.');
         }, function (error) {
-            assert.ok(/Select the generated_bills folder/.test(error.message));
+            assert.ok(/Select the data folder/.test(error.message));
         });
     }).then(function () {
 

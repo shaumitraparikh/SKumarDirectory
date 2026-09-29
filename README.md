@@ -3,19 +3,11 @@
 **General Supply Corporation / S. Kumar & Bros.**
 Price List & Product Catalog Generator
 
-## Quick Start
+## Quickstart
 
-```bash
-# From this directory: validate the data and rebuild customer and seller pages
-python tools/build_catalog.py
-
-# Run the catalog and commerce tests
-python -m unittest discover -s tests -p "test_*.py"
-node tests/order_core.test.js
-node tests/client_directory.test.js
-node tests/bill_archive.test.js
-node tests/bill_archive.test.js
-```
+- **To update the catalog (Build & Push):** Double-click update.bat
+- **To test the seller app locally:** Double-click start.bat
+- **To stop the local server:** Double-click stop.bat
 
 This creates three files directly in the repository root:
 - **print_catalog.html** - Print-ready catalog (Ctrl+P in browser -> Save as PDF)

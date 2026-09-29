@@ -10,3 +10,4 @@ data/client_data.csv
 images_source_backup/
 images/sr_*
 .env
+.vscode/

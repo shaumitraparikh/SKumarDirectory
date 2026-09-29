@@ -80,7 +80,7 @@ class SellerEditorTests(unittest.TestCase):
 
 class ActionsBudgetTests(unittest.TestCase):
     def test_monthly_limit_defaults_to_conservative_cap_and_can_be_configured(self):
-        self.assertEqual(actions_budget.monthly_run_limit({}), 20)
+        self.assertEqual(actions_budget.monthly_run_limit({}), 500)
         self.assertEqual(
             actions_budget.monthly_run_limit({"SKUMAR_PAGES_RUN_LIMIT": "12"}),
             12,

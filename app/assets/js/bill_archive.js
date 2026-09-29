@@ -64,8 +64,8 @@
             mode: 'readwrite'
         });
         return Promise.resolve(selection).then(function (handle) {
-            if (handle.name !== 'generated_bills') {
-                throw new Error('Select the generated_bills folder so monthly bill folders are created in the requested location.');
+            if (handle.name !== 'data') {
+                throw new Error('Select the data folder so monthly bill folders are created in the requested location.');
             }
             self.directoryHandle = handle;
             return self.storage.setDirectory(handle).then(function () {
@@ -116,7 +116,10 @@
                     if (permission !== 'granted') {
                         throw new Error('Folder access was not granted. The bill was not written to generated_bills.');
                     }
-                    return selectedHandle.getDirectoryHandle(month, { create: true });
+                    return selectedHandle.getDirectoryHandle('generated_bills', { create: true });
+                })
+                .then(function (genBillsDir) {
+                    return genBillsDir.getDirectoryHandle(month, { create: true });
                 })
                 .then(function (monthDirectory) {
                     return monthDirectory.getFileHandle(fileName, { create: true });
@@ -154,7 +157,10 @@
                     cached.forEach(function (entry) {
                         if (entry.storage === 'folder') entries.delete(entry.id);
                     });
-                    return readEntries(self.directoryHandle).then(function (months) {
+                    return self.directoryHandle.getDirectoryHandle('generated_bills').catch(function() { return null; }).then(function(genBillsDir) {
+                        if (!genBillsDir) return [];
+                        return readEntries(genBillsDir);
+                    }).then(function (months) {
                         return months.reduce(function (chain, monthEntry) {
                             var month = monthEntry[0];
                             var monthHandle = monthEntry[1];

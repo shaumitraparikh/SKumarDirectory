@@ -120,6 +120,13 @@ def append_bill(order):
             writer.writeheader()
         writer.writerow(row)
         
+    html_payload = order.get('html')
+    if html_payload:
+        generated_dir = ROOT / "data" / "generated_bills" / month
+        generated_dir.mkdir(parents=True, exist_ok=True)
+        html_file = generated_dir / f"{assigned_id}.html"
+        html_file.write_text(html_payload, encoding="utf-8")
+        
     return row
 
 def read_bills():
