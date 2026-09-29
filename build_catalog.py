@@ -186,6 +186,14 @@ def group_by_category(items, images_dir):
         categories[cat_name]['products'].append(item)
 
     for category in categories.values():
+        if not category['image_path']:
+            for p in category['products']:
+                img = find_image(p.get('image_ref', ''), images_dir)
+                if img:
+                    category['image_path'] = img
+                    category['image_ref'] = p.get('image_ref', '')
+                    break
+
         for item in category['products']:
             item['display_image_path'] = item.get('image_path') or category['image_path']
             item['image_is_representative'] = not bool(item.get('image_path')) and bool(category['image_path'])
