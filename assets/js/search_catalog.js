@@ -171,7 +171,25 @@ document.getElementById('billArchiveList').addEventListener('click', event => {
     const entry = visibleBills.get(button.dataset.billId);
     if (entry) {
         if (entry.storage === "server") {
-            window.open('/' + entry.path, '_blank', 'noopener');
+            try {
+                const order = JSON.parse(entry.order_json);
+                cart = order.items || {};
+                const buyer = order.buyer || {};
+                document.getElementById('buyerName').value = buyer.name || '';
+                document.getElementById('buyerPhone').value = buyer.phone || '';
+                document.getElementById('buyerEmail').value = buyer.email || '';
+                document.getElementById('buyerAddress').value = buyer.address || '';
+                if (buyer.state) document.getElementById('buyerState').value = buyer.state;
+                if (buyer.pincode) document.getElementById('buyerPincode').value = buyer.pincode;
+                if (buyer.gstin) document.getElementById('buyerGstin').value = buyer.gstin;
+                
+                renderCart();
+                document.getElementById('billArchiveDialog').close();
+                showToast("Order restored to cart!");
+            } catch (e) {
+                console.error("Failed to restore bill", e);
+                showToast("Failed to restore order from server data.");
+            }
         } else {
             billArchive.openBill(entry);
         }
@@ -1027,7 +1045,7 @@ function fuzzyScore(text, query) {
         document.getElementById('discountTotal').innerText = formatAmount(discountTotal);
         document.getElementById('subTotal').innerText = formatAmount(subTotal);
         displayTaxBreakdown(getTaxBreakdown(subTotal), subTotal);
-        const placeBtn = document.getElementById('placeOrderButton'); if (placeBtn) placeBtn.disabled = keys.length === 0;
+        document.getElementById('placeOrderButton').disabled = keys.length === 0;
         saveCart();
     }
 
@@ -1249,6 +1267,30 @@ function fuzzyScore(text, query) {
     function archiveCurrentBill(date) {
         const reference = document.getElementById('pInvNo').innerText.trim();
         const html = standaloneBillHtml();
+        
+        if (isLocalEnv) {
+            const order = CommerceCore.createOrder({
+                id: reference,
+                createdAt: date.toISOString(),
+                buyer: readBuyerDetails(),
+                items: cart,
+                totals: {
+                    subTotal: getSubTotal(),
+                    grandTotal: getSubTotal() + Object.values(getTaxBreakdown(getSubTotal())).reduce((a, b) => a + b, 0)
+                }
+            });
+            return fetch('/api/bills/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(order)
+            }).then(r => r.json()).then(res => {
+                if (res.success) {
+                    return { storage: 'server', entry: { fileName: res.added.id + '.html', month: res.added.createdAt.substring(0, 7) } };
+                }
+                return billArchive.saveBill({ date, reference, html });
+            }).catch(() => billArchive.saveBill({ date, reference, html }));
+        }
+        
         return billArchive.saveBill({ date, reference, html });
     }
 

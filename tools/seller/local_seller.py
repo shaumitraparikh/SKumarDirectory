@@ -68,6 +68,71 @@ def append_client(new_client):
     return True
 
 
+BILLS_DIR = ROOT / "data" / "bills"
+
+def append_bill(order):
+    BILLS_DIR.mkdir(parents=True, exist_ok=True)
+    created_at = order.get('createdAt', '')
+    if not created_at:
+        return None
+        
+    month = created_at[:7]  # YYYY-MM
+    csv_file = BILLS_DIR / f"{month}.csv"
+    
+    fieldnames = ['id', 'createdAt', 'buyer_name', 'buyer_phone', 'subTotal', 'grandTotal', 'order_json']
+    
+    row = {
+        'id': order.get('id', ''),
+        'createdAt': created_at,
+        'buyer_name': order.get('buyer', {}).get('name', ''),
+        'buyer_phone': order.get('buyer', {}).get('phone', ''),
+        'subTotal': order.get('totals', {}).get('subTotal', 0),
+        'grandTotal': order.get('totals', {}).get('grandTotal', 0),
+        'order_json': json.dumps(order)
+    }
+    
+    file_exists = csv_file.exists()
+    
+    # Read existing to prevent duplicates
+    if file_exists:
+        with csv_file.open(encoding="utf-8-sig", newline="") as f:
+            reader = csv.DictReader(f)
+            for existing_row in reader:
+                if existing_row.get('id') == row['id']:
+                    return row  # Already exists
+                    
+    with csv_file.open(mode="a", encoding="utf-8-sig", newline="") as dest:
+        writer = csv.DictWriter(dest, fieldnames=fieldnames)
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow(row)
+        
+    return row
+
+def read_bills():
+    BILLS_DIR.mkdir(parents=True, exist_ok=True)
+    bills = []
+    import re as regex
+    for csv_file in BILLS_DIR.glob("*.csv"):
+        if not regex.match(r"^\d{4}-\d{2}\.csv$", csv_file.name):
+            continue
+        month = csv_file.stem
+        with csv_file.open(encoding="utf-8-sig", newline="") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                bills.append({
+                    "id": row.get('id'),
+                    "month": month,
+                    "createdAt": row.get('createdAt'),
+                    "reference": f"{row.get('id')} - {row.get('buyer_name')}",
+                    "buyer_name": row.get('buyer_name'),
+                    "grandTotal": row.get('grandTotal'),
+                    "storage": "server",
+                    "order_json": row.get('order_json')
+                })
+    return sorted(bills, key=lambda x: x.get('createdAt', ''), reverse=True)
+
+
 def read_catalog():
     raw = DATA_FILE.read_bytes()
     with DATA_FILE.open(encoding="utf-8-sig", newline="") as source:
@@ -258,23 +323,7 @@ class SellerHandler(SimpleHTTPRequestHandler):
             return
             
         if self.path == "/api/bills":
-            bills_dir = ROOT / "generated_bills"
-            bills = []
-            if bills_dir.exists() and bills_dir.is_dir():
-                import re as regex
-                for month_dir in bills_dir.iterdir():
-                    if month_dir.is_dir() and regex.match(r"^\d{4}-\d{2}$", month_dir.name):
-                        for bill_file in month_dir.iterdir():
-                            if bill_file.suffix == ".html":
-                                bills.append({
-                                    "id": f"{month_dir.name}/{bill_file.name}",
-                                    "month": month_dir.name,
-                                    "fileName": bill_file.name,
-                                    "storage": "server",
-                                    "reference": bill_file.stem,
-                                    "path": f"generated_bills/{month_dir.name}/{bill_file.name}"
-                                })
-            self.send_json(200, {"bills": bills})
+            self.send_json(200, {"bills": read_bills()})
             return
             
         if self.path == "/api/clients":
@@ -323,6 +372,10 @@ class SellerHandler(SimpleHTTPRequestHandler):
             payload = json.loads(self.rfile.read(content_length))
             if self.path == "/api/clients/add":
                 added = append_client(payload)
+                self.send_json(200, {"success": True, "added": added})
+                return
+            if self.path == "/api/bills/add":
+                added = append_bill(payload)
                 self.send_json(200, {"success": True, "added": added})
                 return
             if self.path == "/api/catalog/save":
