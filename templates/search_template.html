@@ -156,7 +156,7 @@ if (isEditMode) {
             </div>
         </div>
         <!-- Standard select maintained for full compatibility with scripts -->
-        <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" class="search-dropdown">
+        <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" class="search-dropdown" style="display: none;">
             <option value="">All Categories</option>
             {% for cat in sorted_categories %}
             <option value="{{ cat.name }}">{{ cat.name }}</option>
@@ -511,5 +511,6 @@ if (isEditMode) {
         });
     }
 </script>
-<script>window.INJECTED_CLIENT_DATA = {{ client_data | tojson }};</script>`n</body>
+<script>window.INJECTED_CLIENT_DATA = {{ client_data | tojson }};</script>
+</body>
 </html>
