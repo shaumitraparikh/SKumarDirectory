@@ -1155,7 +1155,7 @@ if (!lightboxDialog) {
     document.body.appendChild(lightboxDialog);
 }
 
-function openLightbox(item.sr_number) {
+function openLightbox(srNumber) {
     const entry = catalogSearchIndex.find(e => e.item.sr_number === srNumber);
     if (!entry) return;
     const item = entry.item;
