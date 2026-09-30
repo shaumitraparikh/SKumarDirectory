@@ -284,9 +284,14 @@ function setupClientData(records) {
         window.ClientDirectory.renderDataList();
     }
     var statusEl = document.getElementById('clientDirectoryStatus');
-    if (statusEl) statusEl.textContent = '? ' + records.length + ' saved customers ready to auto-fill.';
+    if (statusEl) {
+        statusEl.textContent = records.length
+            ? `${records.length} saved customer${records.length === 1 ? '' : 's'} ready to auto-fill.`
+            : 'Load data/client_data.csv to auto-fill customers, or enter details manually.';
+    }
 }
 
+// Public Pages never embed customer CSV. Optional local seller API can still supply clients.
 if (isLocalEnv) {
     fetch('/api/clients')
         .then(response => response.json())
@@ -319,32 +324,32 @@ document.getElementById('saveClientButton')?.addEventListener('click', () => {
         return;
     }
     
-    // Attempt to save to backend (works if seller server is running)
-    fetch('http://127.0.0.1:8000/api/clients/add', {
+    const statusEl = document.getElementById('clientDirectoryStatus');
+    const saveLocally = () => {
+        clientRecords.push(newClient);
+        setupClientData(clientRecords);
+        if (statusEl) {
+            statusEl.textContent = 'Customer saved in this browser session. Export/update client_data.csv to keep it permanently.';
+        }
+    };
+
+    if (!isLocalEnv) {
+        saveLocally();
+        return;
+    }
+
+    fetch('/api/clients/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newClient)
     }).then(res => res.json()).then(data => {
         if (data.success) {
-            const statusEl = document.getElementById('clientDirectoryStatus');
-            if (statusEl) statusEl.textContent = '? Customer saved to database!';
-            
-            // Re-fetch clean list if localEnv, else append locally
-            if (isLocalEnv) {
-                fetch('/api/clients').then(r=>r.json()).then(d=>setupClientData(d.clients));
-            } else {
-                clientRecords.push(newClient);
-                setupClientData(clientRecords);
-                statusEl.textContent = '? Customer saved to database!';
-            }
+            if (statusEl) statusEl.textContent = 'Customer saved to the local seller directory.';
+            return fetch('/api/clients').then(r => r.json()).then(d => setupClientData(d.clients || []));
         }
-    }).catch(e => {
-        console.log('Backend not available for saving client.', e);
-        // Fallback local UI update if server is not running
-        clientRecords.push(newClient);
-        setupClientData(clientRecords);
-        const statusEl = document.getElementById('clientDirectoryStatus');
-        if (statusEl) statusEl.textContent = '? Customer saved in browser (start seller server to save to CSV).';
+        saveLocally();
+    }).catch(() => {
+        saveLocally();
     });
 });
 
@@ -352,6 +357,12 @@ document.getElementById('customerLookup').addEventListener('input', event => {
     updateCustomerSuggestions(event.target.value);
     const selectedCustomer = ClientDirectory.findCustomer(clientRecords, event.target.value);
     if (selectedCustomer) applySelectedCustomer(selectedCustomer);
+});
+
+document.getElementById('clientCsvFile')?.addEventListener('change', event => {
+    const file = event.target.files && event.target.files[0];
+    if (file) loadCustomerCsv(file);
+    event.target.value = '';
 });
 
 function toggleCart(forceOpen) {
@@ -689,15 +700,7 @@ function fuzzyScore(text, query) {
         let matchCount = 0;
         const matchingEntries = [];
 
-        const isInitialLanding = !input && !selectedCategory;
-        
         catalogSearchIndex.forEach(entry => {
-            if (isInitialLanding) {
-                entry.score = 0;
-                entry.card.style.display = 'none';
-                return;
-            }
-
             const matchesCategory = !selectedCategory || entry.item.category === selectedCategory;
             if (!matchesCategory) {
                 entry.score = 0;
@@ -705,6 +708,7 @@ function fuzzyScore(text, query) {
                 return;
             }
 
+            // Empty search + All Categories (or a chosen category) shows every matching product.
             if (input) {
                 entry.score = fuzzyScore(entry.searchableText, input);
             } else {
@@ -1334,9 +1338,8 @@ function fuzzyScore(text, query) {
             return;
         }
         const now = new Date();
-        // Determine ID to use (empty string allows server to auto-generate SK-YYYYMM-0001)
         const reference = document.getElementById('pInvNo').innerText.trim() || '';
-        
+
         const order = CommerceCore.createOrder({
             id: reference,
             createdAt: now.toISOString(),
@@ -1347,9 +1350,9 @@ function fuzzyScore(text, query) {
                 grandTotal: getSubTotal() + Object.values(getTaxBreakdown(getSubTotal())).reduce((a, b) => a + b, 0)
             }
         });
-        
-        try {
-            if (isLocalEnv) {
+
+        if (isLocalEnv) {
+            try {
                 const response = await fetch('/api/bills/add', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1361,19 +1364,19 @@ function fuzzyScore(text, query) {
                     document.getElementById('pInvNo').innerText = res.added.id;
                     document.getElementById('printBillBtn').style.display = 'block';
                     refreshSavedBills();
-                } else {
-                    showToast("Failed to save bill.");
+                    return;
                 }
-            } else {
-                showToast("Save only works on the local seller server.");
+            } catch (e) {
+                console.warn('Local bill API unavailable; saving via browser/folder archive.', e);
             }
-        } catch (e) {
-            console.error(e);
-            showToast("Network error saving bill.");
         }
+
+        // Static Pages / offline: prepare proforma and archive with File System Access / download
+        generateBill({ printAfter: false });
     }
 
-    function generateBill() {
+    function generateBill(options = {}) {
+        const printAfter = options.printAfter !== false;
         if (Object.keys(cart).length === 0) {
             alert("Cart is empty! Please add items before printing a bill.");
             return;
@@ -1459,6 +1462,9 @@ function fuzzyScore(text, query) {
         document.getElementById('pQuoteNote').hidden = !totals.includesUnpricedItems;
 
         const printBill = () => window.print();
+        const finishWithoutPrint = () => {
+            document.getElementById('printBillBtn').style.display = 'block';
+        };
         try {
             archiveCurrentBill(now).then(result => {
                 const message = result.storage === 'folder'
@@ -1468,25 +1474,31 @@ function fuzzyScore(text, query) {
                         : `Downloaded ${result.entry.fileName}; browser storage is unavailable.`;
                 document.getElementById('billArchiveStatus').textContent = message;
                 showToast(message);
+                finishWithoutPrint();
                 if (result.entry.archiveWarning) {
                     document.getElementById('billArchiveStatus').textContent +=
                         ` Archive detail: ${result.entry.archiveWarning}`;
                 }
             }).catch(error => {
                 if (error.name === 'AbortError') {
-                    document.getElementById('billArchiveStatus').textContent = 'Bill print: Folder selection cancelled.';
+                    document.getElementById('billArchiveStatus').textContent = 'Bill save: Folder selection cancelled.';
+                    finishWithoutPrint();
                     return;
                 }
                 console.error('The proforma invoice could not be archived.', error);
-                const message = `Bill printed but not saved: ${error.message || 'archive error'}`;
+                const message = `Bill prepared but not saved: ${error.message || 'archive error'}`;
                 document.getElementById('billArchiveStatus').textContent = message;
                 showToast(message);
-            }).finally(printBill);
+                finishWithoutPrint();
+            }).finally(() => {
+                if (printAfter) printBill();
+            });
         } catch (error) {
             console.error('The proforma invoice could not be prepared for archiving.', error);
             document.getElementById('billArchiveStatus').textContent =
-                `Bill printed but not saved: ${error.message || 'archive error'}`;
-            printBill();
+                `Bill prepared but not saved: ${error.message || 'archive error'}`;
+            finishWithoutPrint();
+            if (printAfter) printBill();
         }
     }
 
@@ -1494,7 +1506,22 @@ function fuzzyScore(text, query) {
     initCategoryPicker();
     restoreCart();
     renderCart();
-    filterCatalog();
+
+    // Deep link from photo catalog: index.html?category=Capacitors
+    const categoryParam = new URLSearchParams(location.search).get('category');
+    if (categoryParam && typeof window.selectCategory === 'function') {
+        const nativeSelect = document.getElementById('categoryFilter');
+        const hasOption = nativeSelect && Array.from(nativeSelect.options).some(
+            opt => opt.value === categoryParam
+        );
+        if (hasOption) {
+            window.selectCategory(categoryParam);
+        } else {
+            filterCatalog();
+        }
+    } else {
+        filterCatalog();
+    }
 
 
 // Lightbox logic
@@ -1530,7 +1557,8 @@ function openLightbox(srNumber) {
     if (!entry) return;
     const item = entry.item;
     
-    document.getElementById('lightboxImg').src = item.display_image_path || 'assets/placeholder.png';
+    document.getElementById('lightboxImg').src = item.display_image_path || '';
+    document.getElementById('lightboxImg').alt = item.item_name || 'Product image';
     document.getElementById('lightboxTitle').textContent = item.item_name;
     document.getElementById('lightboxPrice').textContent = item.list_price ? `₹${item.list_price}` : 'Price on request';
     document.getElementById('lightboxQty').value = document.getElementById('qty-' + srNumber) ? document.getElementById('qty-' + srNumber).value : 1;

@@ -9,12 +9,15 @@ Reads:
     - data/config.json  : Company info and settings
     - data/catalog_data.csv : Product data
     - images/           : Product images
-    - templates/        : Jinja2 HTML templates
+    - app/templates/    : Jinja2 HTML templates
 
-Produces:
-    - print_catalog.html  : Full print-ready catalog
-    - index.html : Local seller catalog
-    - customer_catalog.html : Customer-facing searchable catalog
+Produces (repo root):
+    - index.html          : Interactive POS / search catalog
+    - print_catalog.html  : Print-ready price list
+    - photo_catalog.html  : Visual photo catalog
+
+Customer directory (data/client_data.csv) is never embedded in public HTML.
+Staff load it locally via the checkout "Load Customer List" control.
 """
 
 import csv
@@ -377,15 +380,9 @@ def build_search_catalog(config, categories, items, env):
     ))
     sorted_categories = sorted(categories, key=lambda c: clean_cat_sort_key(c['name']))
     catalog_version = compute_catalog_version()
-    
-    # Load client data to embed directly in the HTML for offline auto-complete
+
+    # Never embed client_data.csv into public HTML (privacy). Runtime load via CSV picker.
     client_data = []
-    import csv
-    client_file = SCRIPT_DIR / "data" / "client_data.csv"
-    if client_file.exists():
-        with open(client_file, 'r', encoding='utf-8-sig', newline='') as f:
-            reader = csv.DictReader(f)
-            client_data = list(reader)
 
     html = template.render(
         client_data=client_data,

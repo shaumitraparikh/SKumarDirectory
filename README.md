@@ -8,9 +8,10 @@ Digital Product Directory, Interactive POS/Ordering, Photo Catalog & Print Price
 > ### 📌 TL;DR & Quick Instructions
 >
 > 🛒 **1. Find Products & Take Orders (`index.html`)**
-> * **Search**: Start typing any name, size, category, or HSN (e.g. `teflon 1mm`, `soldron 25w`, `hsn 3917`).
+> * **Browse**: Opens with **All Categories** showing the full catalog. Narrow with the category picker or search.
+> * **Search**: Type any name, size, category, or HSN (e.g. `teflon 1mm`, `soldron 25w`, `hsn 3917`).
 > * **Add Items**: Click **Add** (for priced items) or **Add to Quote** (enter custom quote rate directly in cart).
-> * **Save / Print Bill**: Open the Cart → enter customer details → click **Save Bill** (select your `data` folder once to auto-save CSV/PDF invoices directly to your PC) or **Print Proforma Bill**.
+> * **Save / Print Bill**: Open the Cart → enter customer details → click **Save Proforma Bill** (select your `data` folder once to auto-save invoices) or **Print Current Bill**.
 > * **WhatsApp**: Click **Send WhatsApp Order** to forward the formatted itemized order directly to sales.
 >
 > 🖼️ **2. Visual Photo Catalog (`photo_catalog.html`)**
@@ -46,22 +47,24 @@ Double-click any of the standalone HTML files to open them in your browser, or v
 ## 📖 How to Use the System
 
 ### 🔍 1. Interactive Search & POS (`index.html`)
-* **Landing View**: Starts clean with search focus. Type any keyword (e.g. `teflon 10mm`, `soldron 25w`, `hsn 3917`) or pick a category from the dropdown to instantly display products.
+* **Landing View**: Shows the full catalog under **All Categories**. Use the category picker or search box to narrow results.
 * **Fuzzy & Smart Search**: Matches prefixes, exact terms, and minor spelling typos.
 * **Adding to Cart / Quote**:
   * For items with listed prices, click **Add** to add to cart.
   * For *Price on Request* items, click **Add to Quote**; you can enter custom quote rates directly inside the cart drawer.
 * **Customer Directory**:
-  * Type customer name/GSTIN in the checkout panel to auto-fill details, or click **Load Customer List (CSV)** to pull from `data/client_data.csv`.
+  * Copy `data/client_data.example.csv` to `data/client_data.csv` (git-ignored), then use **Load Customer List (CSV)** in checkout. Customer GSTINs are never published to GitHub Pages.
+  * Type customer name/GSTIN in the checkout panel to auto-fill details once the CSV is loaded.
 * **Proforma Invoice & Billing**:
   * Generates a branded proforma invoice with CGST/SGST tax breakdown, customer GSTIN, and company contact details.
-  * Click **Save Bill**: Select the `data` folder when prompted by your browser to auto-archive bills into `data/bills/` (CSV summary) and `data/generated_bills/` (HTML/PDF backup).
+  * Click **Save Proforma Bill**: On GitHub Pages / static hosting, the browser archives bills into `data/bills/` and `data/generated_bills/` via the File System Access API (or downloads a copy).
 * **WhatsApp Order Handoff**:
   * Click **Send WhatsApp Order** to format the entire order into a structured WhatsApp message sent directly to the sales desk.
 
 ### 🖼️ 2. Visual Photo Catalog (`photo_catalog.html`)
 * Filter quickly using the interactive top pill buttons (Tubes & Sleeves, Cables, Capacitors, Soldering, etc.).
-* Click any product thumbnail to open a high-res lightbox preview with full specifications and quick "Add to Cart" capability.
+* Click any product thumbnail to open a high-res lightbox preview with specifications.
+* Use **Order from POS** links to open `index.html?category=...` with that category pre-selected.
 
 ### 📄 3. Print Catalog (`print_catalog.html`)
 * Designed strictly for A4 printing and PDF export.
@@ -138,7 +141,12 @@ Edit **`data/config.json`** to change phone numbers, addresses, sales contact na
 
 ## 🧪 Testing & Validation
 
-Run all automated checks locally from PowerShell or CMD:
+Install Python build deps once:
+```bash
+pip install -r requirements.txt
+```
+
+Run all automated checks locally:
 ```bash
 # Rebuild the catalog HTML files manually
 python tools/build_catalog.py

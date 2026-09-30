@@ -43,17 +43,16 @@
         <h1 class="biz-main">S. Kumar &amp; Bros.</h1>
     </div>
     <div class="contact-group">
+{% for contact in company.sales_contacts %}
         <div class="contact-row">
-            <strong>Shaumitra G. Parikh</strong> <span class="c-pipe">|</span> Mobile: <a href="tel:+919821361314">9821361314</a>, <a href="tel:+918369398586">8369398586</a> &middot; <a href="tel:35989674">35989674</a> <span class="c-pipe">|</span> GSTIN: 27AAGPP1621C1Z5
+            <strong>{{ contact.name }}</strong> <span class="c-pipe">|</span> Mobile: {% for mobile in contact.mobile.split(',') %}{% set m = mobile.strip() %}<a href="tel:+91{{ m }}">{{ m }}</a>{% if not loop.last %}, {% endif %}{% endfor %} &middot; <a href="tel:{{ contact.phone }}">{{ contact.phone }}</a> <span class="c-pipe">|</span> GSTIN: {{ contact.gstin }}
         </div>
-        <div class="contact-row">
-            <strong>Amit G. Parikh</strong> <span class="c-pipe">|</span> Mobile: <a href="tel:+919869905779">9869905779</a> &middot; <a href="tel:45242910">45242910</a> <span class="c-pipe">|</span> GSTIN: 27ACJPP2955J1Z4
-        </div>
+{% endfor %}
         <div class="contact-row" style="margin-top: 5px;">
-            <a href="https://maps.app.goo.gl/LwzbK7p13RpRza3u8" target="_blank" rel="noopener">3rd Central Building, Grd. Flr., 11, Bomanji Master Road, Mumbai - 400 002.</a>
+            <a href="https://maps.app.goo.gl/LwzbK7p13RpRza3u8" target="_blank" rel="noopener">{{ company.address }}</a>
         </div>
         <div class="scope-row">
-            <strong>Scope:</strong> Empire, Fibreglass, Cotton, Silicon, Teflon, PVC, Tube, Cable, Wire, Cloth, Tape &middot; Solder Items, Tester, Fuse Wire.
+            <strong>Scope:</strong> {{ company.product_range }}
         </div>
     </div>
 </div>
@@ -154,9 +153,11 @@
                             <div class="lookup-input-row">
                                 <input type="search" id="customerLookup" list="clientSuggestions" autocomplete="off" placeholder="Search by name, business, phone, or GSTIN to auto-fill...">
                                 <datalist id="clientSuggestions"></datalist>
-                                <button type="button" class="load-clients-btn" id="saveClientButton" title="Save this customer to database">💾 Save / Update</button>
+                                <label class="load-clients-btn" for="clientCsvFile" title="Load local client_data.csv">📁 Load CSV</label>
+                                <input type="file" id="clientCsvFile" accept=".csv,text/csv" hidden>
+                                <button type="button" class="load-clients-btn" id="saveClientButton" title="Save this customer for this browser session">💾 Save / Update</button>
                             </div>
-                            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Saved customers auto-fill your order details instantly.</span>
+                            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Load data/client_data.csv to auto-fill, or enter details manually.</span>
                         </div>
 
                         <!-- 2-Column Form Fields -->

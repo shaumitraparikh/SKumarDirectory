@@ -1,12 +1,11 @@
 // Service Worker for S. Kumar & Bros Catalog
 // Provides instant caching, offline support, and automatic cache updates on new builds.
 
-const CACHE_VERSION = 'v-20260928';
+const CACHE_VERSION = 'v-20260929';
 const CACHE_NAME = 'skumar-catalog-' + CACHE_VERSION;
 
 const CORE_ASSETS = [
     './',
-    'index.html',
     'index.html',
     'print_catalog.html',
     'photo_catalog.html',
@@ -16,7 +15,8 @@ const CORE_ASSETS = [
     'app/assets/js/commerce_core.js',
     'app/assets/js/client_directory_core.js',
     'app/assets/js/bill_archive.js',
-    'data/client_data.csv'
+    'data/config.json',
+    'data/catalog_data.csv'
 ];
 
 self.addEventListener('install', event => {
@@ -46,7 +46,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
 
-    // Bypass caching for seller API (port 8766), non-GET, and edit mode
+    // Bypass caching for seller API, non-GET, and edit mode
     if (event.request.method !== 'GET' ||
         url.port === '8766' ||
         url.search.indexOf('edit=true') > -1 ||
@@ -73,7 +73,7 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // Static assets (CSS, JS, images, CSV): Stale-While-Revalidate
+    // Static assets (CSS, JS, images): Stale-While-Revalidate
     event.respondWith(
         caches.match(event.request).then(cachedResponse => {
             const fetchPromise = fetch(event.request).then(networkResponse => {
