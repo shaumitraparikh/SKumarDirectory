@@ -21,7 +21,7 @@ for /f "delims=" %%B in ('git branch --show-current') do set "CURRENT_BRANCH=%%B
 if not "%CURRENT_BRANCH%"=="main" goto :wrong_branch
 
 echo Checking that main is synchronized with origin...
-git fetch origin main
+git fetch origin
 if errorlevel 1 goto :error
 for /f "delims=" %%H in ('git rev-parse HEAD') do set "LOCAL_HEAD=%%H"
 for /f "delims=" %%H in ('git rev-parse origin/main') do set "REMOTE_HEAD=%%H"
