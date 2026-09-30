@@ -19,6 +19,10 @@ assert.strictEqual(
     directory.findCustomer(customers, 'Asha "Ace" Shah · Ace Electricals · 9869905779'),
     customers[0]
 );
+assert.strictEqual(directory.findCustomer(customers, 'Asha "Ace" Shah'), customers[0]);
+assert.strictEqual(directory.findCustomer(customers, 'Ace Electricals'), customers[0]);
+assert.strictEqual(directory.findCustomer(customers, '9869905779'), customers[0]);
+assert.strictEqual(directory.findCustomer(customers, '27ACJPP2955J1Z4'), customers[0]);
 assert.strictEqual(directory.findCustomer(customers, 'not a customer'), null);
 assert.deepStrictEqual(directory.parseCsv(
     'customer name,company,mobile,delivery address,state,pin code\n'

@@ -206,61 +206,104 @@ document.getElementById('billArchiveList').addEventListener('click', event => {
 
 function updateCustomerSuggestions(query) {
     const suggestions = document.getElementById('clientSuggestions');
+    if (!suggestions) return;
     suggestions.replaceChildren();
-    if (!query || !window.ClientDirectory) return;
+    if (!query || !window.ClientDirectory || !Array.isArray(clientRecords)) return;
     const normalizedQuery = query.trim().toLocaleLowerCase();
+    if (!normalizedQuery) return;
     clientRecords
         .filter(customer => Object.values(customer).some(value =>
             String(value).toLocaleLowerCase().includes(normalizedQuery)
         ))
-        .slice(0, 50)
+        .slice(0, 30)
         .forEach(customer => {
             const option = document.createElement('option');
             option.value = ClientDirectory.displayLabel(customer);
+            if (customer.gstin) {
+                option.label = `GST: ${customer.gstin}`;
+            }
             suggestions.appendChild(option);
         });
 }
 
 function applySelectedCustomer(customer) {
-    document.getElementById('buyerName').value = customer.business_name || customer.name || '';
-    document.getElementById('buyerPhone').value = customer.phone || '';
-    document.getElementById('buyerEmail').value = customer.email || '';
-    document.getElementById('buyerAddress').value = customer.address || '';
-    const stateInput = document.getElementById('buyerState');
-    const matchingState = Array.from(stateInput.options).find(option =>
-        option.value.toLocaleLowerCase() === (customer.state || '').toLocaleLowerCase()
-    );
-    stateInput.value = matchingState ? matchingState.value : '';
-    document.getElementById('buyerPincode').value = customer.pincode || '';
-    document.getElementById('buyerGstin').value = customer.gstin || '';
-    document.getElementById('buyerDetails').open = true;
-    document.getElementById('clientDirectoryStatus').textContent =
-        'Customer details filled in. Review and edit them before submitting the order.';
+    if (!customer) return;
+    const nameField = document.getElementById('buyerName');
+    const phoneField = document.getElementById('buyerPhone');
+    const emailField = document.getElementById('buyerEmail');
+    const addressField = document.getElementById('buyerAddress');
+    const stateField = document.getElementById('buyerState');
+    const pinField = document.getElementById('buyerPincode');
+    const gstinField = document.getElementById('buyerGstin');
+
+    if (nameField) nameField.value = customer.business_name || customer.name || '';
+    if (phoneField) phoneField.value = customer.phone || '';
+    if (emailField) emailField.value = customer.email || '';
+    if (addressField) addressField.value = customer.address || '';
+    if (stateField) {
+        const matchingState = Array.from(stateField.options).find(option =>
+            option.value.toLocaleLowerCase() === (customer.state || '').toLocaleLowerCase()
+        );
+        stateField.value = matchingState ? matchingState.value : '';
+    }
+    if (pinField) pinField.value = customer.pincode || '';
+    if (gstinField) gstinField.value = customer.gstin || '';
+
+    // Auto-open additional details if address/state/email exists
+    const extraDetails = document.getElementById('buyerExtraFields');
+    if (extraDetails && (customer.address || customer.email || customer.state || customer.pincode)) {
+        extraDetails.open = true;
+    }
+
+    const clearBtn = document.getElementById('clearClientButton');
+    if (clearBtn) clearBtn.style.display = 'inline-flex';
+
+    const statusEl = document.getElementById('clientDirectoryStatus');
+    if (statusEl) {
+        const displayName = customer.business_name || customer.name || 'Customer';
+        statusEl.innerHTML = `<span class="autofill-success">✓ Auto-filled: <strong>${displayName}</strong></span>`;
+    }
+}
+
+function clearCustomerFields() {
+    ['buyerName', 'buyerPhone', 'buyerEmail', 'buyerAddress', 'buyerState', 'buyerPincode', 'buyerGstin', 'customerLookup'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    const clearBtn = document.getElementById('clearClientButton');
+    if (clearBtn) clearBtn.style.display = 'none';
+    const statusEl = document.getElementById('clientDirectoryStatus');
+    if (statusEl) {
+        statusEl.textContent = clientRecords.length
+            ? `${clientRecords.length} customers ready. Search above to auto-fill.`
+            : 'Enter details manually or load customer CSV.';
+    }
 }
 
 function loadCustomerCsv(file) {
     const status = document.getElementById('clientDirectoryStatus');
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-        status.textContent = 'Customer CSV is larger than 5 MB. Please choose a smaller file.';
+        if (status) status.textContent = 'Customer CSV is larger than 5 MB. Please choose a smaller file.';
         return;
     }
     file.text().then(contents => {
         const records = ClientDirectory.parseCsv(contents);
         clientRecords = records;
-        document.getElementById('clientSuggestions').replaceChildren();
-        document.getElementById('customerLookup').value = '';
-        status.textContent = records.length
-            ? `${records.length} customer record${records.length === 1 ? '' : 's'} loaded for this browser session.`
-            : 'No customer records found. You can still enter customer details manually.';
+        const sugg = document.getElementById('clientSuggestions');
+        if (sugg) sugg.replaceChildren();
+        const lookup = document.getElementById('customerLookup');
+        if (lookup) lookup.value = '';
+        if (status) {
+            status.textContent = records.length
+                ? `${records.length} customer record${records.length === 1 ? '' : 's'} loaded.`
+                : 'No customer records found. You can still enter customer details manually.';
+        }
     }).catch(error => {
         console.error('Unable to load the customer CSV.', error);
-        status.textContent = error.message || 'Could not read this CSV. Check its format and try again.';
+        if (status) status.textContent = error.message || 'Could not read this CSV. Check its format and try again.';
     });
 }
-
-
-
 
 function setupClientData(records) {
     if (!records || !Array.isArray(records)) records = [];
@@ -272,8 +315,8 @@ function setupClientData(records) {
     var statusEl = document.getElementById('clientDirectoryStatus');
     if (statusEl) {
         statusEl.textContent = records.length
-            ? `${records.length} saved customer${records.length === 1 ? '' : 's'} ready to auto-fill.`
-            : 'Load data/client_data.csv to auto-fill customers, or enter details manually.';
+            ? `${records.length} customers ready. Search above to auto-fill.`
+            : 'Enter details below or load a customer CSV.';
     }
 }
 
@@ -281,13 +324,13 @@ setupClientData(window.INJECTED_CLIENT_DATA || []);
 
 document.getElementById('saveClientButton')?.addEventListener('click', () => {
     const newClient = {
-        name: document.getElementById('buyerName').value,
-        phone: document.getElementById('buyerPhone').value,
-        email: document.getElementById('buyerEmail').value,
-        address: document.getElementById('buyerAddress').value,
-        state: document.getElementById('buyerState').value,
-        pincode: document.getElementById('buyerPincode').value,
-        gstin: document.getElementById('buyerGstin').value,
+        name: (document.getElementById('buyerName') || {}).value || '',
+        phone: (document.getElementById('buyerPhone') || {}).value || '',
+        email: (document.getElementById('buyerEmail') || {}).value || '',
+        address: (document.getElementById('buyerAddress') || {}).value || '',
+        state: (document.getElementById('buyerState') || {}).value || '',
+        pincode: (document.getElementById('buyerPincode') || {}).value || '',
+        gstin: (document.getElementById('buyerGstin') || {}).value || '',
     };
     if (!newClient.name && !newClient.gstin) {
         alert('Please enter a name or GSTIN to save the customer.');
@@ -295,22 +338,27 @@ document.getElementById('saveClientButton')?.addEventListener('click', () => {
     }
     
     const statusEl = document.getElementById('clientDirectoryStatus');
-    const saveLocally = () => {
-        clientRecords.push(newClient);
-        setupClientData(clientRecords);
-        if (statusEl) {
-            statusEl.textContent = 'Customer saved in this browser session. Export/update client_data.csv to keep it permanently.';
+    clientRecords.push(newClient);
+    setupClientData(clientRecords);
+    if (statusEl) {
+        statusEl.innerHTML = '<span class="autofill-success">✓ Customer saved for this session.</span>';
+    }
+});
+
+const lookupInput = document.getElementById('customerLookup');
+if (lookupInput) {
+    const handleLookup = event => {
+        updateCustomerSuggestions(event.target.value);
+        const selectedCustomer = ClientDirectory.findCustomer(clientRecords, event.target.value);
+        if (selectedCustomer) {
+            applySelectedCustomer(selectedCustomer);
         }
     };
+    lookupInput.addEventListener('input', handleLookup);
+    lookupInput.addEventListener('change', handleLookup);
+}
 
-    saveLocally();
-});
-
-document.getElementById('customerLookup').addEventListener('input', event => {
-    updateCustomerSuggestions(event.target.value);
-    const selectedCustomer = ClientDirectory.findCustomer(clientRecords, event.target.value);
-    if (selectedCustomer) applySelectedCustomer(selectedCustomer);
-});
+document.getElementById('clearClientButton')?.addEventListener('click', clearCustomerFields);
 
 document.getElementById('clientCsvFile')?.addEventListener('change', event => {
     const file = event.target.files && event.target.files[0];

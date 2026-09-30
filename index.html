@@ -8,7 +8,7 @@
 <title>S. Kumar &amp; Bros - POS / Search Catalog</title>
 <link rel="stylesheet" href="app/assets/css/search_catalog.css">
 </head>
-<body data-catalog-version="e50a9e8fe4">
+<body data-catalog-version="a202f22749">
 
 <nav class="global-nav" style="background: #102a43; padding: 6px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 9999; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-family: 'Segoe UI', system-ui, sans-serif;">
     <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 0 auto;">
@@ -609,18 +609,23 @@
                     <div class="buyer-fields-wrap">
                         <!-- Quick Customer Lookup Bar -->
                         <div class="customer-lookup-box">
-                            <label for="customerLookup" class="lookup-label">🔍 Find existing customer (optional)</label>
+                            <div class="lookup-header-row">
+                                <label for="customerLookup" class="lookup-label">🔍 Find existing customer</label>
+                                <div class="lookup-actions">
+                                    <label class="load-clients-btn" for="clientCsvFile" title="Load client_data.csv">📁 CSV</label>
+                                    <input type="file" id="clientCsvFile" accept=".csv,text/csv" hidden>
+                                    <button type="button" class="load-clients-btn" id="saveClientButton" title="Save this customer">💾 Save</button>
+                                    <button type="button" class="load-clients-btn clear-btn" id="clearClientButton" onclick="clearCustomerFields()" title="Clear customer fields" style="display: none;">✕ Clear</button>
+                                </div>
+                            </div>
                             <div class="lookup-input-row">
                                 <input type="search" id="customerLookup" list="clientSuggestions" autocomplete="off" placeholder="Search by name, business, phone, or GSTIN to auto-fill...">
                                 <datalist id="clientSuggestions"></datalist>
-                                <label class="load-clients-btn" for="clientCsvFile" title="Load local client_data.csv">📁 Load CSV</label>
-                                <input type="file" id="clientCsvFile" accept=".csv,text/csv" hidden>
-                                <button type="button" class="load-clients-btn" id="saveClientButton" title="Save this customer for this browser session">💾 Save / Update</button>
                             </div>
-                            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Load data/client_data.csv to auto-fill, or enter details manually.</span>
+                            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Load data/client_data.csv to auto-fill customers, or enter details manually.</span>
                         </div>
 
-                        <!-- 2-Column Form Fields -->
+                        <!-- Simplified Core Form Fields -->
                         <div class="buyer-form-grid">
                             <div class="form-group span-2">
                                 <label for="buyerName">Name / Business Name <span class="required-star">*</span></label>
@@ -633,42 +638,50 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="buyerEmail">Email Address (optional)</label>
-                                <input type="email" id="buyerEmail" autocomplete="email" maxlength="254" placeholder="name@example.com">
-                            </div>
-
-                            <div class="form-group span-2">
-                                <label for="buyerAddress">Delivery Address</label>
-                                <textarea id="buyerAddress" autocomplete="street-address" maxlength="400" placeholder="Building, street, area, city" rows="2"></textarea>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="buyerState">State / Union Territory</label>
-                                <select id="buyerState" autocomplete="address-level1">
-                                    <option value="">Select state / UT</option>
-                                    <option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
-                                    <option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option>
-                                    <option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option>
-                                    <option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option>
-                                    <option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option>
-                                    <option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
-                                    <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option>
-                                    <option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option>
-                                    <option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option>
-                                    <option>Uttarakhand</option><option>West Bengal</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="buyerPincode">PIN Code</label>
-                                <input type="text" id="buyerPincode" autocomplete="postal-code" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="6-digit PIN">
-                            </div>
-
-                            <div class="form-group span-2">
                                 <label for="buyerGstin">Customer GSTIN (optional)</label>
                                 <input type="text" id="buyerGstin" maxlength="15" autocapitalize="characters" placeholder="15-character GSTIN">
                             </div>
                         </div>
+
+                        <!-- Collapsible Additional Details (Delivery Address, State, PIN, Email) -->
+                        <details class="buyer-extra-details" id="buyerExtraFields">
+                            <summary class="buyer-extra-summary">
+                                <span>📍 + Additional Details (Delivery Address, State, PIN, Email)</span>
+                            </summary>
+                            <div class="buyer-extra-grid">
+                                <div class="form-group span-2">
+                                    <label for="buyerAddress">Delivery Address</label>
+                                    <input type="text" id="buyerAddress" autocomplete="street-address" maxlength="400" placeholder="Building, street, area, city">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="buyerState">State / Union Territory</label>
+                                    <select id="buyerState" autocomplete="address-level1">
+                                        <option value="">Select state / UT</option>
+                                        <option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
+                                        <option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option>
+                                        <option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option>
+                                        <option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option>
+                                        <option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option>
+                                        <option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
+                                        <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option>
+                                        <option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option>
+                                        <option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option>
+                                        <option>Uttarakhand</option><option>West Bengal</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="buyerPincode">PIN Code</label>
+                                    <input type="text" id="buyerPincode" autocomplete="postal-code" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="6-digit PIN">
+                                </div>
+
+                                <div class="form-group span-2">
+                                    <label for="buyerEmail">Email Address (optional)</label>
+                                    <input type="email" id="buyerEmail" autocomplete="email" maxlength="254" placeholder="name@example.com">
+                                </div>
+                            </div>
+                        </details>
                     </div>
                 </details>
             </div>
@@ -884,11 +897,11 @@
 <script src="app/assets/js/bill_archive.js"></script>
 <script>
     </script>
-<script src="app/assets/js/search_catalog.js?v=e50a9e8fe4"></script>
+<script src="app/assets/js/search_catalog.js?v=a202f22749"></script>
 <script>
     if ('serviceWorker' in navigator  && location.protocol.startsWith('http')) {
         window.addEventListener('load', function() {
-            navigator.serviceWorker.register('app/sw.js?v=e50a9e8fe4').then(function(reg) {
+            navigator.serviceWorker.register('app/sw.js?v=a202f22749').then(function(reg) {
                 reg.onupdatefound = function() {
                     var installing = reg.installing;
                     if (installing) {

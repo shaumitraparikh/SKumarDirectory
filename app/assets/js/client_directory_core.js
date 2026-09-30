@@ -82,12 +82,64 @@
     }
 
     function displayLabel(customer) {
-        return [customer.name, customer.business_name, customer.phone]
-            .filter(Boolean).join(' · ');
+        if (!customer) return '';
+        const parts = [customer.name];
+        if (customer.business_name && String(customer.business_name).toLowerCase() !== String(customer.name || '').toLowerCase()) {
+            parts.push(customer.business_name);
+        }
+        if (customer.phone) parts.push(customer.phone);
+        return parts.filter(Boolean).join(' · ');
     }
 
-    function findCustomer(customers, label) {
-        return customers.find(customer => displayLabel(customer) === label) || null;
+    function findCustomer(customers, query) {
+        if (!customers || !Array.isArray(customers) || !query) return null;
+        const trimmed = String(query).trim();
+        if (!trimmed) return null;
+        const lower = trimmed.toLowerCase();
+
+        // 1. Exact or case-insensitive displayLabel match (e.g. from datalist selection)
+        let found = customers.find(c => {
+            const dl = displayLabel(c);
+            return dl === trimmed || dl.toLowerCase() === lower;
+        });
+        if (found) return found;
+
+        // 2. Exact match on GSTIN (case-insensitive)
+        found = customers.find(c => c.gstin && c.gstin.trim().toLowerCase() === lower);
+        if (found) return found;
+
+        // 3. Exact match on phone number (comparing digits)
+        const digitsOnly = trimmed.replace(/\D/g, '');
+        if (digitsOnly.length >= 7) {
+            found = customers.find(c => {
+                if (!c.phone) return false;
+                const cDigits = String(c.phone).replace(/\D/g, '');
+                return cDigits === digitsOnly || (digitsOnly.length === 10 && cDigits.endsWith(digitsOnly));
+            });
+            if (found) return found;
+        }
+
+        // 4. Match on name, business name, or client ID
+        found = customers.find(c =>
+            (c.business_name && c.business_name.trim().toLowerCase() === lower) ||
+            (c.name && c.name.trim().toLowerCase() === lower) ||
+            (c.client_id && String(c.client_id).trim().toLowerCase() === lower)
+        );
+        if (found) return found;
+
+        // 5. If query contains " · ", match segments
+        if (trimmed.includes(' · ')) {
+            const segments = trimmed.split(' · ').map(s => s.trim().toLowerCase());
+            found = customers.find(c => {
+                const cName = (c.name || '').trim().toLowerCase();
+                const cBiz = (c.business_name || '').trim().toLowerCase();
+                const cPhone = (c.phone || '').trim().toLowerCase();
+                return segments.includes(cName) || segments.includes(cBiz) || (cPhone && segments.includes(cPhone));
+            });
+            if (found) return found;
+        }
+
+        return null;
     }
 
     return { parseCsv, displayLabel, findCustomer };
