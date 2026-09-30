@@ -1084,7 +1084,7 @@
     </section>
 
     <!-- Section 2: Complete 60 Categories Directory -->
-    <section id="allCategoriesSection" style="margin-top: 40px;">
+    <section id="allCategoriesSection" style="margin-top: 40px; display: none;">
         <div class="section-title-wrap">
             <h2 class="section-title">
                 <span>📦</span> Complete Product Directory (All 60 Categories)
@@ -2177,7 +2177,7 @@ function filterByChip(type, btn) {
         if (searchInput) searchInput.value = '';
         filterPhotoCards();
         document.getElementById('featuredDocxSection').style.display = '';
-        document.getElementById('allCategoriesSection').style.display = '';
+        document.getElementById('allCategoriesSection').style.display = 'none';
     } else if (type === 'complete') {
         if (searchInput) searchInput.value = '';
         filterPhotoCards();
@@ -2186,6 +2186,7 @@ function filterByChip(type, btn) {
         document.getElementById('allCategoriesSection').scrollIntoView({ behavior: 'smooth' });
     } else {
         document.getElementById('featuredDocxSection').style.display = '';
+        document.getElementById('allCategoriesSection').style.display = 'none';
         if (searchInput) searchInput.value = type;
         filterPhotoCards();
     }
