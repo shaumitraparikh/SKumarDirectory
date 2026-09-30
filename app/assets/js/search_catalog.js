@@ -675,6 +675,26 @@ document.getElementById('saveClientButton')?.addEventListener('click', () => {
     }
 });
 
+function clearCustomerDetails() {
+    const fieldIds = ['customerLookup', 'buyerName', 'buyerPhone', 'buyerEmail', 'buyerAddress', 'buyerState', 'buyerPincode', 'buyerGstin'];
+    fieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    hideCustomerDropdown();
+    const statusEl = document.getElementById('clientDirectoryStatus');
+    if (statusEl) {
+        statusEl.innerHTML = clientRecords.length
+            ? `${clientRecords.length} saved customer${clientRecords.length === 1 ? '' : 's'} ready to search & auto-fill.`
+            : 'Search by name, phone, or GSTIN to auto-fill, or enter details below.';
+    }
+    showToast('Customer details cleared');
+    document.getElementById('customerLookup')?.focus();
+}
+
+window.clearCustomerDetails = clearCustomerDetails;
+document.getElementById('clearCustomerButton')?.addEventListener('click', clearCustomerDetails);
+
 const lookupInput = document.getElementById('customerLookup');
 if (lookupInput) {
     lookupInput.addEventListener('focus', () => {

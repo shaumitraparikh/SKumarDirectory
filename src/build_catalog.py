@@ -452,7 +452,7 @@ def build_search_catalog(config, categories, items, env):
     catalog_version = compute_catalog_version()
 
     client_data = []
-    client_csv = SCRIPT_DIR / "data" / "client_data.csv"
+    client_csv = Path('data/client_data.csv')
     if client_csv.is_file():
         with open(client_csv, 'r', encoding='utf-8') as cf:
             reader = csv.DictReader(cf)
