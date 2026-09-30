@@ -42,7 +42,7 @@ billArchive.restoreDirectory().catch(error => {
 });
 
 let allSavedBills = [];
-let visibleBills = new Map();
+
 
 function formatMonthLabel(monthStr) {
     if (!monthStr) return 'Unknown Date';

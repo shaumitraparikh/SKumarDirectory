@@ -92,7 +92,12 @@ def load_csv_data(csv_path):
             if '\ufffd' in item.get('packing', ''):
                 item['packing'] = ''
                 
-            item['image_path'] = find_image(item.get('image_ref', ''), IMAGES_DIR)
+            ref = item.get('image_ref', '').strip()
+            if ref and '.' in ref and '.' in item.get('sr_number', ''):
+                if ref.split('.')[0] != item['sr_number'].split('.')[0]:
+                    ref = ''
+                    item['image_ref'] = ''
+            item['image_path'] = find_image(ref, IMAGES_DIR)
             
             items.append(item)
 
@@ -246,7 +251,13 @@ def group_by_category(items, images_dir):
         
         categories[cat_name]['products'].append(item)
 
+    def parse_sr_sort_key(sr):
+        parts = str(sr).split('.')
+        return [int(p) if p.isdigit() else p for p in parts]
+
     for category in categories.values():
+        category['products'].sort(key=lambda p: parse_sr_sort_key(p['sr_number']))
+
         if not category['image_path']:
             for p in category['products']:
                 img = find_image(p.get('image_ref', ''), images_dir)
@@ -266,7 +277,11 @@ def group_by_category(items, images_dir):
                 item['display_image_path'] = find_image_for_sr(item['sr_number'], category['image_path']) or category['image_path']
                 item['image_is_representative'] = not bool(item.get('image_path')) and bool(item['display_image_path'])
     
-    return list(categories.values())
+    sorted_categories = sorted(
+        categories.values(),
+        key=lambda c: min(parse_sr_sort_key(p['sr_number']) for p in c['products']) if c['products'] else [9999]
+    )
+    return sorted_categories
 
 
 def paginate_categories(categories, items_per_page=60):
