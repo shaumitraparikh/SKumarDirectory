@@ -117,19 +117,6 @@ async function refreshSavedBills() {
     status.textContent = 'Loading saved bills...';
     try {
         let entries = [];
-        if (isLocalEnv) {
-            try {
-                const response = await fetch('/api/bills');
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.bills) entries = data.bills;
-                    if (chooseBtn) chooseBtn.style.display = 'none';
-                    status.textContent = 'Showing bills from the server archive.';
-                }
-            } catch (e) {
-                console.log('Could not fetch bills from server:', e);
-            }
-        }
         
         if (entries.length === 0) {
             entries = await billArchive.listBills();
@@ -273,8 +260,7 @@ function loadCustomerCsv(file) {
 }
 
 
-// Auto-load server client data if available locally, or fallback to injected JSON
-var isLocalEnv = (location.hostname === '127.0.0.1' || location.hostname === 'localhost') && location.protocol !== 'https:';
+
 
 function setupClientData(records) {
     if (!records || !Array.isArray(records)) records = [];
@@ -291,23 +277,7 @@ function setupClientData(records) {
     }
 }
 
-// Public Pages never embed customer CSV. Optional local seller API can still supply clients.
-if (isLocalEnv) {
-    fetch('/api/clients')
-        .then(response => response.json())
-        .then(data => {
-            if (data.clients) {
-                setupClientData(data.clients);
-            } else {
-                setupClientData(window.INJECTED_CLIENT_DATA || []);
-            }
-        })
-        .catch(() => {
-            setupClientData(window.INJECTED_CLIENT_DATA || []);
-        });
-} else {
-    setupClientData(window.INJECTED_CLIENT_DATA || []);
-}
+setupClientData(window.INJECTED_CLIENT_DATA || []);
 
 document.getElementById('saveClientButton')?.addEventListener('click', () => {
     const newClient = {
@@ -333,24 +303,7 @@ document.getElementById('saveClientButton')?.addEventListener('click', () => {
         }
     };
 
-    if (!isLocalEnv) {
-        saveLocally();
-        return;
-    }
-
-    fetch('/api/clients/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newClient)
-    }).then(res => res.json()).then(data => {
-        if (data.success) {
-            if (statusEl) statusEl.textContent = 'Customer saved to the local seller directory.';
-            return fetch('/api/clients').then(r => r.json()).then(d => setupClientData(d.clients || []));
-        }
-        saveLocally();
-    }).catch(() => {
-        saveLocally();
-    });
+    saveLocally();
 });
 
 document.getElementById('customerLookup').addEventListener('input', event => {
@@ -1351,25 +1304,7 @@ function fuzzyScore(text, query) {
             }
         });
 
-        if (isLocalEnv) {
-            try {
-                const response = await fetch('/api/bills/add', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(order)
-                });
-                const res = await response.json();
-                if (res.success && res.added) {
-                    showToast(`Bill saved as ${res.added.id}!`);
-                    document.getElementById('pInvNo').innerText = res.added.id;
-                    document.getElementById('printBillBtn').style.display = 'block';
-                    refreshSavedBills();
-                    return;
-                }
-            } catch (e) {
-                console.warn('Local bill API unavailable; saving via browser/folder archive.', e);
-            }
-        }
+
 
         // Static Pages / offline: prepare proforma and archive with File System Access / download
         generateBill({ printAfter: false });
