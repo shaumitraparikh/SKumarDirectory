@@ -19,31 +19,51 @@
 </nav>
 
 <style>
-.unified-header { text-align: center; padding: 15px; margin-bottom: 20px; background: #fff; font-family: 'Segoe UI', system-ui, sans-serif; border-bottom: 3px solid #102a43; }
-.biz-sub { font-size: 16px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 5px 0; }
-.biz-main { font-size: 34px; font-weight: 900; color: #0f172a; margin: 0 0 10px 0; letter-spacing: 0.5px; }
-.biz-address { font-size: 15px; color: #334155; margin-bottom: 12px; font-weight: 500; }
-.contact-block { font-size: 15px; color: #1e293b; line-height: 1.4; margin-bottom: 15px; }
-.contact-person { margin-bottom: 6px; }
-.tagline { font-size: 15px; font-weight: 600; color: #b91c1c; margin-bottom: 8px; letter-spacing: 0.5px; }
-.scope { font-size: 14px; color: #475569; margin-bottom: 8px; font-style: italic; }
-.footer-line { font-size: 14px; color: #0f172a; font-weight: 600; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #cbd5e1; }
+.unified-header { text-align: center; padding: 10px 15px; margin-bottom: 15px; background: #fff; font-family: 'Segoe UI', system-ui, sans-serif; border-bottom: 3px solid #102a43; }
+.biz-sub { font-size: 15px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 2px 0; }
+.biz-main { font-size: 30px; font-weight: 900; color: #0f172a; margin: 0 0 8px 0; letter-spacing: 0.5px; }
+.biz-address { font-size: 14px; color: #334155; margin-bottom: 12px; font-weight: 500; }
+.contact-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; font-size: 14px; color: #1e293b; line-height: 1.4; margin-bottom: 12px; }
+.contact-person { background: #f8fafc; padding: 8px 14px; border-radius: 6px; border: 1px solid #e2e8f0; text-align: center; min-width: 200px; }
+.contact-person strong { display: block; font-size: 15px; margin-bottom: 4px; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+.tagline { font-size: 14px; font-weight: 700; color: #b91c1c; margin-bottom: 6px; letter-spacing: 0.5px; }
+.scope { font-size: 13.5px; color: #475569; margin-bottom: 4px; font-style: italic; max-width: 900px; margin-left: auto; margin-right: auto; }
+.footer-line { font-size: 13.5px; color: #0f172a; font-weight: 600; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #cbd5e1; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+@media (max-width: 600px) {
+    .biz-main { font-size: 26px; }
+    .contact-grid { flex-direction: column; gap: 8px; align-items: stretch; }
+    .contact-person { font-size: 13px; }
+}
+@media print {
+    .contact-grid { gap: 5px; margin-bottom: 8px; }
+    .contact-person { padding: 4px 8px; font-size: 10pt; min-width: 0; flex: 1; }
+    .contact-person strong { font-size: 11pt; margin-bottom: 2px; padding-bottom: 2px; }
+}
 </style>
 <div class="unified-header">
     <div class="biz-sub">General Supply Corporation</div>
     <h1 class="biz-main">S. Kumar &amp; Bros.</h1>
 
-    <div class="contact-block">
-        <div class="contact-person">
-            <strong>Amit G. Parikh</strong> | Mobile: 9869905779 | Phone: 35989674 | GSTIN: 27ACJPP2955J1Z4
-        </div>
-        <div class="contact-person">
-            <strong>Shaumitra G Parikh</strong> | Mobile: 9821361314, 8369398586 | Phone: 35989674 | GSTIN: 27AAGPP1621C1Z5
-        </div>
-    </div>
-
     <div class="biz-address">
         3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.
+    </div>
+
+    <div class="contact-grid">
+        <div class="contact-person">
+            <strong>Amit G. Parikh</strong>
+            Mob: 9869905779<br>
+            GSTIN: 27ACJPP2955J1Z4
+        </div>
+        <div class="contact-person">
+            <strong>Shaumitra G. Parikh</strong>
+            Mob: 9821361314, 8369398586<br>
+            GSTIN: 27AAGPP1621C1Z5
+        </div>
+        <div class="contact-person">
+            <strong>Office &amp; Info</strong>
+            Phone: 35989674, 49233982<br>
+            Price Lists: GSC/2025 &amp; SK/2025
+        </div>
     </div>
 
     <div class="tagline">INSULATING -:- ELECTRICALS -:- ELECTRONIC -:- HARDWARE -:- MATERIALS</div>
@@ -51,16 +71,11 @@
     <div class="scope">Solder Items, Paste, Tester, Fuse Wire, All Cord Wires, Iron Element, T.V. &amp; Cable Plug, Socket, Pin &amp; Splitter.</div>
 
     <div class="footer-line">
-        Phone: - 49233982 &nbsp;|&nbsp; Price Lists: GSC/2025 (Estd. 1962) &amp; SK/2025 (Estd. 1991) &nbsp;|&nbsp; Effective 1ST MAY 2025
+        <span>Effective: 1ST MAY 2025</span>
+        <span style="color: #cbd5e1;">|</span>
+        <span>Estd: GSC (1962), SK (1991)</span>
     </div>
 </div>
-
-
-
-
-
-
-
 
 <!-- Authentic Document Header directly from GSC - SK Catlog Photo.docx -->
 <header class="doc-header">
