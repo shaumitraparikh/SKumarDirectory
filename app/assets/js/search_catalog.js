@@ -504,7 +504,15 @@ function toggleCart(forceOpen) {
         const card = document.createElement('div');
         card.className = 'card';
         card.dataset.srNumber = item.sr_number;
-        
+        card.title = 'Click anywhere to view image & full item details';
+
+        card.addEventListener('click', (event) => {
+            if (event.target.closest('.add-controls, button, input, a, select, textarea')) {
+                return;
+            }
+            openLightbox(item.sr_number);
+        });
+
         const imgContainer = document.createElement('div');
         imgContainer.className = 'card-img-container';
         if (item.display_image_path) {
@@ -514,7 +522,6 @@ function toggleCart(forceOpen) {
             img.alt = item.image_is_representative ? 'Representative image for ' + item.category : item.item_name;
             img.loading = 'lazy';
             img.style.cursor = 'zoom-in';
-            img.onclick = () => openLightbox(item.sr_number);
             imgContainer.appendChild(img);
         } else {
             const noImg = document.createElement('div');
@@ -1622,19 +1629,22 @@ let lightboxDialog = document.getElementById('imageLightbox');
 if (!lightboxDialog) {
     lightboxDialog = document.createElement('dialog');
     lightboxDialog.id = 'imageLightbox';
-    lightboxDialog.style.cssText = 'padding:0; border:none; border-radius:8px; background:transparent; max-width:90vw; max-height:90vh; overflow:visible;';
+    lightboxDialog.style.cssText = 'padding:0; border:none; border-radius:14px; background:transparent; max-width:92vw; max-height:92vh; overflow:visible;';
     lightboxDialog.innerHTML = `
-        <form method="dialog" style="display:flex; flex-direction:column; align-items:center; position:relative; background:white; border-radius:12px; overflow:hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-            <button type="button" onclick="this.closest('dialog').close()" style="position:absolute; top:15px; right:15px; width:36px; height:36px; border-radius:50%; background:#f1f5f9; color:#0f172a; border:none; cursor:pointer; font-weight:bold; font-size:16px; z-index:10; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">✕</button>
-            <div style="background:#f8fafc; width:100%; text-align:center; padding: 20px; border-bottom:1px solid #e2e8f0;">
-                <img id="lightboxImg" style="max-width:90vw; max-height:60vh; object-fit:contain; border-radius:8px;" src="" alt="Large">
+        <form method="dialog" style="display:flex; flex-direction:column; align-items:center; position:relative; background:white; border-radius:14px; overflow:hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.45); max-width:min(92vw, 680px); width:100%; border:1px solid #cbd5e1;">
+            <button type="button" onclick="this.closest('dialog').close()" style="position:absolute; top:12px; right:12px; width:36px; height:36px; border-radius:50%; background:#f1f5f9; color:#0f172a; border:none; cursor:pointer; font-weight:bold; font-size:16px; z-index:10; display:flex; align-items:center; justify-content:center; transition: background 0.2s;" aria-label="Close">✕</button>
+            <div id="lightboxImgWrap" style="background:#f8fafc; width:100%; text-align:center; padding: 20px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:center; align-items:center; min-height:180px;">
+                <img id="lightboxImg" style="max-width:100%; max-height:55vh; object-fit:contain; border-radius:8px;" src="" alt="Product Image">
             </div>
-            <div style="padding: 20px; width:100%; text-align:left; box-sizing:border-box;">
-                <h3 id="lightboxTitle" style="margin:0 0 10px 0; font-size:20px; color:#1e293b;"></h3>
-                <p id="lightboxPrice" style="margin:0 0 15px 0; font-size:18px; color:#10b981; font-weight:bold;"></p>
+            <div style="padding: 20px 24px; width:100%; text-align:left; box-sizing:border-box;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:8px;">
+                    <h3 id="lightboxTitle" style="margin:0; font-size:19px; font-weight:700; color:#0f172a; line-height:1.35;"></h3>
+                    <p id="lightboxPrice" style="margin:0; font-size:18px; color:#1e3a8a; font-weight:800; white-space:nowrap;"></p>
+                </div>
+                <div id="lightboxSpecs" style="margin:0 0 16px 0; font-size:12.5px; color:#64748b; line-height:1.6;"></div>
                 <div style="display:flex; gap:10px; align-items:center;">
-                    <input type="number" id="lightboxQty" value="1" min="1" max="9999" style="width:70px; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-size:16px;">
-                    <button type="button" id="lightboxAddBtn" style="flex:1; background:#2563eb; color:white; border:none; padding:12px 20px; border-radius:6px; font-size:16px; font-weight:bold; cursor:pointer; transition: background 0.2s;">Add to Cart</button>
+                    <input type="number" id="lightboxQty" value="1" min="1" max="9999" style="width:75px; height:42px; padding:6px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:15px; text-align:center;">
+                    <button type="button" id="lightboxAddBtn" style="flex:1; height:42px; background:#1e3a8a; color:white; border:none; padding:0 20px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; transition: background 0.2s;">Add to Cart</button>
                 </div>
             </div>
         </form>
@@ -1650,16 +1660,47 @@ function openLightbox(srNumber) {
     if (!entry) return;
     const item = entry.item;
     
-    document.getElementById('lightboxImg').src = item.display_image_path || '';
-    document.getElementById('lightboxImg').alt = item.item_name || 'Product image';
+    const imgWrap = document.getElementById('lightboxImgWrap');
+    const imgEl = document.getElementById('lightboxImg');
+    if (item.display_image_path) {
+        if (imgWrap) imgWrap.style.display = 'flex';
+        if (imgEl) {
+            imgEl.src = item.display_image_path;
+            imgEl.alt = item.item_name || 'Product image';
+        }
+    } else {
+        if (imgWrap) imgWrap.style.display = 'none';
+    }
+    
     document.getElementById('lightboxTitle').textContent = item.item_name;
     document.getElementById('lightboxPrice').textContent = item.list_price ? `₹${item.list_price}` : 'Price on request';
-    document.getElementById('lightboxQty').value = document.getElementById('qty-' + srNumber) ? document.getElementById('qty-' + srNumber).value : 1;
+
+    const specsEl = document.getElementById('lightboxSpecs');
+    if (specsEl) {
+        const specs = [];
+        if (item.sr_number) specs.push(`<strong>Sr:</strong> ${item.sr_number}`);
+        if (item.category) specs.push(`<strong>Category:</strong> ${item.category}`);
+        if (item.hsn_code) specs.push(`<strong>HSN:</strong> ${item.hsn_code}`);
+        if (item.size) specs.push(`<strong>Size:</strong> ${item.size}`);
+        if (item.id_size) specs.push(`<strong>ID Size:</strong> ${item.id_size}`);
+        if (item.od_size) specs.push(`<strong>OD Size:</strong> ${item.od_size}`);
+        if (item.lf_size) specs.push(`<strong>L/F Size:</strong> ${item.lf_size}`);
+        if (item.unit) specs.push(`<strong>Unit:</strong> ${item.unit}`);
+        if (item.packing) specs.push(`<strong>Pack:</strong> ${item.packing}`);
+        specsEl.innerHTML = specs.join(' · ');
+    }
+    
+    const cardQty = document.getElementById('qty-' + srNumber);
+    document.getElementById('lightboxQty').value = cardQty ? cardQty.value : 1;
     
     const addBtn = document.getElementById('lightboxAddBtn');
+    addBtn.textContent = item.list_price ? 'Add to Cart' : 'Add to Quote';
     addBtn.onclick = () => {
-        const qty = parseInt(document.getElementById('lightboxQty').value) || 1;
-        addToCart(item, qty);
+        const qtyVal = parseInt(document.getElementById('lightboxQty').value, 10) || 1;
+        if (cardQty) {
+            cardQty.value = qtyVal;
+        }
+        addToCart(String(srNumber));
         lightboxDialog.close();
     };
     
