@@ -11,7 +11,7 @@
     }
     body {
         font-family: 'Arial Narrow', Arial, sans-serif;
-        font-size: 13pt;
+        font-size: 10.5pt;
         color: #000;
         margin: 0;
         padding: 0;
@@ -25,16 +25,16 @@
     }
 
     .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 5px; }
-    .contact { border: 1px solid #999; padding: 3px 6px; font-size: 11.5pt; line-height: 1.25; }
-    .contact-name { font-size: 13pt; font-weight: bold; }
+    .contact { border: 1px solid #999; padding: 3px 6px; font-size: 9pt; line-height: 1.25; }
+    .contact-name { font-size: 10.5pt; font-weight: bold; }
     .contact-details { display: flex; justify-content: space-between; gap: 8px; }
     .company-name { margin: 3px 0 1px; font-size: 15pt; line-height: 1.1; text-align: center; font-weight: bold; text-transform: uppercase; }
     .legal-name, .company-address, .company-tagline, .product-range, .product-details, .price-reference { margin: 2px 0; text-align: center; }
-    .legal-name { font-size: 14pt; font-weight: bold; letter-spacing: .08em; }
-    .company-address { font-size: 12pt; }
-    .company-tagline { font-size: 12pt; font-weight: bold; letter-spacing: .04em; }
-    .product-range, .product-details { font-size: 11.5pt; }
-    .price-reference { margin-top: 4px; font-size: 12pt; font-weight: bold; }
+    .legal-name { font-size: 11pt; font-weight: bold; letter-spacing: .08em; }
+    .company-address { font-size: 9.5pt; }
+    .company-tagline { font-size: 9.5pt; font-weight: bold; letter-spacing: .04em; }
+    .product-range, .product-details { font-size: 9pt; }
+    .price-reference { margin-top: 4px; font-size: 9.5pt; font-weight: bold; }
 
     .page-content {
         column-count: 2;
@@ -62,7 +62,7 @@
         border-left: none;
         border-right: none;
         font-weight: bold;
-        font-size: 12pt;
+        font-size: 9.5pt;
         text-align: left;
     }
 
@@ -89,34 +89,34 @@
     }
     .item-img.representative-image { opacity: .75; }
 
-    .col-sr { width: 5%; text-align: center; font-weight: bold; }
-    .col-img { width: 8%; text-align: center; }
-    .col-desc { width: 50%; }
-    .col-hsn { width: 14%; text-align: center; font-size: 11.5pt; }
-    .col-price { width: 13%; text-align: right; font-weight: bold; }
-    .col-per { width: 10%; text-align: center; }
+    .col-sr { width: 9%; text-align: center; font-weight: bold; }
+    .col-img { width: 6%; text-align: center; }
+    .col-desc { width: 45%; }
+    .col-hsn { width: 13%; text-align: center; font-size: 9pt; }
+    .col-price { width: 14%; text-align: right; font-weight: bold; }
+    .col-per { width: 13%; text-align: center; }
 
     .desc-text { font-weight: bold; }
-    .size-text { color: #333; font-size: 12pt; margin-left: 4px; }
-    .pack-text { color: #555; font-size: 11.5pt; font-style: italic; }
+    .size-text { color: #333; font-size: 9.5pt; margin-left: 4px; }
+    .pack-text { color: #555; font-size: 9pt; font-style: italic; }
 
     @media screen {
         body { max-width: 1500px; margin: 0 auto; padding: 12px; box-sizing: border-box; }
     }
 
     @media screen and (max-width: 700px) {
-        body { padding: 8px; font-size: 14pt; }
+        body { padding: 8px; font-size: 11pt; }
         .contact-grid { grid-template-columns: 1fr; }
         .contact-details { flex-wrap: wrap; }
         .page-content { column-count: 1; column-gap: 0; column-rule: none; }
         table { page-break-inside: auto; break-inside: auto; table-layout: fixed; }
-        th, td { padding: 2px 2px; font-size: 13pt; overflow-wrap: anywhere; }
-        .cat-header { font-size: 14pt; }
+        th, td { padding: 2px 2px; font-size: 10.5pt; overflow-wrap: anywhere; }
+        .cat-header { font-size: 11pt; }
         .col-sr { width: 7%; }
-        .col-img { width: 8%; }
+        .col-img { width: 6%; }
         .col-desc { width: 42%; }
-        .col-hsn { width: 15%; font-size: 11pt; }
-        .col-price { width: 13%; }
+        .col-hsn { width: 15%; font-size: 8.5pt; }
+        .col-price { width: 14%; }
         .col-per { width: 15%; }
         .item-img { max-height: 30px; max-width: 40px; }
         .price-reference { line-height: 1.4; overflow-wrap: anywhere; }
@@ -134,18 +134,18 @@
     </div>
 </nav>
 <style>
-.unified-header { text-align: center; padding: 10px 15px; margin-bottom: 15px; background: #fff; font-family: 'Segoe UI', system-ui, sans-serif; border-bottom: 3px solid #102a43; }
-.biz-sub { font-size: 15px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 2px 0; }
-.biz-main { font-size: 30px; font-weight: 900; color: #0f172a; margin: 0 0 8px 0; letter-spacing: 0.5px; }
-.biz-address { font-size: 14px; color: #334155; margin-bottom: 12px; font-weight: 500; }
-.contact-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; font-size: 14px; color: #1e293b; line-height: 1.4; margin-bottom: 12px; }
-.contact-person { background: #f8fafc; padding: 8px 14px; border-radius: 6px; border: 1px solid #e2e8f0; text-align: center; min-width: 200px; }
-.contact-person strong { display: block; font-size: 15px; margin-bottom: 4px; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+.unified-header { text-align: center; padding: 10px 15px; margin-bottom: 6px; background: #fff; font-family: 'Segoe UI', system-ui, sans-serif; border-bottom: 3px solid #102a43; }
+.biz-sub { font-size: 14px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
+.biz-main { font-size: 28px; font-weight: 900; color: #0f172a; margin: 0 0 4px 0; letter-spacing: 0.5px; }
+.biz-address { font-size: 14px; color: #334155; margin-bottom: 6px; font-weight: 500; }
+.contact-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; font-size: 14px; color: #1e293b; line-height: 1.4; margin-bottom: 6px; }
+.contact-person { background: #f8fafc; padding: 4px 10px; border-radius: 6px; border: 1px solid #e2e8f0; text-align: center; min-width: auto; flex: 1; }
+.contact-person strong { display: block; font-size: 14px; margin-bottom: 2px; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px; }
 .tagline { font-size: 14px; font-weight: 700; color: #b91c1c; margin-bottom: 6px; letter-spacing: 0.5px; }
-.scope { font-size: 13.5px; color: #475569; margin-bottom: 4px; font-style: italic; max-width: 900px; margin-left: auto; margin-right: auto; }
-.footer-line { font-size: 13.5px; color: #0f172a; font-weight: 600; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #cbd5e1; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.scope { font-size: 13px; color: #475569; margin-bottom: 2px; font-style: italic; max-width: 900px; margin-left: auto; margin-right: auto; }
+.footer-line { font-size: 13px; color: #0f172a; font-weight: 600; margin-top: 4px; padding-top: 4px; border-top: 1px dashed #cbd5e1; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
 @media (max-width: 600px) {
-    .biz-main { font-size: 26px; }
+    .biz-main { font-size: 20px; }
     .contact-grid { flex-direction: column; gap: 8px; align-items: stretch; }
     .contact-person { font-size: 13px; }
 }
@@ -215,7 +215,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -396,7 +396,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -657,7 +657,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -918,7 +918,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -1179,7 +1179,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -1460,7 +1460,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -1741,7 +1741,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -2262,7 +2262,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -2759,7 +2759,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -2934,7 +2934,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -3489,7 +3489,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -3664,7 +3664,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -3817,7 +3817,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -4036,7 +4036,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -4915,7 +4915,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -5534,7 +5534,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -6325,7 +6325,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -8138,7 +8138,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -8879,7 +8879,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -8980,7 +8980,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -9641,7 +9641,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -12242,7 +12242,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -12483,7 +12483,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -13304,7 +13304,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -13445,7 +13445,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -15326,7 +15326,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -16887,7 +16887,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -18008,7 +18008,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -18629,7 +18629,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -19090,7 +19090,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -19571,7 +19571,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -19672,7 +19672,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -19753,7 +19753,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -19894,7 +19894,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -20115,7 +20115,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -20376,7 +20376,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -20637,7 +20637,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -20738,7 +20738,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -21139,7 +21139,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -21860,7 +21860,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -23121,7 +23121,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -23522,7 +23522,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -23683,7 +23683,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -24564,7 +24564,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -24945,7 +24945,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -26246,7 +26246,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -26767,7 +26767,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -27308,7 +27308,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -27689,7 +27689,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -27990,7 +27990,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -28191,7 +28191,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -28552,7 +28552,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -28973,7 +28973,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -29374,7 +29374,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -29515,7 +29515,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -29656,7 +29656,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -29757,7 +29757,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -29858,7 +29858,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -29939,7 +29939,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>
@@ -30120,7 +30120,7 @@
                 </td>
             </tr>
             <tr>
-                <th class="col-sr">Sr.No.</th>
+                <th class="col-sr">Sr.</th>
                 <th class="col-img"></th>
                 <th class="col-desc">P A R T I C U L A R S</th>
                 <th class="col-hsn">HSN Code</th>

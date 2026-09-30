@@ -267,7 +267,7 @@ function setupClientData(records) {
     clientRecords = records;
     if (window.ClientDirectory) {
         window.ClientDirectory.clients = records;
-        window.ClientDirectory.renderDataList();
+        if (typeof window.ClientDirectory.renderDataList === "function") window.ClientDirectory.renderDataList();
     }
     var statusEl = document.getElementById('clientDirectoryStatus');
     if (statusEl) {
@@ -1052,7 +1052,7 @@ function fuzzyScore(text, query) {
         document.getElementById('discountTotal').innerText = formatAmount(discountTotal);
         document.getElementById('subTotal').innerText = formatAmount(subTotal);
         displayTaxBreakdown(getTaxBreakdown(subTotal), subTotal);
-        document.getElementById('placeOrderButton').disabled = keys.length === 0;
+        const pob = document.getElementById('placeOrderButton'); if (pob) pob.disabled = keys.length === 0;
         saveCart();
     }
 
