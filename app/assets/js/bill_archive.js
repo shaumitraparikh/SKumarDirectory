@@ -26,6 +26,29 @@
         return name + '.html';
     }
 
+    function extractBillMeta(html) {
+        var buyerName = 'Cash customer';
+        var grandTotal = '';
+        var billDate = '';
+        if (!html || typeof html !== 'string') {
+            return { buyerName: buyerName, grandTotal: grandTotal, billDate: billDate };
+        }
+        var buyerMatch = html.match(/id=["']pBuyerName["'][^>]*>([^<]+)</i);
+        if (buyerMatch && buyerMatch[1].trim()) {
+            buyerName = buyerMatch[1].trim();
+        }
+        var totalMatch = html.match(/id=["']pGrandTotal["'][^>]*>([^<]+)</i) ||
+                         html.match(/class=["'][^"']*grand-total[^"']*["'][^>]*>.*?(?:₹|INR|\b)([\d,]+(?:\.\d{2})?)/is);
+        if (totalMatch && totalMatch[1].trim()) {
+            grandTotal = totalMatch[1].trim();
+        }
+        var dateMatch = html.match(/id=["']pDate["'][^>]*>([^<]+)</i);
+        if (dateMatch && dateMatch[1].trim()) {
+            billDate = dateMatch[1].trim();
+        }
+        return { buyerName: buyerName, grandTotal: grandTotal, billDate: billDate };
+    }
+
     function readEntries(directory) {
         var iterator = directory.entries();
         var entries = [];
@@ -52,6 +75,37 @@
             self.directoryHandle = handle;
             return true;
         });
+    };
+
+    BillArchive.prototype.saveToLocalStorage = function (entry) {
+        if (!this.window || !this.window.localStorage) return;
+        try {
+            var raw = this.window.localStorage.getItem('skumar_saved_bills_v1');
+            var list = raw ? JSON.parse(raw) : [];
+            list = list.filter(function (item) { return item.id !== entry.id; });
+            list.unshift(entry);
+            if (list.length > 200) list = list.slice(0, 200);
+            this.window.localStorage.setItem('skumar_saved_bills_v1', JSON.stringify(list));
+        } catch (e) {
+            // LocalStorage might be full or private mode
+        }
+    };
+
+    BillArchive.prototype.loadFromLocalStorage = function () {
+        if (!this.window || !this.window.localStorage) return [];
+        try {
+            var raw = this.window.localStorage.getItem('skumar_saved_bills_v1');
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            return [];
+        }
+    };
+
+    BillArchive.prototype.loadInjectedBills = function () {
+        if (this.window && Array.isArray(this.window.INJECTED_SAVED_BILLS)) {
+            return this.window.INJECTED_SAVED_BILLS;
+        }
+        return [];
     };
 
     BillArchive.prototype.selectDirectory = function () {
@@ -92,15 +146,23 @@
         }
 
         return directoryPromise.then(function (selectedHandle) {
+            var meta = extractBillMeta(bill.html);
             var entry = {
                 id: month + '/' + fileName,
                 month: month,
                 fileName: fileName,
                 reference: bill.reference,
+                buyerName: meta.buyerName,
+                grandTotal: meta.grandTotal,
+                billDate: meta.billDate,
                 savedAt: bill.date.toISOString(),
                 html: bill.html,
                 storage: selectedHandle ? 'folder' : 'browser'
             };
+
+            // Always sync to localStorage
+            self.saveToLocalStorage(entry);
+
             if (!selectedHandle) {
                 return self.storage.saveBill(entry).then(function () {
                     self.downloadBill(fileName, bill.html);
@@ -154,9 +216,37 @@
         var self = this;
         return this.storage.listBills().then(function (cached) {
             var entries = new Map();
-            cached.forEach(function (entry) {
-                entries.set(entry.id, entry);
+
+            // 1. Injected bills from server / disk
+            self.loadInjectedBills().forEach(function (bill) {
+                var meta = extractBillMeta(bill.html);
+                entries.set(bill.id, Object.assign({
+                    buyerName: meta.buyerName,
+                    grandTotal: meta.grandTotal,
+                    billDate: meta.billDate
+                }, bill));
             });
+
+            // 2. LocalStorage bills
+            self.loadFromLocalStorage().forEach(function (bill) {
+                var meta = extractBillMeta(bill.html);
+                entries.set(bill.id, Object.assign({
+                    buyerName: meta.buyerName,
+                    grandTotal: meta.grandTotal,
+                    billDate: meta.billDate
+                }, bill));
+            });
+
+            // 3. Cached indexedDB bills
+            cached.forEach(function (entry) {
+                var meta = extractBillMeta(entry.html);
+                entries.set(entry.id, Object.assign({
+                    buyerName: meta.buyerName,
+                    grandTotal: meta.grandTotal,
+                    billDate: meta.billDate
+                }, entry));
+            });
+
             if (!self.directoryHandle) return Array.from(entries.values()).sort(sortBills);
 
             return Promise.resolve(self.directoryHandle.queryPermission({ mode: 'read' }))
@@ -192,11 +282,15 @@
                                             return fileHandle.getFile().then(function (file) {
                                                 var id = month + '/' + fileName;
                                                 return file.text().then(function (html) {
+                                                    var meta = extractBillMeta(html);
                                                     entries.set(id, {
                                                         id: id,
                                                         month: month,
                                                         fileName: fileName,
                                                         reference: fileName.slice(0, -5),
+                                                        buyerName: meta.buyerName,
+                                                        grandTotal: meta.grandTotal,
+                                                        billDate: meta.billDate,
                                                         savedAt: new Date(file.lastModified).toISOString(),
                                                         html: html,
                                                         storage: 'folder'
@@ -222,17 +316,23 @@
         }
         var blob = new this.window.Blob([html], { type: 'text/html;charset=utf-8' });
         var url = this.window.URL.createObjectURL(blob);
-        var win = this.window.open(url, '_blank', 'noopener');
+        var win = this.window.open(url, '_blank');
         if (!win || win.closed || typeof win.closed === 'undefined') {
             var link = this.window.document.createElement('a');
             link.href = url;
             link.target = '_blank';
             link.rel = 'noopener';
-            link.click();
+            if (this.window.document && this.window.document.body) {
+                this.window.document.body.appendChild(link);
+                link.click();
+                this.window.document.body.removeChild(link);
+            } else {
+                link.click();
+            }
         }
         this.window.setTimeout(function () {
             this.window.URL.revokeObjectURL(url);
-        }.bind(this), 60000);
+        }.bind(this), 120000);
     };
 
     BillArchive.prototype.downloadBill = function (fileName, html) {

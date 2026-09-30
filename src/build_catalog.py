@@ -30,6 +30,7 @@ from collections import OrderedDict
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
+import re
 
 try:
     from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -372,6 +373,57 @@ def compute_catalog_version():
     return hasher.hexdigest()[:10]
 
 
+def load_saved_bills():
+    """Scan data/generated_bills/ and generated_bills/ for saved monthly HTML bills."""
+    saved_bills = []
+    base_dirs = [OUTPUT_DIR / "data" / "generated_bills", OUTPUT_DIR / "generated_bills"]
+    seen_ids = set()
+
+    for base_dir in base_dirs:
+        if not base_dir.is_dir():
+            continue
+        for month_dir in sorted(base_dir.iterdir(), reverse=True):
+            if not month_dir.is_dir() or not re.match(r'^\d{4}-\d{2}$', month_dir.name):
+                continue
+            month = month_dir.name
+            for bill_file in sorted(month_dir.glob("*.html"), reverse=True):
+                bill_id = f"{month}/{bill_file.name}"
+                if bill_id in seen_ids:
+                    continue
+                seen_ids.add(bill_id)
+                try:
+                    content = bill_file.read_text(encoding='utf-8')
+                    ref = bill_file.stem
+                    mtime = datetime.fromtimestamp(bill_file.stat().st_mtime).isoformat()
+
+                    buyer_match = re.search(r'id=["\']pBuyerName["\'][^>]*>([^<]+)<', content)
+                    buyer_name = buyer_match.group(1).strip() if buyer_match else "Cash customer"
+
+                    total_match = re.search(r'id=["\']pGrandTotal["\'][^>]*>([^<]+)<', content) or re.search(r'class=["\'][^"\']*grand-total[^"\']*["\'][^>]*>.*?(?:₹|INR|\b)(\d+(?:,\d+)*(?:\.\d{2})?)', content, re.DOTALL)
+                    grand_total = total_match.group(1).strip() if total_match else ""
+
+                    date_match = re.search(r'id=["\']pDate["\'][^>]*>([^<]+)<', content)
+                    bill_date = date_match.group(1).strip() if date_match else month
+
+                    saved_bills.append({
+                        "id": bill_id,
+                        "month": month,
+                        "fileName": bill_file.name,
+                        "reference": ref,
+                        "buyerName": buyer_name,
+                        "grandTotal": grand_total,
+                        "billDate": bill_date,
+                        "savedAt": mtime,
+                        "storage": "folder",
+                        "html": content
+                    })
+                except Exception as e:
+                    print(f"  [WARN] Failed to load saved bill {bill_file}: {e}")
+
+    saved_bills.sort(key=lambda b: (b["month"], b["fileName"]), reverse=True)
+    return saved_bills
+
+
 def build_search_catalog(config, categories, items, env):
     """Generate a customer or local seller searchable catalog."""
     template = env.get_template('search_template.html')
@@ -391,10 +443,11 @@ def build_search_catalog(config, categories, items, env):
             reader = csv.DictReader(cf)
             client_data = list(reader)
 
+    saved_bills = load_saved_bills()
 
     html = template.render(
         client_data=client_data,
-
+        saved_bills=saved_bills,
         company=config['company'],
         billing=config,
         categories=categories,

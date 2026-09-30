@@ -283,17 +283,31 @@
 
 <dialog class="bill-archive-dialog" id="billArchiveDialog" aria-labelledby="billArchiveTitle">
     <div class="bill-archive-header">
-        <div>
-            <h2 id="billArchiveTitle">Saved proforma bills</h2>
-            <p>Bills are organized in generated_bills/YYYY-MM folders.</p>
+        <div class="bill-archive-header-text">
+            <h2 id="billArchiveTitle">📂 Saved Proforma Bills</h2>
+            <p class="bill-archive-subtitle">Organized by Year &amp; Month · Auto-saved in <code>generated_bills/</code></p>
         </div>
-        <button class="close-cart bill-archive-close" id="closeBillArchiveButton" type="button" aria-label="Close saved bills">×</button>
+        <button class="close-cart bill-archive-close" id="closeBillArchiveButton" type="button" aria-label="Close saved bills">✕</button>
     </div>
-    <div class="bill-archive-actions">
-        <button class="load-clients-btn" id="chooseBillsFolderButton" type="button">Choose generated_bills folder</button>
-        <span id="billArchiveStatus" role="status" aria-live="polite">Loading saved bills…</span>
+    <div class="bill-archive-toolbar">
+        <div class="bill-search-box">
+            <span class="bill-search-icon">🔍</span>
+            <input type="search" id="billSearchInput" class="bill-search-input" placeholder="Search bills by invoice no, customer, or YYYY-MM..." autocomplete="off">
+        </div>
+        <div class="bill-filter-row">
+            <select id="billMonthFilter" class="bill-month-filter" aria-label="Filter by month">
+                <option value="all">📅 All Months &amp; Years</option>
+            </select>
+            <button class="folder-sync-btn" id="chooseBillsFolderButton" type="button" title="Sync with local generated_bills folder">
+                📁 Sync Local Folder
+            </button>
+        </div>
+        <div class="bill-archive-status-line">
+            <span id="billArchiveStatus" role="status" aria-live="polite">Loading saved bills…</span>
+            <span id="billCountBadge" class="bill-count-pill">0 bills</span>
+        </div>
     </div>
-    <div class="bill-archive-list" id="billArchiveList"></div>
+    <div class="bill-archive-list" id="billArchiveList" tabindex="0"></div>
 </dialog>
 
 <div class="catalog-wrapper">
@@ -403,6 +417,7 @@
     }
 </script>
 <script>window.INJECTED_CLIENT_DATA = {{ client_data | tojson }};</script>
+<script>window.INJECTED_SAVED_BILLS = {{ saved_bills | tojson }};</script>
 {% include "partials/_footer.html" %}
 </body>
 </html>

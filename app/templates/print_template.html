@@ -1,64 +1,111 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ company.name }} - Price List</title>
-<link rel="icon" type="image/svg+xml" href="app/assets/icons/favicon.svg">
-<link rel="alternate icon" type="image/png" href="app/assets/icons/favicon.png">
-<link rel="apple-touch-icon" href="app/assets/icons/favicon.png">
-<style>
-    @page {
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ company.name }} - Price List</title>
+    <style>
+      @page {
         size: A4 landscape;
         margin: 8mm 10mm;
-    }
-    body {
-        font-family: 'Arial Narrow', Arial, sans-serif;
+      }
+      body {
+        font-family: "Arial Narrow", Arial, sans-serif;
         font-size: 10.5pt;
         color: #000;
         margin: 0;
         padding: 0;
         background-color: #fff;
-    }
-    
-    .header {
+      }
+
+      .header {
         margin-bottom: 8px;
         padding-bottom: 7px;
         border-bottom: 1px solid #777;
-    }
-    
-    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 5px; }
-    .contact { border: 1px solid #999; padding: 3px 6px; font-size: 9pt; line-height: 1.25; }
-    .contact-name { font-size: 10.5pt; font-weight: bold; }
-    .contact-details { display: flex; justify-content: space-between; gap: 8px; }
-    .company-name { margin: 3px 0 1px; font-size: 15pt; line-height: 1.1; text-align: center; font-weight: bold; text-transform: uppercase; }
-    .legal-name, .company-address, .company-tagline, .product-range, .product-details, .price-reference { margin: 2px 0; text-align: center; }
-    .legal-name { font-size: 11pt; font-weight: bold; letter-spacing: .08em; }
-    .company-address { font-size: 9.5pt; }
-    .company-tagline { font-size: 9.5pt; font-weight: bold; letter-spacing: .04em; }
-    .product-range, .product-details { font-size: 9pt; }
-    .price-reference { margin-top: 4px; font-size: 9.5pt; font-weight: bold; }
-    
-    .page-content {
+      }
+
+      .contact-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 5px;
+      }
+      .contact {
+        border: 1px solid #999;
+        padding: 3px 6px;
+        font-size: 9pt;
+        line-height: 1.25;
+      }
+      .contact-name {
+        font-size: 10.5pt;
+        font-weight: bold;
+      }
+      .contact-details {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .company-name {
+        margin: 3px 0 1px;
+        font-size: 15pt;
+        line-height: 1.1;
+        text-align: center;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+      .legal-name,
+      .company-address,
+      .company-tagline,
+      .product-range,
+      .product-details,
+      .price-reference {
+        margin: 2px 0;
+        text-align: center;
+      }
+      .legal-name {
+        font-size: 11pt;
+        font-weight: bold;
+        letter-spacing: 0.08em;
+      }
+      .company-address {
+        font-size: 9.5pt;
+      }
+      .company-tagline {
+        font-size: 9.5pt;
+        font-weight: bold;
+        letter-spacing: 0.04em;
+      }
+      .product-range,
+      .product-details {
+        font-size: 9pt;
+      }
+      .price-reference {
+        margin-top: 4px;
+        font-size: 9.5pt;
+        font-weight: bold;
+      }
+
+      .page-content {
         column-count: 2;
         column-gap: 8mm;
         column-rule: 1px solid #ccc;
-    }
+      }
 
-    table {
+      table {
         width: 100%;
         border-collapse: collapse;
         margin-bottom: 10px;
         page-break-inside: avoid;
-    }
-    
-    th, td {
+      }
+
+      th,
+      td {
         padding: 1px 2px;
         vertical-align: middle;
         border: 1px solid #ddd;
-    }
-    
-    th {
+      }
+
+      th {
         background-color: #fff;
         border-top: 2px solid #000;
         border-bottom: 2px solid #000;
@@ -67,14 +114,14 @@
         font-weight: bold;
         font-size: 9.5pt;
         text-align: left;
-    }
+      }
 
-    td {
+      td {
         border-left: none;
         border-right: none;
-    }
-    
-    .cat-header {
+      }
+
+      .cat-header {
         background-color: #f8f8f8;
         border-top: 1px solid #000;
         border-bottom: 1px solid #000;
@@ -83,129 +130,247 @@
         text-align: center;
         padding: 4px;
         color: #000;
-    }
+      }
 
-    .item-img {
+      .item-img {
         max-height: 22px;
         max-width: 30px;
         object-fit: contain;
-    }
-    .item-img.representative-image { opacity: .75; }
+      }
+      .item-img.representative-image {
+        opacity: 0.75;
+      }
 
-    .col-sr { width: 9%; text-align: center; font-weight: bold; }
-    .col-img { width: 6%; text-align: center; }
-    .col-desc { width: 45%; }
-    .col-hsn { width: 13%; text-align: center; font-size: 9pt; }
-    .col-price { width: 14%; text-align: right; font-weight: bold; }
-    .col-per { width: 13%; text-align: center; }
+      .col-sr {
+        width: 9%;
+        text-align: center;
+        font-weight: bold;
+      }
+      .col-img {
+        width: 6%;
+        text-align: center;
+      }
+      .col-desc {
+        width: 45%;
+      }
+      .col-hsn {
+        width: 13%;
+        text-align: center;
+        font-size: 9pt;
+      }
+      .col-price {
+        width: 14%;
+        text-align: right;
+        font-weight: bold;
+      }
+      .col-per {
+        width: 13%;
+        text-align: center;
+      }
 
-    .desc-text { font-weight: bold; }
-    .size-text { color: #333; font-size: 9.5pt; margin-left: 4px; }
-    .pack-text { color: #555; font-size: 9pt; font-style: italic; }
+      .desc-text {
+        font-weight: bold;
+      }
+      .size-text {
+        color: #333;
+        font-size: 9.5pt;
+        margin-left: 4px;
+      }
+      .pack-text {
+        color: #555;
+        font-size: 9pt;
+        font-style: italic;
+      }
 
-    @media screen {
-        body { max-width: 1500px; margin: 0 auto; padding: 12px; box-sizing: border-box; }
-    }
+      @media screen {
+        body {
+          max-width: 1500px;
+          margin: 0 auto;
+          padding: 12px;
+          box-sizing: border-box;
+        }
+      }
 
-    @media screen and (max-width: 700px) {
-        body { padding: 8px; font-size: 11pt; }
-        .contact-grid { grid-template-columns: 1fr; }
-        .contact-details { flex-wrap: wrap; }
+      @media screen and (max-width: 700px) {
+        body {
+          padding: 8px;
+          font-size: 11pt;
+        }
+        .contact-grid {
+          grid-template-columns: 1fr;
+        }
+        .contact-details {
+          flex-wrap: wrap;
+        }
         .page-content { column-count: 1; column-gap: 0; column-rule: none; }
-        table { page-break-inside: auto; break-inside: auto; table-layout: fixed; }
-        th, td { padding: 2px 2px; font-size: 10.5pt; overflow-wrap: anywhere; }
-        .cat-header { font-size: 11pt; }
-        .col-sr { width: 7%; }
-        .col-img { width: 6%; }
-        .col-desc { width: 42%; }
-        .col-hsn { width: 15%; font-size: 8.5pt; }
-        .col-price { width: 14%; }
-        .col-per { width: 15%; }
-        .item-img { max-height: 30px; max-width: 40px; }
-        .price-reference { line-height: 1.4; overflow-wrap: anywhere; }
-    }
-    @media print { .global-nav { display: none !important; } }
+        table {
+          page-break-inside: auto;
+          break-inside: auto;
+          table-layout: fixed;
+        }
+        th,
+        td {
+          padding: 2px 2px;
+          font-size: 10.5pt;
+          overflow-wrap: anywhere;
+        }
+        .cat-header {
+          font-size: 11pt;
+        }
+        .col-sr {
+          width: 7%;
+        }
+        .col-img {
+          width: 6%;
+        }
+        .col-desc {
+          width: 42%;
+        }
+        .col-hsn {
+          width: 15%;
+          font-size: 8.5pt;
+        }
+        .col-price {
+          width: 14%;
+        }
+        .col-per {
+          width: 15%;
+        }
+        .item-img {
+          max-height: 30px;
+          max-width: 40px;
+        }
+        .price-reference {
+          line-height: 1.4;
+          overflow-wrap: anywhere;
+        }
+      }
+      @media print {
+        .global-nav {
+          display: none !important;
+        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <nav
+      class="global-nav"
+      style="
+        background: #102a43;
+        padding: 6px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        font-family: &quot;Segoe UI&quot;, system-ui, sans-serif;
+      "
+    >
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 0 auto">
+        <a
+          href="index.html"
+          style="
+            text-decoration: none;
+            padding: 6px 12px;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+            transition: background 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+          "
+          >🛒 POS & Search</a
+        >
+        <a
+          href="print_catalog.html"
+          style="
+            text-decoration: none;
+            padding: 6px 12px;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+            transition: background 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+          "
+          >📄 Price List</a
+        >
+        <a
+          href="photo_catalog.html"
+          style="
+            text-decoration: none;
+            padding: 6px 12px;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+            transition: background 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+          "
+          >🖼️ Photo Gallery</a
+        >
+      </div>
+    </nav>
+    {% include "partials/_header.html" %}
 
-<nav class="global-nav" style="background: #102a43; padding: 6px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 9999; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-family: 'Segoe UI', system-ui, sans-serif;">
-    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 0 auto;">
-        <a href="index.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🛒 POS & Search</a>
-        <a href="print_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">📄 Price List</a>
-        <a href="photo_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🖼️ Photo Gallery</a>
-    </div>
-</nav>
-{% include "partials/_header.html" %}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="page-content">
-    {% for cat in categories %}
-    <table>
+    <div class="page-content">
+      {% for cat in categories %}
+      <table>
         <thead>
-            <tr>
-                <td colspan="6" class="cat-header">
-                    {{ cat.name }}
-                </td>
-            </tr>
-            <tr>
-                <th class="col-sr">Sr.</th>
-                <th class="col-img"></th>
-                <th class="col-desc">P A R T I C U L A R S</th>
-                <th class="col-hsn">HSN Code</th>
-                <th class="col-price">List</th>
-                <th class="col-per">Per</th>
-            </tr>
+          <tr>
+            <td colspan="6" class="cat-header">{{ cat.name }}</td>
+          </tr>
+          <tr>
+            <th class="col-sr">Sr.</th>
+            <th class="col-img"></th>
+            <th class="col-desc">P A R T I C U L A R S</th>
+            <th class="col-hsn">HSN Code</th>
+            <th class="col-price">List</th>
+            <th class="col-per">Per</th>
+          </tr>
         </thead>
         <tbody>
-            {% for item in cat.products %}
-            <tr>
-                <td class="col-sr">{{ item.sr_number }}</td>
-                <td class="col-img">
-                    {% if item.display_image_path %}
-                        <img src="{{ item.display_image_path }}" class="item-img{% if item.image_is_representative %} representative-image{% endif %}" alt="{% if item.image_is_representative %}Representative image for {{ cat.name }}{% else %}{{ item.item_name }}{% endif %}">
-                    {% endif %}
-                </td>
-                <td class="col-desc">
-                    <span class="desc-text">{{ item.item_name }}</span>
-                    {% if item.size and item.size not in item.item_name %}
-                        <span class="size-text">{{ item.size }}</span>
-                    {% endif %}
-{% if item.id_size %}
-                        <br><span class="size-text">ID Size: {{ item.id_size }}</span>
-{% endif %}
-{% if item.od_size %}
-                        <br><span class="size-text">OD Size: {{ item.od_size }}</span>
-{% endif %}
-{% if item.lf_size %}
-                        <br><span class="size-text">L/F Size: {{ item.lf_size }}</span>
-{% endif %}
-                    {% if item.packing %}
-                        <br><span class="pack-text">Pack: {{ item.packing }}</span>
-                    {% endif %}
-                </td>
-                <td class="col-hsn">{{ item.hsn_code }}</td>
-                <td class="col-price">{% if item.list_price %}{{ item.list_price }}{% else %}Price on request{% endif %}</td>
-                <td class="col-per">{{ item.unit }}</td>
-            </tr>
-            {% endfor %}
+          {% for item in cat.products %}
+          <tr>
+            <td class="col-sr">{{ item.sr_number }}</td>
+            <td class="col-img">
+              {% if item.display_image_path %}
+              <img
+                src="{{ item.display_image_path }}"
+                class="item-img{% if item.image_is_representative %} representative-image{% endif %}"
+                alt="{% if item.image_is_representative %}Representative image for {{ cat.name }}{% else %}{{ item.item_name }}{% endif %}"
+              />
+              {% endif %}
+            </td>
+            <td class="col-desc">
+              <span class="desc-text">{{ item.item_name }}</span>
+              {% if item.size and item.size not in item.item_name %}
+              <span class="size-text">{{ item.size }}</span>
+              {% endif %} {% if item.id_size %}
+              <br /><span class="size-text">ID Size: {{ item.id_size }}</span>
+              {% endif %} {% if item.od_size %}
+              <br /><span class="size-text">OD Size: {{ item.od_size }}</span>
+              {% endif %} {% if item.lf_size %}
+              <br /><span class="size-text">L/F Size: {{ item.lf_size }}</span>
+              {% endif %} {% if item.packing %}
+              <br /><span class="pack-text">Pack: {{ item.packing }}</span>
+              {% endif %}
+            </td>
+            <td class="col-hsn">{{ item.hsn_code }}</td>
+            <td class="col-price">{% if item.list_price %}{{ item.list_price }}{% else %}Price on request{% endif %}</td>
+            <td class="col-per">{{ item.unit }}</td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
-    {% endfor %}
-</div>
+      </table>
+      {% endfor %}
+    </div>
 
-{% include "partials/_footer.html" %}
-</body>
+    {% include "partials/_footer.html" %}
+  </body>
 </html>

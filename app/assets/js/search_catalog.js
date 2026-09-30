@@ -41,78 +41,214 @@ billArchive.restoreDirectory().catch(error => {
     console.error('Unable to restore the generated-bills folder.', error);
 });
 
-function renderSavedBills(entries) {
+let allSavedBills = [];
+let visibleBills = new Map();
+
+function formatMonthLabel(monthStr) {
+    if (!monthStr) return 'Unknown Date';
+    try {
+        const d = new Date(`${monthStr}-01T00:00:00Z`);
+        if (isNaN(d.getTime())) return monthStr;
+        return d.toLocaleDateString('en-IN', {
+            month: 'long',
+            year: 'numeric',
+            timeZone: 'UTC'
+        });
+    } catch (e) {
+        return monthStr;
+    }
+}
+
+function populateMonthFilter(entries) {
+    const select = document.getElementById('billMonthFilter');
+    if (!select) return;
+    const currentVal = select.value;
+    const counts = new Map();
+    entries.forEach(e => {
+        const m = e.month || 'Other';
+        counts.set(m, (counts.get(m) || 0) + 1);
+    });
+
+    const months = Array.from(counts.keys()).sort().reverse();
+    select.replaceChildren();
+
+    const allOpt = document.createElement('option');
+    allOpt.value = 'all';
+    allOpt.textContent = `📅 All Months & Years (${entries.length})`;
+    select.appendChild(allOpt);
+
+    months.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = `${formatMonthLabel(m)} (${counts.get(m)})`;
+        select.appendChild(opt);
+    });
+
+    if (months.includes(currentVal)) {
+        select.value = currentVal;
+    } else {
+        select.value = 'all';
+    }
+}
+
+function applySavedBillFilters() {
+    const searchInput = document.getElementById('billSearchInput');
+    const monthSelect = document.getElementById('billMonthFilter');
+    const query = (searchInput?.value || '').trim().toLowerCase();
+    const selectedMonth = monthSelect?.value || 'all';
+
+    const filtered = allSavedBills.filter(entry => {
+        if (selectedMonth !== 'all' && entry.month !== selectedMonth) {
+            return false;
+        }
+        if (query) {
+            const haystack = [
+                entry.reference,
+                entry.buyerName,
+                entry.month,
+                entry.grandTotal,
+                entry.fileName
+            ].filter(Boolean).join(' ').toLowerCase();
+            if (!haystack.includes(query)) return false;
+        }
+        return true;
+    });
+
+    const countBadge = document.getElementById('billCountBadge');
+    if (countBadge) {
+        countBadge.textContent = `${filtered.length} bill${filtered.length === 1 ? '' : 's'}`;
+    }
+
+    renderSavedBills(filtered, Boolean(query || selectedMonth !== 'all'));
+}
+
+function renderSavedBills(entries, isFiltered = false) {
     const list = document.getElementById('billArchiveList');
+    if (!list) return;
     list.replaceChildren();
     visibleBills = new Map(entries.map(entry => [entry.id, entry]));
+
     if (!entries.length) {
-        const empty = document.createElement('p');
-        empty.className = 'bill-empty';
-        empty.textContent = 'No saved bills yet. Print a proforma invoice to archive it.';
+        const empty = document.createElement('div');
+        empty.className = 'bill-empty-state';
+        const icon = document.createElement('span');
+        icon.className = 'bill-empty-icon';
+        icon.textContent = isFiltered ? '🔍' : '📄';
+        const strong = document.createElement('strong');
+        strong.textContent = isFiltered ? 'No matching bills found' : 'No saved bills yet';
+        const desc = document.createElement('p');
+        desc.textContent = isFiltered
+            ? 'Try adjusting your search terms or date filter.'
+            : 'Bills are automatically organized here when you click "Save Proforma Bill" or generate an invoice.';
+        empty.append(icon, strong, desc);
         list.appendChild(empty);
         return;
     }
 
     const byMonth = new Map();
     entries.forEach(entry => {
-        if (!byMonth.has(entry.month)) byMonth.set(entry.month, []);
-        byMonth.get(entry.month).push(entry);
+        const m = entry.month || 'Other';
+        if (!byMonth.has(m)) byMonth.set(m, []);
+        byMonth.get(m).push(entry);
     });
-    let isFirstMonth = true;
+
+    let isFirst = true;
     byMonth.forEach((monthEntries, month) => {
         const section = document.createElement('details');
         section.className = 'bill-month';
-        if (isFirstMonth) {
+        if (isFirst || isFiltered) {
             section.open = true;
-            isFirstMonth = false;
+            isFirst = false;
         }
+
         const summary = document.createElement('summary');
-        const monthDate = new Date(`${month}-01T00:00:00Z`);
-        summary.textContent = `${monthDate.toLocaleDateString('en-IN', {
-            month: 'long',
-            year: 'numeric',
-            timeZone: 'UTC'
-        })} (${monthEntries.length} bill${monthEntries.length === 1 ? '' : 's'})`;
+        const titleWrap = document.createElement('div');
+        titleWrap.className = 'bill-month-title-wrap';
+        const icon = document.createElement('span');
+        icon.textContent = '📅';
+        const name = document.createElement('span');
+        name.textContent = formatMonthLabel(month);
+        titleWrap.append(icon, name);
+
+        const badge = document.createElement('span');
+        badge.className = 'bill-month-badge';
+        badge.textContent = `${monthEntries.length} bill${monthEntries.length === 1 ? '' : 's'}`;
+
+        summary.append(titleWrap, badge);
         section.appendChild(summary);
 
         const monthList = document.createElement('div');
         monthList.className = 'bill-month-list';
+
         monthEntries.forEach(entry => {
             const row = document.createElement('div');
             row.className = 'bill-entry';
-            const label = document.createElement('div');
-            label.className = 'bill-entry-name';
-            label.textContent = entry.reference;
+
+            const info = document.createElement('div');
+            info.className = 'bill-entry-info';
+
+            const top = document.createElement('div');
+            top.className = 'bill-entry-top';
+
+            const refBadge = document.createElement('span');
+            refBadge.className = 'bill-ref-badge';
+            refBadge.textContent = entry.reference;
+
+            const buyer = document.createElement('span');
+            buyer.className = 'bill-buyer-name';
+            buyer.textContent = entry.buyerName || 'Cash customer';
+            buyer.title = entry.buyerName || 'Cash customer';
+
+            top.append(refBadge, buyer);
+
             const meta = document.createElement('div');
             meta.className = 'bill-entry-meta';
-            meta.textContent = (entry.storage === 'folder' || entry.storage === 'server')
-                ? `generated_bills/${entry.month}/${entry.fileName}`
-                : 'Saved in browser archive';
-            label.appendChild(meta);
+
+            const dateSpan = document.createElement('span');
+            dateSpan.className = 'bill-meta-date';
+            dateSpan.textContent = `📅 ${entry.billDate || entry.savedAt?.slice(0, 10) || entry.month}`;
+            meta.appendChild(dateSpan);
+
+            if (entry.grandTotal) {
+                const totalSpan = document.createElement('span');
+                totalSpan.className = 'bill-meta-amount';
+                totalSpan.textContent = `₹${entry.grandTotal}`;
+                meta.appendChild(totalSpan);
+            }
+
+            const storageSpan = document.createElement('span');
+            storageSpan.className = 'bill-meta-storage';
+            storageSpan.textContent = entry.storage === 'folder'
+                ? `📁 generated_bills/${entry.month}/`
+                : '💾 Browser archive';
+            meta.appendChild(storageSpan);
+
+            info.append(top, meta);
+
             const btns = document.createElement('div');
             btns.className = 'bill-entry-actions';
-            btns.style.display = 'flex';
-            btns.style.gap = '8px';
-            const open = document.createElement('button');
-            open.className = 'bill-open-btn';
-            open.type = 'button';
-            open.textContent = 'Open ↗';
-            open.title = 'Open bill in new tab';
-            open.dataset.billId = entry.id;
-            open.dataset.action = 'open';
-            
+
+            const openBtn = document.createElement('button');
+            openBtn.className = 'bill-btn bill-open-btn';
+            openBtn.type = 'button';
+            openBtn.textContent = 'Open ↗';
+            openBtn.title = 'Open bill in a new tab';
+            openBtn.dataset.billId = entry.id;
+            openBtn.dataset.action = 'open';
+
             const printBtn = document.createElement('button');
-            printBtn.className = 'bill-open-btn bill-print-btn';
+            printBtn.className = 'bill-btn bill-print-btn';
             printBtn.type = 'button';
             printBtn.textContent = 'Print 🖨️';
-            printBtn.title = 'Open bill in new tab and print';
+            printBtn.title = 'Open bill in a new tab and print';
             printBtn.dataset.billId = entry.id;
             printBtn.dataset.action = 'print';
-            
-            btns.append(open, printBtn);
-            row.append(label, btns);
+
+            btns.append(openBtn, printBtn);
+            row.append(info, btns);
             monthList.appendChild(row);
         });
+
         section.appendChild(monthList);
         list.appendChild(section);
     });
@@ -121,23 +257,27 @@ function renderSavedBills(entries) {
 async function refreshSavedBills() {
     const status = document.getElementById('billArchiveStatus');
     const chooseBtn = document.getElementById('chooseBillsFolderButton');
-    if (status) status.textContent = 'Loading saved bills...';
+    if (status) status.textContent = 'Loading saved bills…';
     try {
         const entries = await billArchive.listBills();
+        allSavedBills = entries || [];
+        populateMonthFilter(allSavedBills);
+        applySavedBillFilters();
+
         if (status) {
             status.textContent = billArchive.directoryHandle
-                ? `✓ Connected to ${billArchive.directoryHandle.name}/. Monthly folders are synchronized.`
-                : typeof window.showDirectoryPicker === 'function'
-                    ? 'Select your generated_bills folder to save and browse its monthly folders.'
-                    : 'Folder access is unavailable here; bills are kept in this browser archive.';
+                ? `✓ Connected to ${billArchive.directoryHandle.name}/. Monthly folders synchronized.`
+                : '✓ Bills auto-saved & organized by month & year.';
         }
-        if (chooseBtn && typeof window.showDirectoryPicker === 'function') {
-            chooseBtn.style.display = '';
+        if (chooseBtn) {
             if (billArchive.directoryHandle) {
-                chooseBtn.textContent = `📁 Folder: ${billArchive.directoryHandle.name} (Change)`;
+                chooseBtn.textContent = `✓ Folder: ${billArchive.directoryHandle.name} (Change)`;
+                chooseBtn.classList.add('connected');
+            } else {
+                chooseBtn.textContent = '📁 Sync Local Folder';
+                chooseBtn.classList.remove('connected');
             }
         }
-        renderSavedBills(entries);
     } catch (error) {
         console.error('Unable to read saved bills.', error);
         if (status) status.textContent = error.message || 'Could not read saved bills.';
@@ -151,32 +291,43 @@ document.getElementById('openBillsButton')?.addEventListener('click', () => {
     else dialog.setAttribute('open', '');
     refreshSavedBills();
 });
+
 document.getElementById('closeBillArchiveButton')?.addEventListener('click', () => {
     const dialog = document.getElementById('billArchiveDialog');
     if (!dialog) return;
     if (typeof dialog.close === 'function') dialog.close();
     else dialog.removeAttribute('open');
 });
+
+document.getElementById('billSearchInput')?.addEventListener('input', () => {
+    applySavedBillFilters();
+});
+
+document.getElementById('billMonthFilter')?.addEventListener('change', () => {
+    applySavedBillFilters();
+});
+
 document.getElementById('chooseBillsFolderButton')?.addEventListener('click', () => {
     const status = document.getElementById('billArchiveStatus');
-    if (status) status.textContent = 'Choose the generated_bills folder. Monthly folders will be created automatically.';
+    if (status) status.textContent = 'Choose the data or generated_bills folder to synchronize.';
     try {
         billArchive.selectDirectory().then(() => {
-            if (status) status.textContent = 'Folder selected. Bills will be saved into monthly subfolders.';
+            if (status) status.textContent = 'Folder selected. Monthly folders synchronized.';
             refreshSavedBills();
         }).catch(error => {
             if (error.name === 'AbortError') {
                 if (status) status.textContent = 'Folder selection was cancelled.';
                 return;
             }
-            console.error('Unable to select the generated-bills folder.', error);
-            if (status) status.textContent = error.message || 'Could not select the generated_bills folder.';
+            console.error('Unable to select folder.', error);
+            if (status) status.textContent = error.message || 'Could not select folder.';
         });
     } catch (error) {
-        console.error('Unable to select the generated-bills folder.', error);
-        if (status) status.textContent = error.message || 'This browser cannot select a local folder.';
+        console.error('Unable to select folder.', error);
+        if (status) status.textContent = error.message || 'Folder selection is unavailable.';
     }
 });
+
 document.getElementById('billArchiveList')?.addEventListener('click', event => {
     const button = event.target.closest('button[data-bill-id]');
     if (!button) return;
