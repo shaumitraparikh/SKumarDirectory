@@ -199,7 +199,7 @@ class CatalogEndToEndTests(unittest.TestCase):
         self.assertEqual(actual_ids_json, expected_ids)
 
         actual_ids_print = set(re.findall(r'<td class="col-sr">([\d]+(?:\.[\d]+)?)\.?</td>', printed_html))
-        self.assertEqual(len(actual_ids_print), len(expected_ids))
+        self.assertEqual(actual_ids_print, expected_ids)
 
         for page_html in (search_html, printed_html):
             parser = EmbeddedCatalogParser()
