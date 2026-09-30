@@ -52,7 +52,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: space-between;
-        gap: 8px;
+        gap: 6px;
         padding: 10px 14px;
         border: 1px solid #cbd5e1;
         border-radius: 8px;
@@ -122,7 +122,7 @@
     .category-search-input {
         width: 100%;
         box-sizing: border-box;
-        padding: 8px 12px;
+        padding: 6px 10px;
         border: 1px solid #cbd5e1;
         border-radius: 6px;
         font-size: 14px;
@@ -203,7 +203,7 @@
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         transition: transform 0.1s;
     }
@@ -422,7 +422,7 @@
     }
     .lookup-input-row {
         display: flex;
-        gap: 8px;
+        gap: 6px;
         align-items: center;
     }
     .lookup-input-row input {
@@ -588,7 +588,7 @@
     .cart-qty-controls {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         margin-top: 10px;
         background: #f8fafc;
         padding: 3px 6px;
@@ -765,7 +765,7 @@
         padding-top: 10px;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
     }
     .summary-row {
         display: flex;
@@ -817,7 +817,7 @@
     .estimate-disclaimers {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
     }
     .estimate-note {
         font-size: 12px;
@@ -845,7 +845,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 6px;
         box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
         transition: background 0.15s, transform 0.15s;
     }
@@ -880,7 +880,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 6px;
         box-shadow: 0 3px 8px rgba(30, 58, 138, 0.2);
         transition: background 0.15s, transform 0.15s;
     }
@@ -890,7 +890,7 @@
     }
     .secondary-btn-row {
         display: flex;
-        gap: 8px;
+        gap: 6px;
     }
     .archive-btn, .order-copy-btn {
         flex: 1;
@@ -956,12 +956,12 @@
     .bill-archive-header h2 { margin: 0; font-size: 19px; }
     .bill-archive-header p { margin: 5px 0 0; color: #cbd5e1; font-size: 12px; }
     .bill-archive-close { flex: 0 0 auto; }
-    .bill-archive-actions { display: grid; gap: 8px; padding: 14px 20px; border-bottom: 1px solid #e2e8f0; }
+    .bill-archive-actions { display: grid; gap: 6px; padding: 14px 20px; border-bottom: 1px solid #e2e8f0; }
     #billArchiveStatus { color: #627d98; font-size: 12px; line-height: 1.45; }
     .bill-archive-list { display: grid; gap: 10px; padding: 14px 20px 20px; overflow: auto; }
     .bill-month { border: 1px solid #d9e2ec; border-radius: 9px; overflow: hidden; }
     .bill-month summary { padding: 12px 14px; background: #f8fafc; color: #243b53; font-size: 14px; font-weight: 700; cursor: pointer; }
-    .bill-month-list { display: grid; gap: 8px; padding: 10px; }
+    .bill-month-list { display: grid; gap: 6px; padding: 10px; }
     .bill-entry { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 7px; }
     .bill-entry-name { min-width: 0; overflow-wrap: anywhere; font-size: 13px; font-weight: 650; }
     .bill-entry-meta { margin-top: 3px; color: #627d98; font-size: 11px; font-weight: 400; }
@@ -975,7 +975,7 @@
 
     /* Catalog Grid */
     .catalog-wrapper { padding: 20px; max-width: 1400px; margin: 0 auto; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
 
     /* Cards */
     .card {
@@ -985,15 +985,15 @@
         overflow: hidden;
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
         display: flex;
-        padding: 16px;
+        padding: 10px;
         align-items: center;
-        gap: 16px;
+        gap: 10px;
         border: 1px solid #e2e8f0;
     }
     .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px rgba(0,0,0,0.08); }
 
     .card-img-container {
-        width: 85px; height: 85px; background: #f8fafc; display: flex;
+        width: 70px; height: 70px; background: #f8fafc; display: flex;
         align-items: center; justify-content: center; border-radius: 8px;
         border: 1px solid #e2e8f0; flex-shrink: 0; padding: 6px;
         transition: transform 0.2s;
@@ -1104,12 +1104,12 @@
         .cart-summary { border-left: none; border-top: 1px solid #d9e2ec; padding: 16px 16px calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 24px rgba(15,23,42,.05); max-height: none; }
         .header { padding: 14px 12px; }
         .header h1 { font-size: clamp(19px, 5vw, 21px); }
-        .sticky-bar { padding: 10px 12px; gap: 8px; }
+        .sticky-bar { padding: 10px 12px; gap: 6px; }
         
         .cart-toggle-btn { flex: 0 0 auto; padding: 10px 12px; font-size: 14px; }
         .catalog-wrapper { padding: 12px; }
         .grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 10px; }
-        .card { min-width: 0; gap: 8px; padding: 10px; }
+        .card { min-width: 0; gap: 6px; padding: 10px; }
         .card-meta { line-height: 1.4; }
         .qty-input { min-height: 40px; }
         .add-btn { min-height: 40px; padding: 8px 10px; }
