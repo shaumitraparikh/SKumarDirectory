@@ -466,19 +466,48 @@ def extract_photo_catalog_rows():
 
 
 def build_photo_catalog(config, categories, env):
-    """Generate the 3rd HTML Visual Photo Catalog based on GSC - SK Catlog Photo.docx."""
+    """Generate the unified, deduplicated HTML Visual Photo Catalog."""
     template = env.get_template('photo_template.html')
     docx_rows = extract_photo_catalog_rows()
     catalog_version = compute_catalog_version()
     
-    total_docx_items = sum(len(r) for r in docx_rows)
+    docx_cells = [cell for row in docx_rows for cell in row]
+    
+    def clean_name(s):
+        import re
+        return re.sub(r'[^a-z0-9]', '', s.lower())
+
+    enriched_categories = []
+    for cat in categories:
+        cat_copy = dict(cat)
+        c_norm = clean_name(cat['name'])
+        best_match = None
+        for dc in docx_cells:
+            d_norm = clean_name(dc['title'])
+            if d_norm == c_norm:
+                best_match = dc
+                break
+            elif (d_norm in c_norm or c_norm in d_norm) and len(d_norm) > 4:
+                if not best_match:
+                    best_match = dc
+        
+        if best_match and best_match.get('images'):
+            cat_copy['gallery_images'] = best_match['images']
+            cat_copy['sub'] = best_match.get('sub', '')
+        elif cat.get('image_path'):
+            cat_copy['gallery_images'] = [cat['image_path']]
+            cat_copy['sub'] = ''
+        else:
+            cat_copy['gallery_images'] = []
+            cat_copy['sub'] = ''
+        
+        enriched_categories.append(cat_copy)
     
     html = template.render(
         company=config['company'],
         billing=config,
         docx_rows=docx_rows,
-        docx_total_items=total_docx_items,
-        categories=categories,
+        categories=enriched_categories,
         catalog_version=catalog_version,
         generation_date=datetime.now().strftime('%Y-%m-%d %H:%M'),
         images_base='images'
@@ -488,6 +517,7 @@ def build_photo_catalog(config, categories, env):
     
     print(f"  [OK] Photo catalog: {output_path} (v={catalog_version})")
     return output_path
+
 
 
 def main():
