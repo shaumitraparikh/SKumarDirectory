@@ -621,6 +621,25 @@ const initialClients = mergeCustomers([
 ]);
 setupClientData(initialClients);
 
+// Auto-fetch local client_data.csv if served over HTTP/localhost
+if (typeof fetch === 'function' && location.protocol.startsWith('http')) {
+    fetch('data/client_data.csv')
+        .then(res => res.ok ? res.text() : Promise.reject())
+        .then(csvText => {
+            if (window.ClientDirectory && csvText) {
+                const fetchedClients = ClientDirectory.parseCsv(csvText);
+                if (fetchedClients && fetchedClients.length) {
+                    const combined = mergeCustomers([fetchedClients, clientRecords]);
+                    setupClientData(combined);
+                    try {
+                        localStorage.setItem('saved_client_records', JSON.stringify(combined));
+                    } catch (e) {}
+                }
+            }
+        })
+        .catch(() => {});
+}
+
 document.getElementById('saveClientButton')?.addEventListener('click', () => {
     const newClient = {
         name: (document.getElementById('buyerName').value || '').trim(),

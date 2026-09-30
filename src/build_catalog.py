@@ -451,12 +451,8 @@ def build_search_catalog(config, categories, items, env):
     sorted_categories = sorted(categories, key=lambda c: clean_cat_sort_key(c['name']))
     catalog_version = compute_catalog_version()
 
+    # Never embed client_data.csv into public HTML (privacy). Runtime load via CSV picker or local fetch.
     client_data = []
-    client_csv = Path('data/client_data.csv')
-    if client_csv.is_file():
-        with open(client_csv, 'r', encoding='utf-8') as cf:
-            reader = csv.DictReader(cf)
-            client_data = list(reader)
 
     saved_bills = load_saved_bills()
 
