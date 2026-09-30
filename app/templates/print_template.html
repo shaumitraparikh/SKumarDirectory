@@ -11,7 +11,7 @@
     }
     body {
         font-family: 'Arial Narrow', Arial, sans-serif;
-        font-size: 8.5pt;
+        font-size: 13pt;
         color: #000;
         margin: 0;
         padding: 0;
@@ -25,16 +25,16 @@
     }
     
     .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 5px; }
-    .contact { border: 1px solid #999; padding: 3px 6px; font-size: 7.5pt; line-height: 1.25; }
-    .contact-name { font-size: 8.5pt; font-weight: bold; }
+    .contact { border: 1px solid #999; padding: 3px 6px; font-size: 11.5pt; line-height: 1.25; }
+    .contact-name { font-size: 13pt; font-weight: bold; }
     .contact-details { display: flex; justify-content: space-between; gap: 8px; }
     .company-name { margin: 3px 0 1px; font-size: 15pt; line-height: 1.1; text-align: center; font-weight: bold; text-transform: uppercase; }
     .legal-name, .company-address, .company-tagline, .product-range, .product-details, .price-reference { margin: 2px 0; text-align: center; }
-    .legal-name { font-size: 10pt; font-weight: bold; letter-spacing: .08em; }
-    .company-address { font-size: 8pt; }
-    .company-tagline { font-size: 8pt; font-weight: bold; letter-spacing: .04em; }
-    .product-range, .product-details { font-size: 7.5pt; }
-    .price-reference { margin-top: 4px; font-size: 8pt; font-weight: bold; }
+    .legal-name { font-size: 14pt; font-weight: bold; letter-spacing: .08em; }
+    .company-address { font-size: 12pt; }
+    .company-tagline { font-size: 12pt; font-weight: bold; letter-spacing: .04em; }
+    .product-range, .product-details { font-size: 11.5pt; }
+    .price-reference { margin-top: 4px; font-size: 12pt; font-weight: bold; }
     
     .page-content {
         column-count: 2;
@@ -50,7 +50,7 @@
     }
     
     th, td {
-        padding: 2px 3px;
+        padding: 1px 2px;
         vertical-align: middle;
         border: 1px solid #ddd;
     }
@@ -62,7 +62,7 @@
         border-left: none;
         border-right: none;
         font-weight: bold;
-        font-size: 8pt;
+        font-size: 12pt;
         text-align: left;
     }
 
@@ -92,30 +92,30 @@
     .col-sr { width: 5%; text-align: center; font-weight: bold; }
     .col-img { width: 8%; text-align: center; }
     .col-desc { width: 50%; }
-    .col-hsn { width: 14%; text-align: center; font-size: 7.5pt; }
+    .col-hsn { width: 14%; text-align: center; font-size: 11.5pt; }
     .col-price { width: 13%; text-align: right; font-weight: bold; }
     .col-per { width: 10%; text-align: center; }
 
     .desc-text { font-weight: bold; }
-    .size-text { color: #333; font-size: 8pt; margin-left: 4px; }
-    .pack-text { color: #555; font-size: 7.5pt; font-style: italic; }
+    .size-text { color: #333; font-size: 12pt; margin-left: 4px; }
+    .pack-text { color: #555; font-size: 11.5pt; font-style: italic; }
 
     @media screen {
         body { max-width: 1500px; margin: 0 auto; padding: 12px; box-sizing: border-box; }
     }
 
     @media screen and (max-width: 700px) {
-        body { padding: 8px; font-size: 10pt; }
+        body { padding: 8px; font-size: 14pt; }
         .contact-grid { grid-template-columns: 1fr; }
         .contact-details { flex-wrap: wrap; }
         .page-content { column-count: 1; column-gap: 0; column-rule: none; }
         table { page-break-inside: auto; break-inside: auto; table-layout: fixed; }
-        th, td { padding: 4px 3px; font-size: 8.5pt; overflow-wrap: anywhere; }
-        .cat-header { font-size: 10pt; }
+        th, td { padding: 2px 2px; font-size: 13pt; overflow-wrap: anywhere; }
+        .cat-header { font-size: 14pt; }
         .col-sr { width: 7%; }
         .col-img { width: 8%; }
         .col-desc { width: 42%; }
-        .col-hsn { width: 15%; font-size: 7pt; }
+        .col-hsn { width: 15%; font-size: 11pt; }
         .col-price { width: 13%; }
         .col-per { width: 15%; }
         .item-img { max-height: 30px; max-width: 40px; }
@@ -133,27 +133,7 @@
         <a href="photo_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🖼️ Photo Gallery</a>
     </div>
 </nav>
-<div class="header">
-    <div class="contact-grid">
-{% for contact in company.sales_contacts %}
-        <div class="contact">
-            <div class="contact-name">{{ contact.name }}</div>
-            <div class="contact-details">
-                <span>Mobile: {{ contact.mobile }}</span>
-                <span>Phone: {{ contact.phone }}</span>
-            </div>
-            <div>GSTIN: {{ contact.gstin }}</div>
-        </div>
-{% endfor %}
-    </div>
-    <div class="legal-name">{{ company.legal_name }}</div>
-    <h1 class="company-name">{{ company.name }}</h1>
-    <p class="company-address">{{ company.address }}</p>
-    <p class="company-tagline">{{ company.price_list_tagline }}</p>
-    <p class="product-range">{{ company.product_range }}</p>
-    <p class="product-details">{{ company.product_details }}</p>
-    <p class="price-reference">Phone: - {{ company.phone_display }} &nbsp; | &nbsp; Price Lists: GSC/2025 (Estd. {{ company.estd_gsc }}) &amp; SK/2025 (Estd. {{ company.estd_sk }}) &nbsp; | &nbsp; Effective {{ company.date }}</p>
-</div>
+{% include "partials/_header.html" %}
 
 
 

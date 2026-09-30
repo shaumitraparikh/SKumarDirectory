@@ -11,7 +11,7 @@
     }
     body {
         font-family: 'Arial Narrow', Arial, sans-serif;
-        font-size: 8.5pt;
+        font-size: 13pt;
         color: #000;
         margin: 0;
         padding: 0;
@@ -25,16 +25,16 @@
     }
 
     .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 5px; }
-    .contact { border: 1px solid #999; padding: 3px 6px; font-size: 7.5pt; line-height: 1.25; }
-    .contact-name { font-size: 8.5pt; font-weight: bold; }
+    .contact { border: 1px solid #999; padding: 3px 6px; font-size: 11.5pt; line-height: 1.25; }
+    .contact-name { font-size: 13pt; font-weight: bold; }
     .contact-details { display: flex; justify-content: space-between; gap: 8px; }
     .company-name { margin: 3px 0 1px; font-size: 15pt; line-height: 1.1; text-align: center; font-weight: bold; text-transform: uppercase; }
     .legal-name, .company-address, .company-tagline, .product-range, .product-details, .price-reference { margin: 2px 0; text-align: center; }
-    .legal-name { font-size: 10pt; font-weight: bold; letter-spacing: .08em; }
-    .company-address { font-size: 8pt; }
-    .company-tagline { font-size: 8pt; font-weight: bold; letter-spacing: .04em; }
-    .product-range, .product-details { font-size: 7.5pt; }
-    .price-reference { margin-top: 4px; font-size: 8pt; font-weight: bold; }
+    .legal-name { font-size: 14pt; font-weight: bold; letter-spacing: .08em; }
+    .company-address { font-size: 12pt; }
+    .company-tagline { font-size: 12pt; font-weight: bold; letter-spacing: .04em; }
+    .product-range, .product-details { font-size: 11.5pt; }
+    .price-reference { margin-top: 4px; font-size: 12pt; font-weight: bold; }
 
     .page-content {
         column-count: 2;
@@ -50,7 +50,7 @@
     }
 
     th, td {
-        padding: 2px 3px;
+        padding: 1px 2px;
         vertical-align: middle;
         border: 1px solid #ddd;
     }
@@ -62,7 +62,7 @@
         border-left: none;
         border-right: none;
         font-weight: bold;
-        font-size: 8pt;
+        font-size: 12pt;
         text-align: left;
     }
 
@@ -92,30 +92,30 @@
     .col-sr { width: 5%; text-align: center; font-weight: bold; }
     .col-img { width: 8%; text-align: center; }
     .col-desc { width: 50%; }
-    .col-hsn { width: 14%; text-align: center; font-size: 7.5pt; }
+    .col-hsn { width: 14%; text-align: center; font-size: 11.5pt; }
     .col-price { width: 13%; text-align: right; font-weight: bold; }
     .col-per { width: 10%; text-align: center; }
 
     .desc-text { font-weight: bold; }
-    .size-text { color: #333; font-size: 8pt; margin-left: 4px; }
-    .pack-text { color: #555; font-size: 7.5pt; font-style: italic; }
+    .size-text { color: #333; font-size: 12pt; margin-left: 4px; }
+    .pack-text { color: #555; font-size: 11.5pt; font-style: italic; }
 
     @media screen {
         body { max-width: 1500px; margin: 0 auto; padding: 12px; box-sizing: border-box; }
     }
 
     @media screen and (max-width: 700px) {
-        body { padding: 8px; font-size: 10pt; }
+        body { padding: 8px; font-size: 14pt; }
         .contact-grid { grid-template-columns: 1fr; }
         .contact-details { flex-wrap: wrap; }
         .page-content { column-count: 1; column-gap: 0; column-rule: none; }
         table { page-break-inside: auto; break-inside: auto; table-layout: fixed; }
-        th, td { padding: 4px 3px; font-size: 8.5pt; overflow-wrap: anywhere; }
-        .cat-header { font-size: 10pt; }
+        th, td { padding: 2px 2px; font-size: 13pt; overflow-wrap: anywhere; }
+        .cat-header { font-size: 14pt; }
         .col-sr { width: 7%; }
         .col-img { width: 8%; }
         .col-desc { width: 42%; }
-        .col-hsn { width: 15%; font-size: 7pt; }
+        .col-hsn { width: 15%; font-size: 11pt; }
         .col-price { width: 13%; }
         .col-per { width: 15%; }
         .item-img { max-height: 30px; max-width: 40px; }
@@ -133,35 +133,41 @@
         <a href="photo_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🖼️ Photo Gallery</a>
     </div>
 </nav>
-<div class="header">
-    <div class="contact-grid">
+<style>
+.unified-header { text-align: center; padding: 15px; margin-bottom: 20px; background: #fff; font-family: 'Segoe UI', system-ui, sans-serif; border-bottom: 3px solid #102a43; }
+.biz-sub { font-size: 16px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 5px 0; }
+.biz-main { font-size: 34px; font-weight: 900; color: #0f172a; margin: 0 0 10px 0; letter-spacing: 0.5px; }
+.biz-address { font-size: 15px; color: #334155; margin-bottom: 12px; font-weight: 500; }
+.contact-block { font-size: 15px; color: #1e293b; line-height: 1.4; margin-bottom: 15px; }
+.contact-person { margin-bottom: 6px; }
+.tagline { font-size: 15px; font-weight: 600; color: #b91c1c; margin-bottom: 8px; letter-spacing: 0.5px; }
+.scope { font-size: 14px; color: #475569; margin-bottom: 8px; font-style: italic; }
+.footer-line { font-size: 14px; color: #0f172a; font-weight: 600; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #cbd5e1; }
+</style>
+<div class="unified-header">
+    <div class="biz-sub">General Supply Corporation</div>
+    <h1 class="biz-main">S. Kumar &amp; Bros.</h1>
 
-        <div class="contact">
-            <div class="contact-name">Amit G. Parikh</div>
-            <div class="contact-details">
-                <span>Mobile: 9869905779</span>
-                <span>Phone: 35989674</span>
-            </div>
-            <div>GSTIN: 27ACJPP2955J1Z4</div>
+    <div class="contact-block">
+        <div class="contact-person">
+            <strong>Amit G. Parikh</strong> | Mobile: 9869905779 | Phone: 35989674 | GSTIN: 27ACJPP2955J1Z4
         </div>
-
-        <div class="contact">
-            <div class="contact-name">Shaumitra G Parikh</div>
-            <div class="contact-details">
-                <span>Mobile: 9821361314, 8369398586</span>
-                <span>Phone: 35989674</span>
-            </div>
-            <div>GSTIN: 27AAGPP1621C1Z5</div>
+        <div class="contact-person">
+            <strong>Shaumitra G Parikh</strong> | Mobile: 9821361314, 8369398586 | Phone: 35989674 | GSTIN: 27AAGPP1621C1Z5
         </div>
-
     </div>
-    <div class="legal-name">S. Kumar &amp; Bros</div>
-    <h1 class="company-name">S. Kumar &amp; Bros</h1>
-    <p class="company-address">3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.</p>
-    <p class="company-tagline">INSULATING -:- ELECTRICALS -:- ELECTRONIC -:- HARDWARE -:- MATERIALS</p>
-    <p class="product-range">Empire, Fibreglass, Cotton, Silicon, Teflon, P.V.C., Heatshrinkable, etc. Tube, Cable, Wire, Cloth, Tape.</p>
-    <p class="product-details">Solder Items, Paste, Tester, Fuse Wire, All Cord Wires, Iron Element, T.V. &amp; Cable Plug, Socket, Pin &amp; Splitter.</p>
-    <p class="price-reference">Phone: - 49233982 &nbsp; | &nbsp; Price Lists: GSC/2025 (Estd. 1962) &amp; SK/2025 (Estd. 1991) &nbsp; | &nbsp; Effective 1ST MAY 2025</p>
+
+    <div class="biz-address">
+        3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.
+    </div>
+
+    <div class="tagline">INSULATING -:- ELECTRICALS -:- ELECTRONIC -:- HARDWARE -:- MATERIALS</div>
+    <div class="scope">Empire, Fibreglass, Cotton, Silicon, Teflon, P.V.C., Heatshrinkable, etc. Tube, Cable, Wire, Cloth, Tape.</div>
+    <div class="scope">Solder Items, Paste, Tester, Fuse Wire, All Cord Wires, Iron Element, T.V. &amp; Cable Plug, Socket, Pin &amp; Splitter.</div>
+
+    <div class="footer-line">
+        Phone: - 49233982 &nbsp;|&nbsp; Price Lists: GSC/2025 (Estd. 1962) &amp; SK/2025 (Estd. 1991) &nbsp;|&nbsp; Effective 1ST MAY 2025
+    </div>
 </div>
 
 

@@ -3,7 +3,7 @@
 Build Catalog - Generates HTML catalogs from CSV data and images.
 
 Usage:
-    python tools/build_catalog.py
+    python src/build_catalog.py
 
 Reads:
     - data/config.json  : Company info and settings

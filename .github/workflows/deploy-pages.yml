@@ -37,7 +37,7 @@ jobs:
         run: python -m pip install jinja2 python-docx Pillow
 
       - name: Build catalogs
-        run: python tools/build_catalog.py
+        run: python src/build_catalog.py
         env:
           CATALOG_NO_BROWSER: "1"
 

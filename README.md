@@ -149,7 +149,7 @@ pip install -r requirements.txt
 Run all automated checks locally:
 ```bash
 # Rebuild the catalog HTML files manually
-python tools/build_catalog.py
+python src/build_catalog.py
 
 # Run Python data integrity and build tests
 python -m unittest discover -s tests -p "test_*.py"
