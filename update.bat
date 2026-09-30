@@ -20,12 +20,9 @@ if "%LOCAL_MODE%"=="1" goto :run_validation
 for /f "delims=" %%B in ('git branch --show-current') do set "CURRENT_BRANCH=%%B"
 if not "%CURRENT_BRANCH%"=="main" goto :wrong_branch
 
-echo Checking that main is synchronized with origin...
-git fetch origin
+echo Pulling latest changes from origin main...
+git pull origin main
 if errorlevel 1 goto :error
-for /f "delims=" %%H in ('git rev-parse HEAD') do set "LOCAL_HEAD=%%H"
-for /f "delims=" %%H in ('git rev-parse origin/main') do set "REMOTE_HEAD=%%H"
-if not "%LOCAL_HEAD%"=="%REMOTE_HEAD%" goto :branch_out_of_date
 
 :run_validation
 if exist ".venv\Scripts\python.exe" (
@@ -90,12 +87,6 @@ echo ERROR: Run this updater from the main branch so Pages can be updated.
 set "EXIT_CODE=1"
 goto :finish
 
-:branch_out_of_date
-echo ERROR: Local main is not exactly synchronized with origin/main.
-echo Sync or resolve the branch first, then rerun this updater.
-echo No catalog changes were built, committed, or pushed.
-set "EXIT_CODE=1"
-goto :finish
 
 :error
 echo.
