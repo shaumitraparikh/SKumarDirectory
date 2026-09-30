@@ -444,8 +444,8 @@
 <script id="catalogData" type="application/json">{{ catalog_data | tojson }}</script>
 <script src="app/assets/js/commerce_core.js"></script>
 <script src="app/assets/js/bill_archive.js"></script>
-<script>
-    </script>
+<script>window.INJECTED_CLIENT_DATA = {{ client_data | tojson }};</script>
+<script>window.INJECTED_SAVED_BILLS = {{ saved_bills | tojson }};</script>
 <script src="app/assets/js/search_catalog.js?v={{ catalog_version }}"></script>
 <script>
     if ('serviceWorker' in navigator  && location.protocol.startsWith('http')) {
@@ -467,8 +467,6 @@
         });
     }
 </script>
-<script>window.INJECTED_CLIENT_DATA = {{ client_data | tojson }};</script>
-<script>window.INJECTED_SAVED_BILLS = {{ saved_bills | tojson }};</script>
 {% include "partials/_footer.html" %}
 </body>
 </html>
