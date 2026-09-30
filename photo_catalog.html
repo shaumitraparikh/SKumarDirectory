@@ -181,14 +181,13 @@
     </div>
 
     <div class="quick-chips-bar" id="categoryChips">
-        <button type="button" class="chip-btn active" onclick="filterByChip('all', this)">🌍 All Categories</button>
+        <button type="button" class="chip-btn active" onclick="filterByChip('all', this)">🌍 All Categories (60)</button>
         <button type="button" class="chip-btn" onclick="filterByChip('tube', this)">🧫 Tubes &amp; Sleeves</button>
         <button type="button" class="chip-btn" onclick="filterByChip('pipe', this)">🚿 Pipes &amp; Cords</button>
         <button type="button" class="chip-btn" onclick="filterByChip('cable', this)">🔌 Cables &amp; Wires</button>
         <button type="button" class="chip-btn" onclick="filterByChip('capacitor', this)">🔋 Capacitors</button>
         <button type="button" class="chip-btn" onclick="filterByChip('tape', this)">🎗️ Industrial Tapes</button>
-        <button type="button" class="chip-btn" onclick="filterByChip('sealer', this)">⚙️ Sealer Machine &amp; Part</button>
-        <button type="button" class="chip-btn" onclick="filterByChip('complete', this)">📋 All 60 Categories</button>
+        <button type="button" class="chip-btn" onclick="filterByChip('sealer', this)">⚙️ Sealer Machine &amp; Parts</button>
     </div>
 </nav>
 
@@ -1171,7 +1170,7 @@
     </section>
 
     <!-- Section 2: Complete 60 Categories Directory -->
-    <section id="allCategoriesSection" style="margin-top: 40px; display: none;">
+    <section id="allCategoriesSection" style="margin-top: 40px;">
         <div class="section-title-wrap">
             <h2 class="section-title">
                 <span>📦</span> Complete Product Directory (All 60 Categories)
@@ -2247,12 +2246,30 @@ document.addEventListener('keydown', function(e) {
 
 function filterPhotoCards() {
     const q = (document.getElementById('categorySearch').value || '').toLowerCase().trim();
-    const cards = document.querySelectorAll('.photo-card, .cat-overview-card');
-    cards.forEach(card => {
+    const docxCards = document.querySelectorAll('#featuredDocxSection .photo-card');
+    const allCatCards = document.querySelectorAll('#allCategoriesGrid .cat-overview-card');
+
+    let docxMatches = 0;
+    docxCards.forEach(card => {
         const text = card.dataset.categoryTitle || '';
         const match = !q || text.includes(q);
         card.style.display = match ? '' : 'none';
+        if (match) docxMatches++;
     });
+
+    let allCatMatches = 0;
+    allCatCards.forEach(card => {
+        const text = card.dataset.categoryTitle || '';
+        const match = !q || text.includes(q);
+        card.style.display = match ? '' : 'none';
+        if (match) allCatMatches++;
+    });
+
+    // If searching, show the full 60 categories directory so user sees every matching item
+    if (q) {
+        document.getElementById('featuredDocxSection').style.display = docxMatches > 0 ? '' : 'none';
+        document.getElementById('allCategoriesSection').style.display = allCatMatches > 0 ? '' : 'none';
+    }
 }
 
 function filterByChip(type, btn) {
@@ -2262,18 +2279,10 @@ function filterByChip(type, btn) {
     const searchInput = document.getElementById('categorySearch');
     if (type === 'all') {
         if (searchInput) searchInput.value = '';
-        filterPhotoCards();
         document.getElementById('featuredDocxSection').style.display = '';
-        document.getElementById('allCategoriesSection').style.display = 'none';
-    } else if (type === 'complete') {
-        if (searchInput) searchInput.value = '';
-        filterPhotoCards();
-        document.getElementById('featuredDocxSection').style.display = 'none';
         document.getElementById('allCategoriesSection').style.display = '';
-        document.getElementById('allCategoriesSection').scrollIntoView({ behavior: 'smooth' });
+        filterPhotoCards();
     } else {
-        document.getElementById('featuredDocxSection').style.display = '';
-        document.getElementById('allCategoriesSection').style.display = 'none';
         if (searchInput) searchInput.value = type;
         filterPhotoCards();
     }
