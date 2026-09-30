@@ -1,58 +1,49 @@
 <style>
-.unified-header { text-align: center; padding: 10px 15px; margin-bottom: 6px; background: #fff; font-family: 'Segoe UI', system-ui, sans-serif; border-bottom: 3px solid #102a43; }
-.biz-sub { font-size: 14px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
-.biz-main { font-size: 28px; font-weight: 900; color: #0f172a; margin: 0 0 4px 0; letter-spacing: 0.5px; }
-.biz-address { font-size: 14px; color: #334155; margin-bottom: 6px; font-weight: 500; }
-.contact-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; font-size: 14px; color: #1e293b; line-height: 1.4; margin-bottom: 6px; }
-.contact-person { background: #f8fafc; padding: 4px 10px; border-radius: 6px; border: 1px solid #e2e8f0; text-align: center; min-width: auto; flex: 1; }
-.contact-person strong { display: block; font-size: 14px; margin-bottom: 2px; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px; }
-.tagline { font-size: 14px; font-weight: 700; color: #b91c1c; margin-bottom: 6px; letter-spacing: 0.5px; }
-.scope { font-size: 13px; color: #475569; margin-bottom: 2px; font-style: italic; max-width: 900px; margin-left: auto; margin-right: auto; }
-.footer-line { font-size: 13px; color: #0f172a; font-weight: 600; margin-top: 4px; padding-top: 4px; border-top: 1px dashed #cbd5e1; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.unified-header { text-align: center; padding: 6px 10px; margin-bottom: 4px; background: #fff; font-family: 'Segoe UI', system-ui, sans-serif; border-bottom: 2px solid #102a43; font-size: 11px; line-height: 1.2; }
+.biz-title-row { display: flex; align-items: baseline; justify-content: center; gap: 8px; margin-bottom: 3px; }
+.biz-sub { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
+.biz-main { font-size: 20px; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: 0.5px; }
+.biz-address { font-size: 12px; color: #334155; margin-bottom: 4px; font-weight: 500; }
+.contact-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-bottom: 4px; }
+.contact-person { background: #f8fafc; padding: 3px 6px; border-radius: 4px; border: 1px solid #e2e8f0; text-align: center; flex: 1; min-width: 150px; }
+.contact-person strong { display: block; font-size: 12px; margin-bottom: 1px; color: #0f172a; border-bottom: 1px solid #e2e8f0; }
+.tagline { font-size: 12px; font-weight: 700; color: #b91c1c; margin-bottom: 2px; }
+.scope { font-size: 11px; color: #475569; font-style: italic; max-width: 900px; margin: 0 auto; }
+.footer-line { font-size: 11px; color: #0f172a; font-weight: 600; margin-top: 3px; padding-top: 3px; border-top: 1px dashed #cbd5e1; display: flex; justify-content: center; gap: 6px; }
 @media (max-width: 600px) {
-    .biz-main { font-size: 20px; }
-    .contact-grid { flex-direction: column; gap: 8px; align-items: stretch; }
-    .contact-person { font-size: 13px; }
-}
-@media print {
-    .contact-grid { gap: 5px; margin-bottom: 8px; }
-    .contact-person { padding: 4px 8px; font-size: 10pt; min-width: 0; flex: 1; }
-    .contact-person strong { font-size: 11pt; margin-bottom: 2px; padding-bottom: 2px; }
+    .biz-title-row { flex-direction: column; align-items: center; gap: 0; }
+    .contact-grid { flex-direction: column; align-items: stretch; }
 }
 </style>
 <div class="unified-header">
-    <div class="biz-sub">General Supply Corporation</div>
-    <h1 class="biz-main">S. Kumar &amp; Bros.</h1>
+    <div class="biz-title-row">
+        <div class="biz-sub">General Supply Corporation</div>
+        <h1 class="biz-main">S. Kumar &amp; Bros.</h1>
+    </div>
     
     <div class="biz-address">
-        <a href="https://maps.app.goo.gl/LwzbK7p13RpRza3u8" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline; text-decoration-color: #cbd5e1;">3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.</a>
+        <a href="https://maps.app.goo.gl/LwzbK7p13RpRza3u8" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.</a>
     </div>
 
     <div class="contact-grid">
         <div class="contact-person">
             <strong>Amit G. Parikh</strong>
-            Mob: 9869905779<br>
-            GSTIN: 27ACJPP2955J1Z4
+            Mob: 9869905779 | GSTIN: 27ACJPP2955J1Z4
         </div>
         <div class="contact-person">
             <strong>Shaumitra G. Parikh</strong>
-            Mob: 9821361314, 8369398586<br>
-            GSTIN: 27AAGPP1621C1Z5
+            Mob: 9821361314, 8369398586 | GSTIN: 27AAGPP1621C1Z5
         </div>
         <div class="contact-person">
             <strong>Office &amp; Info</strong>
-            Phone: 35989674, 49233982<br>
-            Price Lists: GSC/2025 &amp; SK/2025
+            Ph: 35989674, 49233982 | Price Lists: GSC/2025 &amp; SK/2025
         </div>
     </div>
 
     <div class="tagline">INSULATING -:- ELECTRICALS -:- ELECTRONIC -:- HARDWARE -:- MATERIALS</div>
-    <div class="scope">Empire, Fibreglass, Cotton, Silicon, Teflon, P.V.C., Heatshrinkable, etc. Tube, Cable, Wire, Cloth, Tape.</div>
-    <div class="scope">Solder Items, Paste, Tester, Fuse Wire, All Cord Wires, Iron Element, T.V. &amp; Cable Plug, Socket, Pin &amp; Splitter.</div>
+    <div class="scope">Empire, Fibreglass, Cotton, Silicon, Teflon, P.V.C., Heatshrinkable, etc. Tube, Cable, Wire, Cloth, Tape. Solder Items, Paste, Tester, Fuse Wire, All Cord Wires, Iron Element, T.V. &amp; Cable Plug, Socket, Pin &amp; Splitter.</div>
 
     <div class="footer-line">
-        <span>Effective: 1ST MAY 2025</span>
-        <span style="color: #cbd5e1;">|</span>
-        <span>Estd: GSC (1962), SK (1991)</span>
+        <span>Effective: 1ST MAY 2025</span> <span style="color: #cbd5e1;">|</span> <span>Estd: GSC (1962), SK (1991)</span>
     </div>
 </div>
