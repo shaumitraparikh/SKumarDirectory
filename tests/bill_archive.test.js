@@ -112,6 +112,26 @@ function run() {
         assert.strictEqual(entries[0].id, '2026-10/PI-20261002-000001.html');
         assert.strictEqual(entries[1].id, '2026-09/PI-20260926-000001.html');
         assert.strictEqual(entries[1].html, '<!doctype html><p>test bill</p>');
+        const genBillsRoot = makeDirectory('generated_bills');
+        const genBillsArchive = new BillArchive({
+            storage: new MemoryStorage(),
+            indexedDB: null,
+            window: { showDirectoryPicker: () => Promise.resolve(genBillsRoot) }
+        });
+        return genBillsArchive.saveBill({
+            date: new Date(2026, 8, 26, 12),
+            reference: 'PI-20260926-000005',
+            html: '<p>direct gen_bills folder test</p>'
+        }).then(function(res) {
+            assert.strictEqual(res.storage, 'folder');
+            assert.ok(genBillsRoot.directories.has('2026-09'));
+            assert.ok(genBillsRoot.directories.get('2026-09').files.has('PI-20260926-000005.html'));
+            return genBillsArchive.listBills();
+        }).then(function(genEntries) {
+            assert.strictEqual(genEntries.length, 1);
+            assert.strictEqual(genEntries[0].id, '2026-09/PI-20260926-000005.html');
+        });
+    }).then(function () {
         return wrongFolderArchive.saveBill({
             date,
             reference: 'PI-20260926-000002',

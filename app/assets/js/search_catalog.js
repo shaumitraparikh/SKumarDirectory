@@ -58,16 +58,21 @@ function renderSavedBills(entries) {
         if (!byMonth.has(entry.month)) byMonth.set(entry.month, []);
         byMonth.get(entry.month).push(entry);
     });
+    let isFirstMonth = true;
     byMonth.forEach((monthEntries, month) => {
         const section = document.createElement('details');
         section.className = 'bill-month';
+        if (isFirstMonth) {
+            section.open = true;
+            isFirstMonth = false;
+        }
         const summary = document.createElement('summary');
         const monthDate = new Date(`${month}-01T00:00:00Z`);
         summary.textContent = `${monthDate.toLocaleDateString('en-IN', {
             month: 'long',
             year: 'numeric',
             timeZone: 'UTC'
-        })} (${monthEntries.length})`;
+        })} (${monthEntries.length} bill${monthEntries.length === 1 ? '' : 's'})`;
         section.appendChild(summary);
 
         const monthList = document.createElement('div');
@@ -82,7 +87,7 @@ function renderSavedBills(entries) {
             meta.className = 'bill-entry-meta';
             meta.textContent = (entry.storage === 'folder' || entry.storage === 'server')
                 ? `generated_bills/${entry.month}/${entry.fileName}`
-                : 'Saved in this browser archive';
+                : 'Saved in browser archive';
             label.appendChild(meta);
             const btns = document.createElement('div');
             btns.className = 'bill-entry-actions';
@@ -91,14 +96,16 @@ function renderSavedBills(entries) {
             const open = document.createElement('button');
             open.className = 'bill-open-btn';
             open.type = 'button';
-            open.textContent = 'Open';
+            open.textContent = 'Open ↗';
+            open.title = 'Open bill in new tab';
             open.dataset.billId = entry.id;
             open.dataset.action = 'open';
             
             const printBtn = document.createElement('button');
-            printBtn.className = 'bill-open-btn';
+            printBtn.className = 'bill-open-btn bill-print-btn';
             printBtn.type = 'button';
-            printBtn.textContent = 'Print';
+            printBtn.textContent = 'Print 🖨️';
+            printBtn.title = 'Open bill in new tab and print';
             printBtn.dataset.billId = entry.id;
             printBtn.dataset.action = 'print';
             
@@ -114,93 +121,73 @@ function renderSavedBills(entries) {
 async function refreshSavedBills() {
     const status = document.getElementById('billArchiveStatus');
     const chooseBtn = document.getElementById('chooseBillsFolderButton');
-    status.textContent = 'Loading saved bills...';
+    if (status) status.textContent = 'Loading saved bills...';
     try {
-        let entries = [];
-        
-        if (entries.length === 0) {
-            entries = await billArchive.listBills();
+        const entries = await billArchive.listBills();
+        if (status) {
             status.textContent = billArchive.directoryHandle
-                ? 'Showing bills from the selected folder and this browser archive.'
+                ? `✓ Connected to ${billArchive.directoryHandle.name}/. Monthly folders are synchronized.`
                 : typeof window.showDirectoryPicker === 'function'
                     ? 'Select your generated_bills folder to save and browse its monthly folders.'
-                    : 'Folder access is unavailable here; bills are kept in this browser and downloaded.';
-            if (chooseBtn && typeof window.showDirectoryPicker === 'function') chooseBtn.style.display = '';
+                    : 'Folder access is unavailable here; bills are kept in this browser archive.';
         }
-        
+        if (chooseBtn && typeof window.showDirectoryPicker === 'function') {
+            chooseBtn.style.display = '';
+            if (billArchive.directoryHandle) {
+                chooseBtn.textContent = `📁 Folder: ${billArchive.directoryHandle.name} (Change)`;
+            }
+        }
         renderSavedBills(entries);
     } catch (error) {
         console.error('Unable to read saved bills.', error);
-        status.textContent = error.message || 'Could not read saved bills.';
+        if (status) status.textContent = error.message || 'Could not read saved bills.';
     }
 }
 
-document.getElementById('openBillsButton').addEventListener('click', () => {
+document.getElementById('openBillsButton')?.addEventListener('click', () => {
     const dialog = document.getElementById('billArchiveDialog');
+    if (!dialog) return;
     if (typeof dialog.showModal === 'function') dialog.showModal();
     else dialog.setAttribute('open', '');
     refreshSavedBills();
 });
-document.getElementById('closeBillArchiveButton').addEventListener('click', () => {
+document.getElementById('closeBillArchiveButton')?.addEventListener('click', () => {
     const dialog = document.getElementById('billArchiveDialog');
+    if (!dialog) return;
     if (typeof dialog.close === 'function') dialog.close();
     else dialog.removeAttribute('open');
 });
-document.getElementById('chooseBillsFolderButton').addEventListener('click', () => {
+document.getElementById('chooseBillsFolderButton')?.addEventListener('click', () => {
     const status = document.getElementById('billArchiveStatus');
-    status.textContent = 'Choose the generated_bills folder. Monthly folders will be created automatically.';
+    if (status) status.textContent = 'Choose the generated_bills folder. Monthly folders will be created automatically.';
     try {
         billArchive.selectDirectory().then(() => {
-            status.textContent = 'Folder selected. Bills will be saved into monthly subfolders.';
+            if (status) status.textContent = 'Folder selected. Bills will be saved into monthly subfolders.';
             refreshSavedBills();
         }).catch(error => {
             if (error.name === 'AbortError') {
-                status.textContent = 'Folder selection was cancelled.';
+                if (status) status.textContent = 'Folder selection was cancelled.';
                 return;
             }
             console.error('Unable to select the generated-bills folder.', error);
-            status.textContent = error.message || 'Could not select the generated_bills folder.';
+            if (status) status.textContent = error.message || 'Could not select the generated_bills folder.';
         });
     } catch (error) {
         console.error('Unable to select the generated-bills folder.', error);
-        status.textContent = error.message || 'This browser cannot select a local folder.';
+        if (status) status.textContent = error.message || 'This browser cannot select a local folder.';
     }
 });
-document.getElementById('billArchiveList').addEventListener('click', event => {
+document.getElementById('billArchiveList')?.addEventListener('click', event => {
     const button = event.target.closest('button[data-bill-id]');
     if (!button) return;
     const action = button.dataset.action;
     const entry = visibleBills.get(button.dataset.billId);
-    if (entry) {
-        if (entry.storage === "server") {
-            try {
-                const order = JSON.parse(entry.order_json);
-                cart = order.items || {};
-                const buyer = order.buyer || {};
-                document.getElementById('buyerName').value = buyer.name || '';
-                document.getElementById('buyerPhone').value = buyer.phone || '';
-                document.getElementById('buyerEmail').value = buyer.email || '';
-                document.getElementById('buyerAddress').value = buyer.address || '';
-                if (buyer.state) document.getElementById('buyerState').value = buyer.state;
-                if (buyer.pincode) document.getElementById('buyerPincode').value = buyer.pincode;
-                if (buyer.gstin) document.getElementById('buyerGstin').value = buyer.gstin;
-                
-                renderCart();
-                document.getElementById('pInvNo').innerText = order.id || entry.reference || '';
-                document.getElementById('printBillBtn').style.display = 'block';
-                if (action === 'print') {
-                    generateBill();
-                } else {
-                    document.getElementById('billArchiveDialog').close();
-                    showToast("Order restored to cart!");
-                }
-            } catch (e) {
-                console.error("Failed to restore bill", e);
-                showToast("Failed to restore order from server data.");
-            }
-        } else {
-            billArchive.openBill(entry);
-        }
+    if (!entry) return;
+
+    if (action === 'open') {
+        billArchive.openBill(entry, false);
+    } else if (action === 'print') {
+        billArchive.openBill(entry, true);
     }
 });
 
@@ -1275,7 +1262,12 @@ function fuzzyScore(text, query) {
         const reference = document.getElementById('pInvNo').innerText.trim();
         const html = standaloneBillHtml();
         
-        return billArchive.saveBill({ date, reference, html });
+        return billArchive.saveBill({ date, reference, html }).then(result => {
+            if (typeof refreshSavedBills === 'function') {
+                refreshSavedBills().catch(() => {});
+            }
+            return result;
+        });
     }
 
         async function saveBillRequest() {

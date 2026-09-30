@@ -64,8 +64,8 @@
             mode: 'readwrite'
         });
         return Promise.resolve(selection).then(function (handle) {
-            if (handle.name !== 'data') {
-                throw new Error('Select the data folder so monthly bill folders are created in the requested location.');
+            if (handle.name !== 'data' && handle.name !== 'generated_bills') {
+                throw new Error('Select the data folder or generated_bills folder so monthly bill folders are created in the requested location.');
             }
             self.directoryHandle = handle;
             return self.storage.setDirectory(handle).then(function () {
@@ -81,7 +81,12 @@
         var handle = this.directoryHandle;
         var directoryPromise;
         if (!handle && typeof this.window.showDirectoryPicker === 'function') {
-            directoryPromise = this.selectDirectory();
+            directoryPromise = this.selectDirectory().catch(function (error) {
+                if (error && error.name === 'AbortError') {
+                    return null;
+                }
+                throw error;
+            });
         } else {
             directoryPromise = Promise.resolve(handle);
         }
@@ -115,6 +120,9 @@
                 .then(function (permission) {
                     if (permission !== 'granted') {
                         throw new Error('Folder access was not granted. The bill was not written to generated_bills.');
+                    }
+                    if (selectedHandle.name === 'generated_bills') {
+                        return selectedHandle;
                     }
                     return selectedHandle.getDirectoryHandle('generated_bills', { create: true });
                 })
@@ -157,7 +165,11 @@
                     cached.forEach(function (entry) {
                         if (entry.storage === 'folder') entries.delete(entry.id);
                     });
-                    return self.directoryHandle.getDirectoryHandle('generated_bills').catch(function() { return null; }).then(function(genBillsDir) {
+                    var getGenBills = self.directoryHandle.name === 'generated_bills'
+                        ? Promise.resolve(self.directoryHandle)
+                        : self.directoryHandle.getDirectoryHandle('generated_bills').catch(function() { return null; });
+
+                    return getGenBills.then(function(genBillsDir) {
                         if (!genBillsDir) return [];
                         return readEntries(genBillsDir);
                     }).then(function (months) {
@@ -203,11 +215,21 @@
         });
     };
 
-    BillArchive.prototype.openBill = function (entry) {
-        var url = this.window.URL.createObjectURL(
-            new this.window.Blob([entry.html], { type: 'text/html;charset=utf-8' })
-        );
-        this.window.open(url, '_blank', 'noopener');
+    BillArchive.prototype.openBill = function (entry, autoPrint) {
+        var html = entry.html;
+        if (autoPrint) {
+            html = html.replace('</body>', '<script>window.addEventListener("load", function() { setTimeout(function() { window.print(); }, 400); });<\/script></body>');
+        }
+        var blob = new this.window.Blob([html], { type: 'text/html;charset=utf-8' });
+        var url = this.window.URL.createObjectURL(blob);
+        var win = this.window.open(url, '_blank', 'noopener');
+        if (!win || win.closed || typeof win.closed === 'undefined') {
+            var link = this.window.document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.click();
+        }
         this.window.setTimeout(function () {
             this.window.URL.revokeObjectURL(url);
         }.bind(this), 60000);
