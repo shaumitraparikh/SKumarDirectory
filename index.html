@@ -8,7 +8,7 @@
 <title>S. Kumar &amp; Bros - POS / Search Catalog</title>
 <link rel="stylesheet" href="app/assets/css/search_catalog.css">
 </head>
-<body data-catalog-version="a202f22749">
+<body data-catalog-version="e50a9e8fe4">
 
 <nav class="global-nav" style="background: #102a43; padding: 6px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 9999; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-family: 'Segoe UI', system-ui, sans-serif;">
     <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 0 auto;">
@@ -20,18 +20,20 @@
 
 <style>
 .unified-header { text-align: center; padding: 12px 15px; margin-bottom: 8px; background: #ffffff; font-family: 'Segoe UI', system-ui, sans-serif; border-bottom: 3px solid #1e3a8a; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.biz-title-row { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; margin-bottom: 6px; }
-.biz-sub { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0; }
-.biz-main { font-size: 26px; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: 0.5px; background: linear-gradient(90deg, #1e3a8a, #0f172a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.biz-title-row { display: flex; align-items: center; justify-content: center; margin-bottom: 5px; }
+.biz-main { font-size: 24px; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 12px; }
+.biz-title-sep { color: #94a3b8; font-weight: 300; }
 .biz-address { font-size: 13px; color: #334155; margin-bottom: 0px; font-weight: 500; }
 .biz-address a { color: inherit; text-decoration: none; border-bottom: 1px dotted #cbd5e1; transition: border-color 0.2s; }
 .biz-address a:hover { border-bottom-color: #1e3a8a; }
 
 @media (max-width: 768px) {
     .unified-header { padding: 10px; }
-    .biz-main { font-size: 22px; }
-    .biz-sub { font-size: 10px; }
+    .biz-main { font-size: 18px; gap: 4px 8px; }
     .biz-address { font-size: 11px; }
+}
+@media (max-width: 480px) {
+    .biz-main { font-size: 15.5px; }
 }
 @media print {
     .unified-header { border-bottom: 2px solid #000; box-shadow: none; padding: 10px 0; margin-bottom: 10px; }
@@ -88,8 +90,11 @@
 </style>
 <div class="unified-header">
     <div class="biz-title-row">
-        <div class="biz-sub">General Supply Corporation</div>
-        <h1 class="biz-main">S. Kumar &amp; Bros.</h1>
+        <h1 class="biz-main">
+            <span>S. Kumar &amp; Bros.</span>
+            <span class="biz-title-sep">|</span>
+            <span>General Supply Corporation</span>
+        </h1>
     </div>
     <div class="biz-address">
         <a href="https://maps.app.goo.gl/LwzbK7p13RpRza3u8" target="_blank" rel="noopener">📍 3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.</a>
@@ -609,23 +614,18 @@
                     <div class="buyer-fields-wrap">
                         <!-- Quick Customer Lookup Bar -->
                         <div class="customer-lookup-box">
-                            <div class="lookup-header-row">
-                                <label for="customerLookup" class="lookup-label">🔍 Find existing customer</label>
-                                <div class="lookup-actions">
-                                    <label class="load-clients-btn" for="clientCsvFile" title="Load client_data.csv">📁 CSV</label>
-                                    <input type="file" id="clientCsvFile" accept=".csv,text/csv" hidden>
-                                    <button type="button" class="load-clients-btn" id="saveClientButton" title="Save this customer">💾 Save</button>
-                                    <button type="button" class="load-clients-btn clear-btn" id="clearClientButton" onclick="clearCustomerFields()" title="Clear customer fields" style="display: none;">✕ Clear</button>
-                                </div>
-                            </div>
+                            <label for="customerLookup" class="lookup-label">🔍 Find existing customer (optional)</label>
                             <div class="lookup-input-row">
                                 <input type="search" id="customerLookup" list="clientSuggestions" autocomplete="off" placeholder="Search by name, business, phone, or GSTIN to auto-fill...">
                                 <datalist id="clientSuggestions"></datalist>
+                                <label class="load-clients-btn" for="clientCsvFile" title="Load local client_data.csv">📁 Load CSV</label>
+                                <input type="file" id="clientCsvFile" accept=".csv,text/csv" hidden>
+                                <button type="button" class="load-clients-btn" id="saveClientButton" title="Save this customer for this browser session">💾 Save / Update</button>
                             </div>
-                            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Load data/client_data.csv to auto-fill customers, or enter details manually.</span>
+                            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Load data/client_data.csv to auto-fill, or enter details manually.</span>
                         </div>
 
-                        <!-- Simplified Core Form Fields -->
+                        <!-- 2-Column Form Fields -->
                         <div class="buyer-form-grid">
                             <div class="form-group span-2">
                                 <label for="buyerName">Name / Business Name <span class="required-star">*</span></label>
@@ -638,50 +638,42 @@
                             </div>
 
                             <div class="form-group">
+                                <label for="buyerEmail">Email Address (optional)</label>
+                                <input type="email" id="buyerEmail" autocomplete="email" maxlength="254" placeholder="name@example.com">
+                            </div>
+
+                            <div class="form-group span-2">
+                                <label for="buyerAddress">Delivery Address</label>
+                                <textarea id="buyerAddress" autocomplete="street-address" maxlength="400" placeholder="Building, street, area, city" rows="2"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buyerState">State / Union Territory</label>
+                                <select id="buyerState" autocomplete="address-level1">
+                                    <option value="">Select state / UT</option>
+                                    <option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
+                                    <option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option>
+                                    <option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option>
+                                    <option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option>
+                                    <option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option>
+                                    <option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
+                                    <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option>
+                                    <option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option>
+                                    <option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option>
+                                    <option>Uttarakhand</option><option>West Bengal</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="buyerPincode">PIN Code</label>
+                                <input type="text" id="buyerPincode" autocomplete="postal-code" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="6-digit PIN">
+                            </div>
+
+                            <div class="form-group span-2">
                                 <label for="buyerGstin">Customer GSTIN (optional)</label>
                                 <input type="text" id="buyerGstin" maxlength="15" autocapitalize="characters" placeholder="15-character GSTIN">
                             </div>
                         </div>
-
-                        <!-- Collapsible Additional Details (Delivery Address, State, PIN, Email) -->
-                        <details class="buyer-extra-details" id="buyerExtraFields">
-                            <summary class="buyer-extra-summary">
-                                <span>📍 + Additional Details (Delivery Address, State, PIN, Email)</span>
-                            </summary>
-                            <div class="buyer-extra-grid">
-                                <div class="form-group span-2">
-                                    <label for="buyerAddress">Delivery Address</label>
-                                    <input type="text" id="buyerAddress" autocomplete="street-address" maxlength="400" placeholder="Building, street, area, city">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="buyerState">State / Union Territory</label>
-                                    <select id="buyerState" autocomplete="address-level1">
-                                        <option value="">Select state / UT</option>
-                                        <option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
-                                        <option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option>
-                                        <option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option>
-                                        <option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option>
-                                        <option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option>
-                                        <option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
-                                        <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option>
-                                        <option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option>
-                                        <option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option>
-                                        <option>Uttarakhand</option><option>West Bengal</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="buyerPincode">PIN Code</label>
-                                    <input type="text" id="buyerPincode" autocomplete="postal-code" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="6-digit PIN">
-                                </div>
-
-                                <div class="form-group span-2">
-                                    <label for="buyerEmail">Email Address (optional)</label>
-                                    <input type="email" id="buyerEmail" autocomplete="email" maxlength="254" placeholder="name@example.com">
-                                </div>
-                            </div>
-                        </details>
                     </div>
                 </details>
             </div>
@@ -897,11 +889,11 @@
 <script src="app/assets/js/bill_archive.js"></script>
 <script>
     </script>
-<script src="app/assets/js/search_catalog.js?v=a202f22749"></script>
+<script src="app/assets/js/search_catalog.js?v=e50a9e8fe4"></script>
 <script>
     if ('serviceWorker' in navigator  && location.protocol.startsWith('http')) {
         window.addEventListener('load', function() {
-            navigator.serviceWorker.register('app/sw.js?v=a202f22749').then(function(reg) {
+            navigator.serviceWorker.register('app/sw.js?v=e50a9e8fe4').then(function(reg) {
                 reg.onupdatefound = function() {
                     var installing = reg.installing;
                     if (installing) {

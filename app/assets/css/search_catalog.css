@@ -408,29 +408,17 @@
         background: #f8fafc;
         border: 1px solid #cbd5e1;
         border-radius: 10px;
-        padding: 12px 14px;
-        margin-bottom: 16px;
-    }
-    .lookup-header-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-        gap: 8px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
     }
     .lookup-label {
         display: block;
         font-size: 12px;
         font-weight: 700;
         color: #334e68;
+        margin-bottom: 8px;
         text-transform: uppercase;
         letter-spacing: 0.03em;
-        margin: 0;
-    }
-    .lookup-actions {
-        display: inline-flex;
-        gap: 5px;
-        align-items: center;
     }
     .lookup-input-row {
         display: flex;
@@ -439,10 +427,10 @@
     }
     .lookup-input-row input {
         flex: 1 1 auto;
-        padding: 9px 12px;
+        padding: 10px 14px;
         border: 1.5px solid #cbd5e1;
         border-radius: 8px;
-        font-size: 13.5px;
+        font-size: 14px;
         color: #0f172a;
         background: #ffffff;
         transition: border-color 0.15s, box-shadow 0.15s;
@@ -453,74 +441,33 @@
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
     }
     .load-clients-btn {
-        padding: 5px 10px;
+        padding: 10px 14px;
         border: 1px solid #cbd5e1;
-        border-radius: 6px;
+        border-radius: 8px;
         background: #ffffff;
         color: #334e68;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 600;
         cursor: pointer;
         white-space: nowrap;
-        transition: all 0.15s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
+        transition: background 0.15s, border-color 0.15s;
     }
     .load-clients-btn:hover {
-        background: #f1f5f9;
+        background: #e2e8f0;
         border-color: #94a3b8;
-    }
-    .load-clients-btn.clear-btn {
-        color: #dc2626;
-        border-color: #fca5a5;
-        background: #fff5f5;
-    }
-    .load-clients-btn.clear-btn:hover {
-        background: #fee2e2;
-        border-color: #ef4444;
     }
     .client-directory-status {
         display: block;
-        margin-top: 6px;
-        font-size: 11.5px;
+        margin-top: 8px;
+        font-size: 12px;
         color: #64748b;
-    }
-    .client-directory-status .autofill-success {
-        color: #059669;
-        font-weight: 600;
     }
 
     /* 2-Column Buyer Form Grid */
     .buyer-form-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
-
-    /* Extra buyer fields toggle */
-    .buyer-extra-details {
-        margin-top: 12px;
-        border-top: 1px dashed #cbd5e1;
-        padding-top: 8px;
-    }
-    .buyer-extra-summary {
-        font-size: 12px;
-        font-weight: 600;
-        color: #2563eb;
-        cursor: pointer;
-        user-select: none;
-        padding: 4px 0;
-        outline: none;
-    }
-    .buyer-extra-summary:hover {
-        color: #1d4ed8;
-    }
-    .buyer-extra-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-top: 10px;
+        gap: 16px;
     }
     .form-group {
         display: flex;

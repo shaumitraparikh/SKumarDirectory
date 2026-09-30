@@ -6,7 +6,7 @@
 <meta name="description" content="Visual Photo Catalog & Category Gallery for General Supply Corporation / S. Kumar & Bros insulating materials and electrical products.">
 <meta name="theme-color" content="#102a43">
 <title>Visual Photo Catalog - General Supply Corporation / S. Kumar &amp; Bros</title>
-<link rel="stylesheet" href="app/assets/css/photo_catalog.css?v=a202f22749">
+<link rel="stylesheet" href="app/assets/css/photo_catalog.css?v=e50a9e8fe4">
 </head>
 <body>
 
@@ -20,18 +20,20 @@
 
 <style>
 .unified-header { text-align: center; padding: 12px 15px; margin-bottom: 8px; background: #ffffff; font-family: 'Segoe UI', system-ui, sans-serif; border-bottom: 3px solid #1e3a8a; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.biz-title-row { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; margin-bottom: 6px; }
-.biz-sub { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0; }
-.biz-main { font-size: 26px; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: 0.5px; background: linear-gradient(90deg, #1e3a8a, #0f172a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.biz-title-row { display: flex; align-items: center; justify-content: center; margin-bottom: 5px; }
+.biz-main { font-size: 24px; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 12px; }
+.biz-title-sep { color: #94a3b8; font-weight: 300; }
 .biz-address { font-size: 13px; color: #334155; margin-bottom: 0px; font-weight: 500; }
 .biz-address a { color: inherit; text-decoration: none; border-bottom: 1px dotted #cbd5e1; transition: border-color 0.2s; }
 .biz-address a:hover { border-bottom-color: #1e3a8a; }
 
 @media (max-width: 768px) {
     .unified-header { padding: 10px; }
-    .biz-main { font-size: 22px; }
-    .biz-sub { font-size: 10px; }
+    .biz-main { font-size: 18px; gap: 4px 8px; }
     .biz-address { font-size: 11px; }
+}
+@media (max-width: 480px) {
+    .biz-main { font-size: 15.5px; }
 }
 @media print {
     .unified-header { border-bottom: 2px solid #000; box-shadow: none; padding: 10px 0; margin-bottom: 10px; }
@@ -88,8 +90,11 @@
 </style>
 <div class="unified-header">
     <div class="biz-title-row">
-        <div class="biz-sub">General Supply Corporation</div>
-        <h1 class="biz-main">S. Kumar &amp; Bros.</h1>
+        <h1 class="biz-main">
+            <span>S. Kumar &amp; Bros.</span>
+            <span class="biz-title-sep">|</span>
+            <span>General Supply Corporation</span>
+        </h1>
     </div>
     <div class="biz-address">
         <a href="https://maps.app.goo.gl/LwzbK7p13RpRza3u8" target="_blank" rel="noopener">📍 3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.</a>
