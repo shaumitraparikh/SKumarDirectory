@@ -366,6 +366,9 @@ def compute_catalog_version():
         hasher.update(DATA_FILE.read_bytes())
     if CONFIG_FILE.exists():
         hasher.update(CONFIG_FILE.read_bytes())
+    js_file = SCRIPT_DIR / "app" / "assets" / "js" / "search_catalog.js"
+    if js_file.exists():
+        hasher.update(js_file.read_bytes())
     return hasher.hexdigest()[:10]
 
 
