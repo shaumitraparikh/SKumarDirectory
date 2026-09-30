@@ -1,100 +1,149 @@
 <style>
-.unified-header { text-align: center; padding: 12px 15px; margin-bottom: 8px; background: #ffffff; font-family: 'Segoe UI', system-ui, sans-serif; border-bottom: 3px solid #1e3a8a; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.biz-title-row { display: flex; align-items: center; justify-content: center; margin-bottom: 5px; }
-.biz-main { font-size: 24px; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 12px; }
-.biz-title-sep { color: #94a3b8; font-weight: 300; }
-.biz-address { font-size: 13px; color: #334155; margin-bottom: 0px; font-weight: 500; }
-.biz-address a { color: inherit; text-decoration: none; border-bottom: 1px dotted #cbd5e1; transition: border-color 0.2s; }
-.biz-address a:hover { border-bottom-color: #1e3a8a; }
-
-@media (max-width: 768px) {
-    .unified-header { padding: 10px; }
-    .biz-main { font-size: 18px; gap: 4px 8px; }
-    .biz-address { font-size: 11px; }
+.unified-header {
+    text-align: center;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    background: #ffffff;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    border-bottom: 3px solid #1e3a8a;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
-@media (max-width: 480px) {
-    .biz-main { font-size: 15.5px; }
-}
-@media print {
-    .unified-header { border-bottom: 2px solid #000; box-shadow: none; padding: 10px 0; margin-bottom: 10px; }
-    .biz-main { -webkit-text-fill-color: #000; background: none; color: #000; }
-}
-
-.header-contacts {
+.biz-columns-container {
     display: flex;
-    flex-wrap: wrap;
     justify-content: center;
-    align-items: center;
-    gap: 6px 12px;
-    margin-top: 6px;
-    font-size: 11.5px;
-    color: #334155;
+    align-items: stretch;
+    gap: 16px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
 }
-.header-contact-item {
+.biz-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    min-width: 280px;
+    max-width: 480px;
+}
+.biz-company-name {
+    font-size: 20px;
+    font-weight: 900;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+    letter-spacing: 0.4px;
+}
+.biz-contact-info {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    font-size: 11.5px;
+    color: #334155;
     background: #f8fafc;
-    padding: 3px 8px;
+    padding: 3px 10px;
     border-radius: 5px;
     border: 1px solid #e2e8f0;
 }
-.header-contact-item .contact-name {
+.biz-contact-info .contact-name {
     font-weight: 700;
     color: #0f172a;
 }
-.header-contact-item a {
+.biz-contact-info a {
     color: #1e3a8a;
     text-decoration: none;
     font-weight: 600;
 }
-.header-contact-item a:hover {
+.biz-contact-info a:hover {
     text-decoration: underline;
 }
-.header-contact-item .contact-sep {
+.contact-sep {
     color: #cbd5e1;
     font-weight: 300;
 }
-.header-contact-item .contact-gst {
+.contact-gst {
     color: #475569;
     font-size: 11px;
 }
-@media (max-width: 768px) {
-    .header-contacts { gap: 4px 8px; font-size: 11px; }
-    .header-contact-item { padding: 2px 6px; }
+.biz-divider {
+    width: 1px;
+    background: #e2e8f0;
 }
-@media (max-width: 580px) {
-    .header-contacts { flex-direction: column; align-items: stretch; }
-    .header-contact-item { justify-content: center; flex-wrap: wrap; text-align: center; }
+.biz-address {
+    font-size: 12px;
+    color: #475569;
+    font-weight: 500;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed #e2e8f0;
+}
+.biz-address a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px dotted #cbd5e1;
+    transition: border-color 0.2s;
+}
+.biz-address a:hover {
+    border-bottom-color: #1e3a8a;
+    color: #1e3a8a;
+}
+.office-tel a {
+    color: #1e3a8a;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .unified-header { padding: 8px 10px; }
+    .biz-columns-container { gap: 8px; flex-direction: column; align-items: center; }
+    .biz-company-name { font-size: 17px; }
+    .biz-contact-info { font-size: 11px; padding: 2px 6px; }
+    .biz-divider { display: none; }
+    .biz-address { font-size: 11px; flex-direction: column; gap: 2px; }
+    .biz-address .addr-sep { display: none; }
+}
+@media print {
+    .unified-header { border-bottom: 2px solid #000; box-shadow: none; padding: 8px 0; margin-bottom: 8px; }
+    .biz-company-name { color: #000; }
+    .biz-divider { display: none; }
 }
 </style>
 <div class="unified-header">
-    <div class="biz-title-row">
-        <h1 class="biz-main">
-            <span>S. Kumar &amp; Bros.</span>
-            <span class="biz-title-sep">|</span>
-            <span>General Supply Corporation</span>
-        </h1>
+    <div class="biz-columns-container">
+        <!-- S. Kumar & Bros. Section -->
+        <div class="biz-column">
+            <h1 class="biz-company-name">S. Kumar &amp; Bros.</h1>
+            <div class="biz-contact-info">
+                <span class="contact-name">Shaumitra G. Parikh:</span>
+                <span>📞 <a href="tel:+919821361314">9821361314</a>, <a href="tel:+918369398586">8369398586</a></span>
+                <span class="contact-sep">|</span>
+                <span class="contact-gst">GSTIN: <strong>27AAGPP1621C1Z5</strong></span>
+            </div>
+        </div>
+
+        <div class="biz-divider"></div>
+
+        <!-- General Supply Corporation Section -->
+        <div class="biz-column">
+            <h2 class="biz-company-name">General Supply Corporation</h2>
+            <div class="biz-contact-info">
+                <span class="contact-name">Amit G. Parikh:</span>
+                <span>📞 <a href="tel:+919869905779">9869905779</a></span>
+                <span class="contact-sep">|</span>
+                <span class="contact-gst">GSTIN: <strong>27ACJPP2955J1Z4</strong></span>
+            </div>
+        </div>
     </div>
+
+    <!-- Centered Shared Address & Office Contact -->
     <div class="biz-address">
         <a href="https://maps.app.goo.gl/LwzbK7p13RpRza3u8" target="_blank" rel="noopener">📍 3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.</a>
-    </div>
-    <div class="header-contacts">
-        <div class="header-contact-item">
-            <span class="contact-name">Amit G. Parikh:</span>
-            <span>📞 <a href="tel:+919869905779">9869905779</a></span>
-            <span class="contact-sep">|</span>
-            <span class="contact-gst">GSTIN: <strong>27ACJPP2955J1Z4</strong></span>
-        </div>
-        <div class="header-contact-item">
-            <span class="contact-name">Shaumitra G. Parikh:</span>
-            <span>📞 <a href="tel:+919821361314">9821361314</a>, <a href="tel:+918369398586">8369398586</a></span>
-            <span class="contact-sep">|</span>
-            <span class="contact-gst">GSTIN: <strong>27AAGPP1621C1Z5</strong></span>
-        </div>
-        <div class="header-contact-item">
-            <span class="contact-name">Office:</span>
-            <span>📞 <a href="tel:02235989674">35989674</a>, <a href="tel:02249233982">49233982</a></span>
-        </div>
+        <span class="addr-sep">•</span>
+        <span class="office-tel">Office: 📞 <a href="tel:02235989674">35989674</a>, <a href="tel:02249233982">49233982</a></span>
     </div>
 </div>
