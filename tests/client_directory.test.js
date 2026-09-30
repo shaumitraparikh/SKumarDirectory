@@ -37,4 +37,14 @@ assert.deepStrictEqual(directory.parseCsv(
 }]);
 assert.throws(() => directory.parseCsv('name,address\n"unfinished,road'), /unclosed quoted field/);
 
-console.log('PASS: customer CSV parsing, safe display labels, lookup, and aliases.');
+// Tests for filterCustomers
+assert.strictEqual(directory.filterCustomers(customers, '').length, 2);
+assert.strictEqual(directory.filterCustomers(customers, 'Ace').length, 1);
+assert.strictEqual(directory.filterCustomers(customers, 'Ace')[0].name, 'Asha "Ace" Shah');
+assert.strictEqual(directory.filterCustomers(customers, '98699').length, 1);
+assert.strictEqual(directory.filterCustomers(customers, '27ACJP').length, 1);
+assert.strictEqual(directory.filterCustomers(customers, 'Market Road').length, 1);
+assert.strictEqual(directory.filterCustomers(customers, 'NonExistentXYZ').length, 0);
+
+console.log('PASS: customer CSV parsing, safe display labels, lookup, filtering, and aliases.');
+

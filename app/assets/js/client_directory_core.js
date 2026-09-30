@@ -159,7 +159,8 @@
             const gstinMatch = c.gstin && c.gstin.toLowerCase().includes(lower);
             if (gstinMatch) return true;
 
-            const addrMatch = c.address && c.address.toLowerCase().includes(lower);
+            const addrMatch = (c.address && c.address.toLowerCase().includes(lower)) ||
+                              (c.state && c.state.toLowerCase().includes(lower));
             if (addrMatch) return true;
 
             if (digitsOnly.length >= 3 && c.phone) {

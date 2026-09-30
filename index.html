@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="app/assets/icons/favicon.png">
 <link rel="stylesheet" href="app/assets/css/search_catalog.css">
 </head>
-<body data-catalog-version="b9a8841238">
+<body data-catalog-version="c2925e5761">
 
 <nav class="global-nav" style="background: #102a43; padding: 6px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 9999; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-family: 'Segoe UI', system-ui, sans-serif;">
     <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 0 auto;">
@@ -724,8 +724,7 @@
                         <div class="customer-lookup-box">
                             <label for="customerLookup" class="lookup-label">🔍 Find existing customer (optional)</label>
                             <div class="lookup-input-row">
-                                <input type="search" id="customerLookup" list="clientSuggestions" autocomplete="off" placeholder="Search by name, business, phone, or GSTIN to auto-fill...">
-                                <datalist id="clientSuggestions"></datalist>
+                                <input type="search" id="customerLookup" autocomplete="off" placeholder="Search by name, business, phone, or GSTIN to auto-fill...">
                                 <input type="file" id="clientCsvFile" accept=".csv,text/csv" hidden>
                                 <button type="button" class="load-clients-btn" id="saveClientButton" title="Save customer details for future auto-fill">💾 Save / Update</button>
                             </div>
@@ -800,6 +799,13 @@
                         <span id="orderSummaryCount" class="badge-pill">0 items</span>
                     </summary>
                     <div class="cart-items-container">
+                        <div class="cart-product-search-wrap">
+                            <div class="cart-product-search-bar">
+                                <span class="cart-product-search-icon">🔍</span>
+                                <input type="search" id="cartProductSearch" class="cart-product-search-input" placeholder="Quick search catalog to add items..." autocomplete="off">
+                            </div>
+                            <div id="cartProductSearchResults" class="cart-product-search-dropdown" style="display: none;" role="listbox" aria-label="Catalog item suggestions"></div>
+                        </div>
                         <div class="cart-items" id="cartItems" aria-live="polite">
                             <div class="cart-empty">
                                 <div class="empty-icon">🛒</div>
@@ -1058,11 +1064,11 @@
 <script src="app/assets/js/bill_archive.js"></script>
 <script>
     </script>
-<script src="app/assets/js/search_catalog.js?v=b9a8841238"></script>
+<script src="app/assets/js/search_catalog.js?v=c2925e5761"></script>
 <script>
     if ('serviceWorker' in navigator  && location.protocol.startsWith('http')) {
         window.addEventListener('load', function() {
-            navigator.serviceWorker.register('app/sw.js?v=b9a8841238').then(function(reg) {
+            navigator.serviceWorker.register('app/sw.js?v=c2925e5761').then(function(reg) {
                 reg.onupdatefound = function() {
                     var installing = reg.installing;
                     if (installing) {

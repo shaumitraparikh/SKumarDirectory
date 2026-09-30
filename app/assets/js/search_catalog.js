@@ -397,12 +397,12 @@ const DEFAULT_DEMO_CUSTOMERS = [
     {
         name: "Asha Shah",
         business_name: "Ace Electricals",
-        phone: "9869905779",
+        phone: "9820011223",
         email: "asha@example.in",
         address: "12, Market Road, Mumbai",
         state: "Maharashtra",
         pincode: "400002",
-        gstin: "27ACJPP2955J1Z4"
+        gstin: "27AAACE1234A1Z1"
     },
     {
         name: "Shaumitra Parikh",
@@ -421,9 +421,9 @@ function mergeCustomers(lists) {
         if (!Array.isArray(list)) return;
         list.forEach(c => {
             if (!c || (!c.name && !c.business_name && !c.gstin)) return;
-            const key = (c.gstin && c.gstin.trim().toUpperCase()) ||
-                        (c.business_name && c.business_name.trim().toLowerCase()) ||
-                        (c.name && c.name.trim().toLowerCase());
+            const normBiz = (c.business_name || c.name || '').trim().toLowerCase();
+            const normGstin = (c.gstin || '').trim().toUpperCase();
+            const key = normGstin ? `${normGstin}_${normBiz}` : normBiz;
             if (key) {
                 if (map.has(key)) {
                     map.set(key, Object.assign({}, map.get(key), c));
@@ -436,21 +436,47 @@ function mergeCustomers(lists) {
     return Array.from(map.values());
 }
 
-function populateCustomerDatalist() {
-    const suggestions = document.getElementById('clientSuggestions');
-    if (!suggestions || !window.ClientDirectory) return;
-    suggestions.replaceChildren();
-    clientRecords.forEach(customer => {
-        const option = document.createElement('option');
-        option.value = ClientDirectory.displayLabel(customer);
-        suggestions.appendChild(option);
-    });
+function filterCustomersCore(customers, query, limit) {
+    if (!Array.isArray(customers)) return [];
+    const max = typeof limit === 'number' ? limit : 50;
+    const trimmed = (query || '').trim();
+    if (!trimmed) return customers.slice(0, max);
+    const lower = trimmed.toLowerCase();
+    const digitsOnly = trimmed.replace(/\D/g, '');
+
+    return customers.filter(c => {
+        if (!c) return false;
+        const nameMatch = (c.name && c.name.toLowerCase().includes(lower)) ||
+                          (c.business_name && c.business_name.toLowerCase().includes(lower));
+        if (nameMatch) return true;
+
+        const gstinMatch = c.gstin && c.gstin.toLowerCase().includes(lower);
+        if (gstinMatch) return true;
+
+        const addrMatch = (c.address && c.address.toLowerCase().includes(lower)) ||
+                          (c.state && c.state.toLowerCase().includes(lower));
+        if (addrMatch) return true;
+
+        if (digitsOnly.length >= 3 && c.phone) {
+            const cDigits = String(c.phone).replace(/\D/g, '');
+            if (cDigits.includes(digitsOnly)) return true;
+        }
+
+        return false;
+    }).slice(0, max);
 }
+
+if (window.ClientDirectory && typeof window.ClientDirectory === 'object') {
+    window.ClientDirectory.filterCustomers = filterCustomersCore;
+}
+
+let activeCustomerIdx = -1;
 
 function renderCustomerSearchResults(results) {
     const container = document.getElementById('customerSearchResults');
     if (!container) return;
     container.replaceChildren();
+    activeCustomerIdx = -1;
 
     if (!results || results.length === 0) {
         const empty = document.createElement('div');
@@ -461,15 +487,16 @@ function renderCustomerSearchResults(results) {
         return;
     }
 
-    results.forEach(customer => {
+    results.forEach((customer, idx) => {
         const item = document.createElement('div');
         item.className = 'customer-search-item';
         item.setAttribute('role', 'option');
+        item.dataset.index = idx;
 
         const title = document.createElement('div');
         title.className = 'customer-search-item-title';
         title.textContent = customer.business_name || customer.name || 'Customer';
-        if (customer.name && customer.business_name && customer.name !== customer.business_name) {
+        if (customer.name && customer.business_name && customer.name.toLowerCase() !== customer.business_name.toLowerCase()) {
             title.textContent += ` (${customer.name})`;
         }
 
@@ -493,13 +520,20 @@ function renderCustomerSearchResults(results) {
         }
 
         item.append(title, meta);
-        item.addEventListener('mousedown', (e) => {
-            e.preventDefault();
+        const handleSelect = (e) => {
+            if (e) e.preventDefault();
             applySelectedCustomer(customer);
-            const lookupInput = document.getElementById('customerLookup');
-            if (lookupInput) lookupInput.value = ClientDirectory.displayLabel(customer);
+            const lookup = document.getElementById('customerLookup');
+            if (lookup) {
+                lookup.value = (window.ClientDirectory && ClientDirectory.displayLabel)
+                    ? ClientDirectory.displayLabel(customer)
+                    : (customer.business_name || customer.name);
+            }
             hideCustomerDropdown();
-        });
+        };
+
+        item.addEventListener('mousedown', handleSelect);
+        item.addEventListener('click', handleSelect);
 
         container.appendChild(item);
     });
@@ -510,6 +544,7 @@ function renderCustomerSearchResults(results) {
 function hideCustomerDropdown() {
     const container = document.getElementById('customerSearchResults');
     if (container) container.style.display = 'none';
+    activeCustomerIdx = -1;
 }
 
 function applySelectedCustomer(customer) {
@@ -561,7 +596,7 @@ function setupClientData(records) {
     clientRecords = records;
     if (window.ClientDirectory) {
         window.ClientDirectory.clients = records;
-        populateCustomerDatalist();
+        window.ClientDirectory.filterCustomers = filterCustomersCore;
     }
     const statusEl = document.getElementById('clientDirectoryStatus');
     if (statusEl) {
@@ -625,40 +660,46 @@ const lookupInput = document.getElementById('customerLookup');
 if (lookupInput) {
     lookupInput.addEventListener('focus', () => {
         const val = lookupInput.value.trim();
-        const matches = (window.ClientDirectory && typeof ClientDirectory.filterCustomers === 'function')
-            ? ClientDirectory.filterCustomers(clientRecords, val)
-            : clientRecords;
+        const matches = filterCustomersCore(clientRecords, val);
         renderCustomerSearchResults(matches);
     });
 
     lookupInput.addEventListener('input', event => {
         const val = event.target.value.trim();
-        const matches = (window.ClientDirectory && typeof ClientDirectory.filterCustomers === 'function')
-            ? ClientDirectory.filterCustomers(clientRecords, val)
-            : clientRecords;
+        const matches = filterCustomersCore(clientRecords, val);
         renderCustomerSearchResults(matches);
 
-        const selectedCustomer = ClientDirectory.findCustomer(clientRecords, val);
+        const selectedCustomer = (window.ClientDirectory && ClientDirectory.findCustomer)
+            ? ClientDirectory.findCustomer(clientRecords, val)
+            : null;
         if (selectedCustomer) {
             applySelectedCustomer(selectedCustomer);
         }
-    });
-
-    lookupInput.addEventListener('change', event => {
-        const val = event.target.value.trim();
-        const selectedCustomer = ClientDirectory.findCustomer(clientRecords, val);
-        if (selectedCustomer) {
-            applySelectedCustomer(selectedCustomer);
-            hideCustomerDropdown();
-        }
-    });
-
-    lookupInput.addEventListener('blur', () => {
-        setTimeout(hideCustomerDropdown, 250);
     });
 
     lookupInput.addEventListener('keydown', e => {
-        if (e.key === 'Escape') {
+        const container = document.getElementById('customerSearchResults');
+        if (!container || container.style.display === 'none') return;
+        const items = container.querySelectorAll('.customer-search-item');
+        if (!items.length) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeCustomerIdx = Math.min(items.length - 1, activeCustomerIdx + 1);
+            items.forEach((it, i) => it.classList.toggle('active', i === activeCustomerIdx));
+            if (items[activeCustomerIdx]) items[activeCustomerIdx].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeCustomerIdx = Math.max(0, activeCustomerIdx - 1);
+            items.forEach((it, i) => it.classList.toggle('active', i === activeCustomerIdx));
+            if (items[activeCustomerIdx]) items[activeCustomerIdx].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const target = activeCustomerIdx >= 0 ? items[activeCustomerIdx] : items[0];
+            if (target) {
+                target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+            }
+        } else if (e.key === 'Escape') {
             hideCustomerDropdown();
         }
     });
@@ -668,6 +709,154 @@ document.getElementById('clientCsvFile')?.addEventListener('change', event => {
     const file = event.target.files && event.target.files[0];
     if (file) loadCustomerCsv(file);
     event.target.value = '';
+});
+
+function hideCartProductSearchDropdown() {
+    const dd = document.getElementById('cartProductSearchResults');
+    if (dd) dd.style.display = 'none';
+}
+
+function initCartProductSearch() {
+    const input = document.getElementById('cartProductSearch');
+    const dropdown = document.getElementById('cartProductSearchResults');
+    if (!input || !dropdown) return;
+
+    let activeProductIdx = -1;
+
+    function renderProductResults(matches) {
+        dropdown.replaceChildren();
+        activeProductIdx = -1;
+
+        if (!matches || matches.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'customer-search-empty';
+            empty.textContent = 'No matching catalog products found.';
+            dropdown.appendChild(empty);
+            dropdown.style.display = 'block';
+            return;
+        }
+
+        matches.forEach((entry, idx) => {
+            const item = entry.item;
+            const row = document.createElement('div');
+            row.className = 'cart-product-search-item';
+            row.dataset.index = idx;
+
+            if (item.display_image_path) {
+                const img = document.createElement('img');
+                img.src = item.display_image_path;
+                img.className = 'cart-product-search-thumb';
+                img.alt = item.item_name;
+                row.appendChild(img);
+            }
+
+            const info = document.createElement('div');
+            info.className = 'cart-product-search-info';
+
+            const name = document.createElement('div');
+            name.className = 'cart-product-search-name';
+            name.textContent = item.item_name;
+
+            const meta = document.createElement('div');
+            meta.className = 'cart-product-search-meta';
+            meta.innerHTML = `<span>Sr: ${item.sr_number}</span>` +
+                (item.hsn_code ? `<span>HSN: ${item.hsn_code}</span>` : '') +
+                (item.unit ? `<span>Unit: ${item.unit}</span>` : '') +
+                (item.list_price ? `<span class="cart-product-search-price">₹${item.list_price}</span>` : '<span class="cart-product-search-price">Quote only</span>');
+
+            info.append(name, meta);
+            row.appendChild(info);
+
+            const addBtn = document.createElement('button');
+            addBtn.type = 'button';
+            addBtn.className = 'cart-product-quick-add';
+            addBtn.textContent = '+ Add';
+            addBtn.title = `Add ${item.item_name} to cart`;
+            addBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                addToCart(String(item.sr_number));
+                input.value = '';
+                dropdown.style.display = 'none';
+                showToast(`Added ${item.item_name} to cart`);
+            });
+
+            row.appendChild(addBtn);
+
+            row.addEventListener('click', () => {
+                addToCart(String(item.sr_number));
+                input.value = '';
+                dropdown.style.display = 'none';
+                showToast(`Added ${item.item_name} to cart`);
+            });
+
+            dropdown.appendChild(row);
+        });
+
+        dropdown.style.display = 'block';
+    }
+
+    input.addEventListener('input', () => {
+        const raw = input.value.trim();
+        const query = normalizeSearchText(raw);
+        if (!query) {
+            dropdown.style.display = 'none';
+            return;
+        }
+        const matches = [];
+        for (let i = 0; i < catalogSearchIndex.length; i++) {
+            const entry = catalogSearchIndex[i];
+            const text = entry.searchableText;
+            let score = 0;
+            if (text.includes(query)) {
+                score = 1.0;
+                if (entry.item.item_name && entry.item.item_name.toLowerCase().includes(query)) {
+                    score = 1.5;
+                }
+            } else {
+                score = fuzzyScore(text, query);
+            }
+            if (score >= 0.45) {
+                matches.push({ entry, score });
+            }
+        }
+        matches.sort((a, b) => b.score - a.score);
+        renderProductResults(matches.slice(0, 10).map(m => m.entry));
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (dropdown.style.display === 'none') return;
+        const items = dropdown.querySelectorAll('.cart-product-search-item');
+        if (!items.length) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeProductIdx = Math.min(items.length - 1, activeProductIdx + 1);
+            items.forEach((it, i) => it.classList.toggle('active', i === activeProductIdx));
+            if (items[activeProductIdx]) items[activeProductIdx].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeProductIdx = Math.max(0, activeProductIdx - 1);
+            items.forEach((it, i) => it.classList.toggle('active', i === activeProductIdx));
+            if (items[activeProductIdx]) items[activeProductIdx].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const target = activeProductIdx >= 0 ? items[activeProductIdx] : items[0];
+            if (target) {
+                target.querySelector('.cart-product-quick-add')?.click();
+            }
+        } else if (e.key === 'Escape') {
+            dropdown.style.display = 'none';
+        }
+    });
+}
+
+document.addEventListener('click', (event) => {
+    if (!event.target.closest('.customer-lookup-box')) {
+        hideCustomerDropdown();
+    }
+    if (!event.target.closest('.cart-product-search-wrap')) {
+        hideCartProductSearchDropdown();
+    }
 });
 
 function toggleCart(forceOpen) {
@@ -1111,9 +1300,16 @@ function fuzzyScore(text, query) {
         };
     }
 
-    function addToCart(sr_number) {
+    function addToCart(sr_number, explicitQty) {
         const qtyInput = document.getElementById('qty-' + sr_number);
-        const qty = Number(qtyInput.value);
+        let qty;
+        if (typeof explicitQty === 'number' && Number.isInteger(explicitQty) && explicitQty > 0) {
+            qty = explicitQty;
+        } else if (qtyInput && Number.isInteger(Number(qtyInput.value)) && Number(qtyInput.value) > 0) {
+            qty = Number(qtyInput.value);
+        } else {
+            qty = 1;
+        }
         const existingQty = cart[sr_number] ? cart[sr_number].qty : 0;
 
         if (!Number.isInteger(qty) || qty <= 0 || existingQty + qty > CommerceCore.MAX_QUANTITY) {
@@ -1132,7 +1328,9 @@ function fuzzyScore(text, query) {
             cart[sr_number] = item;
         }
 
-        qtyInput.value = 1; // reset
+        if (qtyInput) {
+            qtyInput.value = 1; // reset
+        }
         renderCart();
         showToast((cart[sr_number].price === null ? 'Added quote request for ' : 'Added ' + qty + ' × ') + cart[sr_number].name);
 
@@ -1807,6 +2005,7 @@ function fuzzyScore(text, query) {
 
     initCatalogCacheAndPrefs();
     initCategoryPicker();
+    initCartProductSearch();
     restoreCart();
     renderCart();
 
@@ -1960,7 +2159,7 @@ function openLightbox(srNumber) {
             if (cardQty) {
                 cardQty.value = qtyVal;
             }
-            addToCart(String(srNumber));
+            addToCart(String(srNumber), qtyVal);
             dialog.close();
         };
     }
