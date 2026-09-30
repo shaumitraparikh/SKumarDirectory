@@ -109,11 +109,10 @@
                             <div class="lookup-input-row">
                                 <input type="search" id="customerLookup" list="clientSuggestions" autocomplete="off" placeholder="Search by name, business, phone, or GSTIN to auto-fill...">
                                 <datalist id="clientSuggestions"></datalist>
-                                <label class="load-clients-btn" for="clientCsvFile" title="Load local client_data.csv">📁 Load CSV</label>
                                 <input type="file" id="clientCsvFile" accept=".csv,text/csv" hidden>
-                                <button type="button" class="load-clients-btn" id="saveClientButton" title="Save this customer for this browser session">💾 Save / Update</button>
+                                <button type="button" class="load-clients-btn" id="saveClientButton" title="Save customer details for future auto-fill">💾 Save / Update</button>
                             </div>
-                            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Load data/client_data.csv to auto-fill, or enter details manually.</span>
+                            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Search by name, phone, or GSTIN to auto-fill, or enter details below.</span>
                         </div>
 
                         <!-- 2-Column Form Fields -->

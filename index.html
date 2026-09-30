@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="app/assets/icons/favicon.png">
 <link rel="stylesheet" href="app/assets/css/search_catalog.css">
 </head>
-<body data-catalog-version="89ccf012ac">
+<body data-catalog-version="ddc4d9a2a5">
 
 <nav class="global-nav" style="background: #102a43; padding: 6px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 9999; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-family: 'Segoe UI', system-ui, sans-serif;">
     <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 0 auto;">
@@ -691,11 +691,10 @@
                             <div class="lookup-input-row">
                                 <input type="search" id="customerLookup" list="clientSuggestions" autocomplete="off" placeholder="Search by name, business, phone, or GSTIN to auto-fill...">
                                 <datalist id="clientSuggestions"></datalist>
-                                <label class="load-clients-btn" for="clientCsvFile" title="Load local client_data.csv">📁 Load CSV</label>
                                 <input type="file" id="clientCsvFile" accept=".csv,text/csv" hidden>
-                                <button type="button" class="load-clients-btn" id="saveClientButton" title="Save this customer for this browser session">💾 Save / Update</button>
+                                <button type="button" class="load-clients-btn" id="saveClientButton" title="Save customer details for future auto-fill">💾 Save / Update</button>
                             </div>
-                            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Load data/client_data.csv to auto-fill, or enter details manually.</span>
+                            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Search by name, phone, or GSTIN to auto-fill, or enter details below.</span>
                         </div>
 
                         <!-- 2-Column Form Fields -->
@@ -962,11 +961,11 @@
 <script src="app/assets/js/bill_archive.js"></script>
 <script>
     </script>
-<script src="app/assets/js/search_catalog.js?v=89ccf012ac"></script>
+<script src="app/assets/js/search_catalog.js?v=ddc4d9a2a5"></script>
 <script>
     if ('serviceWorker' in navigator  && location.protocol.startsWith('http')) {
         window.addEventListener('load', function() {
-            navigator.serviceWorker.register('app/sw.js?v=89ccf012ac').then(function(reg) {
+            navigator.serviceWorker.register('app/sw.js?v=ddc4d9a2a5').then(function(reg) {
                 reg.onupdatefound = function() {
                     var installing = reg.installing;
                     if (installing) {

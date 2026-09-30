@@ -260,21 +260,29 @@ function setupClientData(records) {
     if (statusEl) {
         statusEl.textContent = records.length
             ? `${records.length} saved customer${records.length === 1 ? '' : 's'} ready to auto-fill.`
-            : 'Load data/client_data.csv to auto-fill customers, or enter details manually.';
+            : 'Search by name, phone, or GSTIN to auto-fill, or enter details below.';
     }
 }
 
-setupClientData(window.INJECTED_CLIENT_DATA || []);
+let localSavedClients = [];
+try {
+    const raw = localStorage.getItem('saved_client_records');
+    if (raw) localSavedClients = JSON.parse(raw);
+} catch (e) {}
+const initialClients = (window.INJECTED_CLIENT_DATA && window.INJECTED_CLIENT_DATA.length)
+    ? window.INJECTED_CLIENT_DATA
+    : localSavedClients;
+setupClientData(initialClients);
 
 document.getElementById('saveClientButton')?.addEventListener('click', () => {
     const newClient = {
-        name: document.getElementById('buyerName').value,
-        phone: document.getElementById('buyerPhone').value,
-        email: document.getElementById('buyerEmail').value,
-        address: document.getElementById('buyerAddress').value,
-        state: document.getElementById('buyerState').value,
-        pincode: document.getElementById('buyerPincode').value,
-        gstin: document.getElementById('buyerGstin').value,
+        name: (document.getElementById('buyerName').value || '').trim(),
+        phone: (document.getElementById('buyerPhone').value || '').trim(),
+        email: (document.getElementById('buyerEmail').value || '').trim(),
+        address: (document.getElementById('buyerAddress').value || '').trim(),
+        state: (document.getElementById('buyerState').value || '').trim(),
+        pincode: (document.getElementById('buyerPincode').value || '').trim(),
+        gstin: (document.getElementById('buyerGstin').value || '').trim(),
     };
     if (!newClient.name && !newClient.gstin) {
         alert('Please enter a name or GSTIN to save the customer.');
@@ -282,15 +290,22 @@ document.getElementById('saveClientButton')?.addEventListener('click', () => {
     }
     
     const statusEl = document.getElementById('clientDirectoryStatus');
-    const saveLocally = () => {
+    const existingIdx = clientRecords.findIndex(c => 
+        (newClient.name && c.name && c.name.trim().toLowerCase() === newClient.name.toLowerCase()) ||
+        (newClient.gstin && c.gstin && c.gstin.trim().toUpperCase() === newClient.gstin.toUpperCase())
+    );
+    if (existingIdx >= 0) {
+        clientRecords[existingIdx] = Object.assign({}, clientRecords[existingIdx], newClient);
+    } else {
         clientRecords.push(newClient);
-        setupClientData(clientRecords);
-        if (statusEl) {
-            statusEl.textContent = 'Customer saved in this browser session. Export/update client_data.csv to keep it permanently.';
-        }
-    };
-
-    saveLocally();
+    }
+    try {
+        localStorage.setItem('saved_client_records', JSON.stringify(clientRecords));
+    } catch (e) {}
+    setupClientData(clientRecords);
+    if (statusEl) {
+        statusEl.textContent = `✓ Customer "${newClient.name || newClient.gstin}" saved & ready to auto-fill.`;
+    }
 });
 
 document.getElementById('customerLookup').addEventListener('input', event => {
