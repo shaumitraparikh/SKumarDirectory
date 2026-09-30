@@ -1015,7 +1015,7 @@
     /* Cards */
     .card {
         background: #ffffff;
-        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s;
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
@@ -1024,9 +1024,8 @@
         align-items: center;
         gap: 10px;
         border: 1px solid #e2e8f0;
-        cursor: pointer;
     }
-    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px rgba(0,0,0,0.08); border-color: #94a3b8; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px rgba(0,0,0,0.08); }
 
     .card-img-container {
         width: 70px; height: 70px; background: #f8fafc; display: flex;
@@ -1044,7 +1043,7 @@
     .card-price { font-size: 15px; color: var(--primary); font-weight: bold; margin: 5px 0 0 0; }
 
     /* Add to Cart Controls */
-    .add-controls { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; cursor: default; }
+    .add-controls { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
     .qty-input { width: 45px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
     .add-btn { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700; transition: background 0.2s, transform 0.1s; }
     .add-btn:active { transform: scale(0.96); }
@@ -1058,6 +1057,252 @@
         font-size: 14px; opacity: 0; transition: opacity 0.3s;
     }
     #toast.show { visibility: visible; opacity: 1; }
+
+    /* Product Zoom / Lightbox Dialog */
+    .product-zoom-dialog {
+        width: min(720px, calc(100vw - 20px));
+        max-width: 720px;
+        max-height: min(92dvh, 840px);
+        padding: 0;
+        border: 0;
+        border-radius: 16px;
+        background: #ffffff;
+        color: #1e293b;
+        box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.45);
+        overflow: hidden;
+    }
+    .product-zoom-dialog::backdrop {
+        background: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
+    .product-zoom-wrap {
+        display: flex;
+        flex-direction: column;
+        max-height: min(92dvh, 840px);
+        overflow-y: auto;
+    }
+    .product-zoom-header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 20px;
+        background: #0f172a;
+        color: #ffffff;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .product-zoom-tags {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .product-zoom-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11.5px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: rgba(255,255,255,0.15);
+        color: #f8fafc;
+    }
+    .product-zoom-badge.category-badge {
+        background: #2563eb;
+        color: #ffffff;
+    }
+    .product-zoom-badge.sr-badge {
+        background: #059669;
+        color: #ffffff;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .product-zoom-close {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 0;
+        background: rgba(255,255,255,0.15);
+        color: #cbd5e1;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, color 0.2s;
+    }
+    .product-zoom-close:hover {
+        background: #ef4444;
+        color: #ffffff;
+    }
+
+    .product-zoom-img-section {
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        min-height: 200px;
+    }
+    .product-zoom-img {
+        max-width: 100%;
+        max-height: 48vh;
+        object-fit: contain;
+        border-radius: 8px;
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08));
+        transition: transform 0.25s ease;
+    }
+    .product-zoom-img:hover {
+        transform: scale(1.03);
+    }
+    .representative-notice {
+        margin-top: 10px;
+        font-size: 11px;
+        color: #64748b;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        padding: 3px 8px;
+        border-radius: 12px;
+    }
+
+    .product-zoom-body {
+        padding: 20px 24px 24px;
+        display: grid;
+        gap: 16px;
+    }
+    .product-zoom-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .product-zoom-title {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.35;
+        flex: 1 1 300px;
+    }
+    .product-zoom-price-box {
+        text-align: right;
+        flex: 0 0 auto;
+    }
+    .product-zoom-price {
+        font-size: 22px;
+        font-weight: 900;
+        color: #1e3a8a;
+        margin: 0;
+    }
+    .product-zoom-price-unit {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        margin: 2px 0 0;
+    }
+
+    /* Specs Table */
+    .product-specs-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #f8fafc;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        font-size: 12.5px;
+    }
+    .product-specs-table th {
+        background: #f1f5f9;
+        color: #475569;
+        font-weight: 600;
+        padding: 9px 14px;
+        text-align: left;
+        width: 35%;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .product-specs-table td {
+        padding: 9px 14px;
+        color: #0f172a;
+        font-weight: 600;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .product-specs-table tr:last-child th,
+    .product-specs-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Actions footer */
+    .product-zoom-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding-top: 8px;
+        border-top: 1px solid #e2e8f0;
+    }
+    .product-zoom-qty-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex: 0 0 auto;
+    }
+    .product-zoom-qty-btn {
+        width: 38px;
+        height: 42px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #f8fafc;
+        color: #0f172a;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s;
+    }
+    .product-zoom-qty-btn:hover {
+        background: #e2e8f0;
+    }
+    .product-zoom-qty-input {
+        width: 60px;
+        height: 42px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 700;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        color: #0f172a;
+    }
+    .product-zoom-add-btn {
+        flex: 1 1 auto;
+        height: 44px;
+        background: #1e3a8a;
+        color: #ffffff;
+        border: 0;
+        border-radius: 8px;
+        font-size: 14.5px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: background 0.2s, transform 0.1s;
+    }
+    .product-zoom-add-btn:hover {
+        background: #172554;
+    }
+    .product-zoom-add-btn:active {
+        transform: scale(0.98);
+    }
 
     /* Print invoice */
     #printBill { display: none; }

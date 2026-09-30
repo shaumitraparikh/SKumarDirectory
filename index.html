@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="app/assets/icons/favicon.png">
 <link rel="stylesheet" href="app/assets/css/search_catalog.css">
 </head>
-<body data-catalog-version="46abd93dcc">
+<body data-catalog-version="b8dd2a59a2">
 
 <nav class="global-nav" style="background: #102a43; padding: 6px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 9999; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-family: 'Segoe UI', system-ui, sans-serif;">
     <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 0 auto;">
@@ -900,6 +900,49 @@
 
 <div id="toast">Item added to cart</div>
 
+<dialog class="product-zoom-dialog" id="imageLightbox" aria-labelledby="lightboxTitle">
+    <div class="product-zoom-wrap">
+        <div class="product-zoom-header">
+            <div class="product-zoom-tags">
+                <span id="lightboxCategory" class="product-zoom-badge category-badge"></span>
+                <span id="lightboxSrNumber" class="product-zoom-badge sr-badge"></span>
+                <span id="lightboxPage" class="product-zoom-badge" style="display:none;"></span>
+            </div>
+            <button type="button" class="product-zoom-close" onclick="document.getElementById('imageLightbox').close()" aria-label="Close">✕</button>
+        </div>
+
+        <div id="lightboxImgWrap" class="product-zoom-img-section">
+            <img id="lightboxImg" class="product-zoom-img" src="" alt="Product image">
+            <div id="lightboxRepNotice" class="representative-notice" style="display:none;">ℹ️ Representative category photo</div>
+        </div>
+
+        <div class="product-zoom-body">
+            <div class="product-zoom-title-row">
+                <h3 id="lightboxTitle" class="product-zoom-title"></h3>
+                <div class="product-zoom-price-box">
+                    <div id="lightboxPrice" class="product-zoom-price"></div>
+                    <div id="lightboxUnit" class="product-zoom-price-unit"></div>
+                </div>
+            </div>
+
+            <table class="product-specs-table" id="lightboxSpecsTable">
+                <tbody id="lightboxSpecsBody"></tbody>
+            </table>
+
+            <div class="product-zoom-actions">
+                <div class="product-zoom-qty-wrap">
+                    <button type="button" class="product-zoom-qty-btn" id="lightboxQtyMinus" aria-label="Decrease quantity">−</button>
+                    <input type="number" id="lightboxQty" class="product-zoom-qty-input" value="1" min="1" max="9999" aria-label="Quantity">
+                    <button type="button" class="product-zoom-qty-btn" id="lightboxQtyPlus" aria-label="Increase quantity">+</button>
+                </div>
+                <button type="button" id="lightboxAddBtn" class="product-zoom-add-btn">
+                    <span>🛒 Add to Cart</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</dialog>
+
 <section id="printBill" aria-label="Proforma invoice">
     <div class="inv-topline"></div>
     <div class="inv-header">
@@ -979,11 +1022,11 @@
 <script src="app/assets/js/bill_archive.js"></script>
 <script>
     </script>
-<script src="app/assets/js/search_catalog.js?v=46abd93dcc"></script>
+<script src="app/assets/js/search_catalog.js?v=b8dd2a59a2"></script>
 <script>
     if ('serviceWorker' in navigator  && location.protocol.startsWith('http')) {
         window.addEventListener('load', function() {
-            navigator.serviceWorker.register('app/sw.js?v=46abd93dcc').then(function(reg) {
+            navigator.serviceWorker.register('app/sw.js?v=b8dd2a59a2').then(function(reg) {
                 reg.onupdatefound = function() {
                     var installing = reg.installing;
                     if (installing) {

@@ -318,6 +318,49 @@
 
 <div id="toast">Item added to cart</div>
 
+<dialog class="product-zoom-dialog" id="imageLightbox" aria-labelledby="lightboxTitle">
+    <div class="product-zoom-wrap">
+        <div class="product-zoom-header">
+            <div class="product-zoom-tags">
+                <span id="lightboxCategory" class="product-zoom-badge category-badge"></span>
+                <span id="lightboxSrNumber" class="product-zoom-badge sr-badge"></span>
+                <span id="lightboxPage" class="product-zoom-badge" style="display:none;"></span>
+            </div>
+            <button type="button" class="product-zoom-close" onclick="document.getElementById('imageLightbox').close()" aria-label="Close">✕</button>
+        </div>
+
+        <div id="lightboxImgWrap" class="product-zoom-img-section">
+            <img id="lightboxImg" class="product-zoom-img" src="" alt="Product image">
+            <div id="lightboxRepNotice" class="representative-notice" style="display:none;">ℹ️ Representative category photo</div>
+        </div>
+
+        <div class="product-zoom-body">
+            <div class="product-zoom-title-row">
+                <h3 id="lightboxTitle" class="product-zoom-title"></h3>
+                <div class="product-zoom-price-box">
+                    <div id="lightboxPrice" class="product-zoom-price"></div>
+                    <div id="lightboxUnit" class="product-zoom-price-unit"></div>
+                </div>
+            </div>
+
+            <table class="product-specs-table" id="lightboxSpecsTable">
+                <tbody id="lightboxSpecsBody"></tbody>
+            </table>
+
+            <div class="product-zoom-actions">
+                <div class="product-zoom-qty-wrap">
+                    <button type="button" class="product-zoom-qty-btn" id="lightboxQtyMinus" aria-label="Decrease quantity">−</button>
+                    <input type="number" id="lightboxQty" class="product-zoom-qty-input" value="1" min="1" max="9999" aria-label="Quantity">
+                    <button type="button" class="product-zoom-qty-btn" id="lightboxQtyPlus" aria-label="Increase quantity">+</button>
+                </div>
+                <button type="button" id="lightboxAddBtn" class="product-zoom-add-btn">
+                    <span>🛒 Add to Cart</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</dialog>
+
 <section id="printBill" aria-label="Proforma invoice">
     <div class="inv-topline"></div>
     <div class="inv-header">
