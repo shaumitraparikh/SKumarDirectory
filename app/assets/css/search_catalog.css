@@ -557,16 +557,6 @@ details[open] > .order-summary-toggle::after {
   background: #e2e8f0;
   border-color: #94a3b8;
 }
-.clear-client-btn {
-  background: #f8fafc;
-  color: #64748b;
-  border-color: #cbd5e1;
-}
-.clear-client-btn:hover {
-  background: #fee2e2;
-  color: #dc2626;
-  border-color: #fca5a5;
-}
 .client-directory-status {
   display: block;
   margin-top: 8px;
