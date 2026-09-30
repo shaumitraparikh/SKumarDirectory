@@ -405,11 +405,64 @@
         background: #ffffff;
     }
     .customer-lookup-box {
+        position: relative;
         background: #f8fafc;
         border: 1px solid #cbd5e1;
         border-radius: 10px;
         padding: 14px 16px;
         margin-bottom: 20px;
+    }
+    .customer-search-dropdown {
+        position: absolute;
+        top: calc(100% - 10px);
+        left: 16px;
+        right: 16px;
+        background: #ffffff;
+        border: 1.5px solid #2563eb;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.18), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
+        max-height: 250px;
+        overflow-y: auto;
+        z-index: 9999;
+    }
+    .customer-search-item {
+        padding: 10px 14px;
+        cursor: pointer;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        text-align: left;
+        transition: background 0.15s;
+    }
+    .customer-search-item:last-child {
+        border-bottom: none;
+    }
+    .customer-search-item:hover, .customer-search-item.active {
+        background: #eff6ff;
+    }
+    .customer-search-item-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .customer-search-item-meta {
+        font-size: 11.5px;
+        color: #64748b;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .customer-search-item-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+    }
+    .customer-search-empty {
+        padding: 14px 16px;
+        font-size: 12.5px;
+        color: #64748b;
+        text-align: center;
     }
     .lookup-label {
         display: block;

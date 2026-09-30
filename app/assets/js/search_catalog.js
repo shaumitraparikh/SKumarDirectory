@@ -43,7 +43,6 @@ billArchive.restoreDirectory().catch(error => {
 
 let allSavedBills = [];
 
-
 function formatMonthLabel(monthStr) {
     if (!monthStr) return 'Unknown Date';
     try {
@@ -342,38 +341,199 @@ document.getElementById('billArchiveList')?.addEventListener('click', event => {
     }
 });
 
-function updateCustomerSuggestions(query) {
-    const suggestions = document.getElementById('clientSuggestions');
-    suggestions.replaceChildren();
-    if (!query || !window.ClientDirectory) return;
-    const normalizedQuery = query.trim().toLocaleLowerCase();
-    clientRecords
-        .filter(customer => Object.values(customer).some(value =>
-            String(value).toLocaleLowerCase().includes(normalizedQuery)
-        ))
-        .slice(0, 50)
-        .forEach(customer => {
-            const option = document.createElement('option');
-            option.value = ClientDirectory.displayLabel(customer);
-            suggestions.appendChild(option);
+function extractCustomersFromSavedBills(bills) {
+    if (!bills || !Array.isArray(bills)) return [];
+    const extracted = [];
+    bills.forEach(bill => {
+        const html = bill.html;
+        if (!html) return;
+        const billedToMatch = html.match(/Billed To[^<]*<\/h4>([\s\S]*?)<\/div>/i);
+        if (!billedToMatch) return;
+        const box = billedToMatch[1];
+
+        const nameMatch = box.match(/id=["']pBuyerName["'][^>]*>([^<]+)</) || box.match(/<strong[^>]*>([^<]+)<\/strong>/);
+        const buyerName = nameMatch ? nameMatch[1].trim() : '';
+        if (!buyerName || buyerName.toLowerCase() === 'cash customer') return;
+
+        let phone = '';
+        const phoneMatch = box.match(/📞\s*([0-9\s+-]+)/) || box.match(/(?:Mob|Phone|Tel|WhatsApp)[:\s]+([0-9\s+-]+)/i) || box.match(/\b([6-9]\d{9})\b/);
+        if (phoneMatch) phone = phoneMatch[1].replace(/\D/g, '').slice(-10);
+
+        let gstin = '';
+        const gstinMatch = box.match(/GSTIN:\s*([0-9A-Z]{15})/i);
+        if (gstinMatch) gstin = gstinMatch[1].toUpperCase();
+
+        let address = '';
+        const lines = box.split(/<br\s*\/?>|<\/?span>/i).map(l => l.replace(/<[^>]+>/g, '').trim()).filter(Boolean);
+        const addrLine = lines.find(l => !l.includes(buyerName) && !l.includes('📞') && !l.includes('GSTIN:') && l.length > 5);
+        if (addrLine) address = addrLine;
+
+        let state = '';
+        const stateMatch = html.match(/Supply Place:\s*([A-Za-z\s]+?)(?:\s*\(|$|<)/i);
+        if (stateMatch) state = stateMatch[1].trim();
+
+        extracted.push({
+            name: buyerName,
+            business_name: buyerName,
+            phone,
+            gstin,
+            address,
+            state: state || 'Maharashtra'
         });
+    });
+    return extracted;
+}
+
+const DEFAULT_DEMO_CUSTOMERS = [
+    {
+        name: "General Supply Corporation",
+        business_name: "General Supply Corporation",
+        phone: "9869905779",
+        gstin: "27ACJPP2955J1Z4",
+        address: "3rd Central Building, Grd. Floor, Kalbadevi, Mumbai - 400002",
+        state: "Maharashtra",
+        pincode: "400002"
+    },
+    {
+        name: "Asha Shah",
+        business_name: "Ace Electricals",
+        phone: "9869905779",
+        email: "asha@example.in",
+        address: "12, Market Road, Mumbai",
+        state: "Maharashtra",
+        pincode: "400002",
+        gstin: "27ACJPP2955J1Z4"
+    },
+    {
+        name: "Shaumitra Parikh",
+        business_name: "S. Kumar & Bros",
+        phone: "9821361314",
+        gstin: "27AAGPP1621C1Z5",
+        address: "38, Bapu Khote Street, Pydhonie, Mumbai - 400003",
+        state: "Maharashtra",
+        pincode: "400003"
+    }
+];
+
+function mergeCustomers(lists) {
+    const map = new Map();
+    lists.forEach(list => {
+        if (!Array.isArray(list)) return;
+        list.forEach(c => {
+            if (!c || (!c.name && !c.business_name && !c.gstin)) return;
+            const key = (c.gstin && c.gstin.trim().toUpperCase()) ||
+                        (c.business_name && c.business_name.trim().toLowerCase()) ||
+                        (c.name && c.name.trim().toLowerCase());
+            if (key) {
+                if (map.has(key)) {
+                    map.set(key, Object.assign({}, map.get(key), c));
+                } else {
+                    map.set(key, Object.assign({}, c));
+                }
+            }
+        });
+    });
+    return Array.from(map.values());
+}
+
+function populateCustomerDatalist() {
+    const suggestions = document.getElementById('clientSuggestions');
+    if (!suggestions || !window.ClientDirectory) return;
+    suggestions.replaceChildren();
+    clientRecords.forEach(customer => {
+        const option = document.createElement('option');
+        option.value = ClientDirectory.displayLabel(customer);
+        suggestions.appendChild(option);
+    });
+}
+
+function renderCustomerSearchResults(results) {
+    const container = document.getElementById('customerSearchResults');
+    if (!container) return;
+    container.replaceChildren();
+
+    if (!results || results.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'customer-search-empty';
+        empty.textContent = 'No matching saved customer found. Enter details below & click "💾 Save / Update" to store them.';
+        container.appendChild(empty);
+        container.style.display = 'block';
+        return;
+    }
+
+    results.forEach(customer => {
+        const item = document.createElement('div');
+        item.className = 'customer-search-item';
+        item.setAttribute('role', 'option');
+
+        const title = document.createElement('div');
+        title.className = 'customer-search-item-title';
+        title.textContent = customer.business_name || customer.name || 'Customer';
+        if (customer.name && customer.business_name && customer.name !== customer.business_name) {
+            title.textContent += ` (${customer.name})`;
+        }
+
+        const meta = document.createElement('div');
+        meta.className = 'customer-search-item-meta';
+
+        if (customer.phone) {
+            const phoneSpan = document.createElement('span');
+            phoneSpan.textContent = `📞 ${customer.phone}`;
+            meta.appendChild(phoneSpan);
+        }
+        if (customer.gstin) {
+            const gstinSpan = document.createElement('span');
+            gstinSpan.textContent = `📑 ${customer.gstin}`;
+            meta.appendChild(gstinSpan);
+        }
+        if (customer.state || customer.address) {
+            const locSpan = document.createElement('span');
+            locSpan.textContent = `📍 ${customer.state || customer.address.slice(0, 25)}`;
+            meta.appendChild(locSpan);
+        }
+
+        item.append(title, meta);
+        item.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            applySelectedCustomer(customer);
+            const lookupInput = document.getElementById('customerLookup');
+            if (lookupInput) lookupInput.value = ClientDirectory.displayLabel(customer);
+            hideCustomerDropdown();
+        });
+
+        container.appendChild(item);
+    });
+
+    container.style.display = 'block';
+}
+
+function hideCustomerDropdown() {
+    const container = document.getElementById('customerSearchResults');
+    if (container) container.style.display = 'none';
 }
 
 function applySelectedCustomer(customer) {
+    if (!customer) return;
     document.getElementById('buyerName').value = customer.business_name || customer.name || '';
     document.getElementById('buyerPhone').value = customer.phone || '';
     document.getElementById('buyerEmail').value = customer.email || '';
     document.getElementById('buyerAddress').value = customer.address || '';
     const stateInput = document.getElementById('buyerState');
-    const matchingState = Array.from(stateInput.options).find(option =>
-        option.value.toLocaleLowerCase() === (customer.state || '').toLocaleLowerCase()
-    );
-    stateInput.value = matchingState ? matchingState.value : '';
+    if (stateInput) {
+        const matchingState = Array.from(stateInput.options).find(option =>
+            option.value.toLocaleLowerCase() === (customer.state || '').toLocaleLowerCase()
+        );
+        stateInput.value = matchingState ? matchingState.value : '';
+    }
     document.getElementById('buyerPincode').value = customer.pincode || '';
     document.getElementById('buyerGstin').value = customer.gstin || '';
-    document.getElementById('buyerDetails').open = true;
-    document.getElementById('clientDirectoryStatus').textContent =
-        'Customer details filled in. Review and edit them before submitting the order.';
+    const buyerDetails = document.getElementById('buyerDetails');
+    if (buyerDetails) buyerDetails.open = true;
+
+    const statusEl = document.getElementById('clientDirectoryStatus');
+    if (statusEl) {
+        statusEl.innerHTML = `<span style="color:#16a34a; font-weight:600;">✓ Auto-filled details for "${customer.business_name || customer.name}". You can review or edit below.</span>`;
+    }
 }
 
 function loadCustomerCsv(file) {
@@ -385,11 +545,10 @@ function loadCustomerCsv(file) {
     }
     file.text().then(contents => {
         const records = ClientDirectory.parseCsv(contents);
-        clientRecords = records;
-        document.getElementById('clientSuggestions').replaceChildren();
+        setupClientData(mergeCustomers([records, clientRecords]));
         document.getElementById('customerLookup').value = '';
         status.textContent = records.length
-            ? `${records.length} customer record${records.length === 1 ? '' : 's'} loaded for this browser session.`
+            ? `${records.length} customer record${records.length === 1 ? '' : 's'} loaded.`
             : 'No customer records found. You can still enter customer details manually.';
     }).catch(error => {
         console.error('Unable to load the customer CSV.', error);
@@ -397,20 +556,17 @@ function loadCustomerCsv(file) {
     });
 }
 
-
-
-
 function setupClientData(records) {
     if (!records || !Array.isArray(records)) records = [];
     clientRecords = records;
     if (window.ClientDirectory) {
         window.ClientDirectory.clients = records;
-        if (typeof window.ClientDirectory.renderDataList === "function") window.ClientDirectory.renderDataList();
+        populateCustomerDatalist();
     }
-    var statusEl = document.getElementById('clientDirectoryStatus');
+    const statusEl = document.getElementById('clientDirectoryStatus');
     if (statusEl) {
         statusEl.textContent = records.length
-            ? `${records.length} saved customer${records.length === 1 ? '' : 's'} ready to auto-fill.`
+            ? `${records.length} saved customer${records.length === 1 ? '' : 's'} ready to search & auto-fill.`
             : 'Search by name, phone, or GSTIN to auto-fill, or enter details below.';
     }
 }
@@ -420,14 +576,20 @@ try {
     const raw = localStorage.getItem('saved_client_records');
     if (raw) localSavedClients = JSON.parse(raw);
 } catch (e) {}
-const initialClients = (window.INJECTED_CLIENT_DATA && window.INJECTED_CLIENT_DATA.length)
-    ? window.INJECTED_CLIENT_DATA
-    : localSavedClients;
+
+const billExtractedClients = extractCustomersFromSavedBills(window.INJECTED_SAVED_BILLS || []);
+const initialClients = mergeCustomers([
+    window.INJECTED_CLIENT_DATA || [],
+    localSavedClients,
+    billExtractedClients,
+    DEFAULT_DEMO_CUSTOMERS
+]);
 setupClientData(initialClients);
 
 document.getElementById('saveClientButton')?.addEventListener('click', () => {
     const newClient = {
         name: (document.getElementById('buyerName').value || '').trim(),
+        business_name: (document.getElementById('buyerName').value || '').trim(),
         phone: (document.getElementById('buyerPhone').value || '').trim(),
         email: (document.getElementById('buyerEmail').value || '').trim(),
         address: (document.getElementById('buyerAddress').value || '').trim(),
@@ -448,22 +610,59 @@ document.getElementById('saveClientButton')?.addEventListener('click', () => {
     if (existingIdx >= 0) {
         clientRecords[existingIdx] = Object.assign({}, clientRecords[existingIdx], newClient);
     } else {
-        clientRecords.push(newClient);
+        clientRecords.unshift(newClient);
     }
     try {
         localStorage.setItem('saved_client_records', JSON.stringify(clientRecords));
     } catch (e) {}
     setupClientData(clientRecords);
     if (statusEl) {
-        statusEl.textContent = `✓ Customer "${newClient.name || newClient.gstin}" saved & ready to auto-fill.`;
+        statusEl.innerHTML = `<span style="color:#16a34a; font-weight:600;">✓ Customer "${newClient.name || newClient.gstin}" saved & ready to auto-fill.</span>`;
     }
 });
 
-document.getElementById('customerLookup').addEventListener('input', event => {
-    updateCustomerSuggestions(event.target.value);
-    const selectedCustomer = ClientDirectory.findCustomer(clientRecords, event.target.value);
-    if (selectedCustomer) applySelectedCustomer(selectedCustomer);
-});
+const lookupInput = document.getElementById('customerLookup');
+if (lookupInput) {
+    lookupInput.addEventListener('focus', () => {
+        const val = lookupInput.value.trim();
+        const matches = (window.ClientDirectory && typeof ClientDirectory.filterCustomers === 'function')
+            ? ClientDirectory.filterCustomers(clientRecords, val)
+            : clientRecords;
+        renderCustomerSearchResults(matches);
+    });
+
+    lookupInput.addEventListener('input', event => {
+        const val = event.target.value.trim();
+        const matches = (window.ClientDirectory && typeof ClientDirectory.filterCustomers === 'function')
+            ? ClientDirectory.filterCustomers(clientRecords, val)
+            : clientRecords;
+        renderCustomerSearchResults(matches);
+
+        const selectedCustomer = ClientDirectory.findCustomer(clientRecords, val);
+        if (selectedCustomer) {
+            applySelectedCustomer(selectedCustomer);
+        }
+    });
+
+    lookupInput.addEventListener('change', event => {
+        const val = event.target.value.trim();
+        const selectedCustomer = ClientDirectory.findCustomer(clientRecords, val);
+        if (selectedCustomer) {
+            applySelectedCustomer(selectedCustomer);
+            hideCustomerDropdown();
+        }
+    });
+
+    lookupInput.addEventListener('blur', () => {
+        setTimeout(hideCustomerDropdown, 250);
+    });
+
+    lookupInput.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            hideCustomerDropdown();
+        }
+    });
+}
 
 document.getElementById('clientCsvFile')?.addEventListener('change', event => {
     const file = event.target.files && event.target.files[0];
