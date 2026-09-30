@@ -703,6 +703,14 @@ function toggleCart(forceOpen) {
         const card = document.createElement('div');
         card.className = 'card';
         card.dataset.srNumber = item.sr_number;
+        card.title = 'Click anywhere to view image & full item details';
+
+        card.addEventListener('click', (event) => {
+            if (event.target.closest('.add-controls, button, input, a, select, textarea')) {
+                return;
+            }
+            openLightbox(item.sr_number);
+        });
         
         const imgContainer = document.createElement('div');
         imgContainer.className = 'card-img-container';
@@ -713,7 +721,10 @@ function toggleCart(forceOpen) {
             img.alt = item.image_is_representative ? 'Representative image for ' + item.category : item.item_name;
             img.loading = 'lazy';
             img.style.cursor = 'zoom-in';
-            img.onclick = () => openLightbox(item.sr_number);
+            img.onclick = (e) => {
+                e.stopPropagation();
+                openLightbox(item.sr_number);
+            };
             imgContainer.appendChild(img);
         } else {
             const noImg = document.createElement('div');

@@ -139,44 +139,36 @@
             if (found) return found;
         }
 
-        // 6. Substring match if query is at least 3 characters and unambiguously matches 1 customer
-        if (lower.length >= 3) {
-            const matches = customers.filter(c => {
-                const name = (c.name || '').toLowerCase();
-                const biz = (c.business_name || '').toLowerCase();
-                const gstin = (c.gstin || '').toLowerCase();
-                const phone = String(c.phone || '').replace(/\D/g, '');
-                return name.includes(lower) || biz.includes(lower) || gstin.includes(lower) || (digitsOnly.length >= 3 && phone.includes(digitsOnly));
-            });
-            if (matches.length === 1) {
-                return matches[0];
-            }
-        }
-
         return null;
     }
 
-    function filterCustomers(customers, query) {
-        if (!customers || !Array.isArray(customers)) return [];
-        if (!query || !String(query).trim()) return customers.slice(0, 50);
-        const lower = String(query).trim().toLowerCase();
-        const digitsOnly = lower.replace(/\D/g, '');
+    function filterCustomers(customers, query, limit) {
+        if (!Array.isArray(customers)) return [];
+        const max = typeof limit === 'number' ? limit : 50;
+        const trimmed = (query || '').trim();
+        if (!trimmed) return customers.slice(0, max);
+        const lower = trimmed.toLowerCase();
+        const digitsOnly = trimmed.replace(/\D/g, '');
 
         return customers.filter(c => {
-            const name = (c.name || '').toLowerCase();
-            const biz = (c.business_name || '').toLowerCase();
-            const gstin = (c.gstin || '').toLowerCase();
-            const phone = String(c.phone || '').replace(/\D/g, '');
-            const addr = (c.address || '').toLowerCase();
-            const state = (c.state || '').toLowerCase();
+            if (!c) return false;
+            const nameMatch = (c.name && c.name.toLowerCase().includes(lower)) ||
+                              (c.business_name && c.business_name.toLowerCase().includes(lower));
+            if (nameMatch) return true;
 
-            return name.includes(lower) ||
-                   biz.includes(lower) ||
-                   gstin.includes(lower) ||
-                   (digitsOnly.length >= 3 && phone.includes(digitsOnly)) ||
-                   addr.includes(lower) ||
-                   state.includes(lower);
-        }).slice(0, 50);
+            const gstinMatch = c.gstin && c.gstin.toLowerCase().includes(lower);
+            if (gstinMatch) return true;
+
+            const addrMatch = c.address && c.address.toLowerCase().includes(lower);
+            if (addrMatch) return true;
+
+            if (digitsOnly.length >= 3 && c.phone) {
+                const cDigits = String(c.phone).replace(/\D/g, '');
+                if (cDigits.includes(digitsOnly)) return true;
+            }
+
+            return false;
+        }).slice(0, max);
     }
 
     return { parseCsv, displayLabel, findCustomer, filterCustomers };

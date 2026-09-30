@@ -1077,6 +1077,7 @@
         align-items: center;
         gap: 10px;
         border: 1px solid #e2e8f0;
+        cursor: pointer;
     }
     .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px rgba(0,0,0,0.08); }
 
@@ -1096,7 +1097,8 @@
     .card-price { font-size: 15px; color: var(--primary); font-weight: bold; margin: 5px 0 0 0; }
 
     /* Add to Cart Controls */
-    .add-controls { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+    .add-controls { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; cursor: default; }
+    .add-controls * { cursor: auto; }
     .qty-input { width: 45px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
     .add-btn { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700; transition: background 0.2s, transform 0.1s; }
     .add-btn:active { transform: scale(0.96); }
