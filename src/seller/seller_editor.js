@@ -278,9 +278,7 @@
         status.textContent = 'Unsaved changes are in this page draft. Save & run updater to write them to the CSV.';
     });
 
-    document.getElementById('sellerEditorClose').addEventListener('click', function () {
-        editorDialog.close();
-    });
+    // The submit handler handles saving and closing
     document.getElementById('sellerEditorCancel').addEventListener('click', function () {
         editorDialog.close();
     });

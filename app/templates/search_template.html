@@ -81,7 +81,6 @@
     />
   </head>
   <body data-catalog-version="{{ catalog_version }}">
-    <div class="super-sticky-wrapper" style="position: sticky; top: 0; z-index: 9999; display: flex; flex-direction: column; background: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
     <section
       class="seller-tools"
       id="sellerTools"
@@ -134,7 +133,7 @@
           <button id="sellerEditorCancel" type="button" class="btn-cancel">
             Cancel
           </button>
-          <button id="sellerEditorClose" type="button" class="btn-save">
+          <button id="sellerEditorApply" type="submit" class="btn-save">
             Apply changes
           </button>
         </div>
@@ -149,8 +148,10 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        position: relative;
-        z-index: 1;
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         font-family: &quot;Segoe UI&quot;, system-ui, sans-serif;
       "
     >
@@ -348,7 +349,6 @@
       >
         Cart <span class="cart-badge" id="cartCountBadge">0</span>
       </button>
-    </div>
     </div>
     <div
       style="
