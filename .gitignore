@@ -15,3 +15,6 @@ data/bills/
 data/monthly_reports/
 
 data/estimates/
+
+# Local handoff / ops notes (not for public Pages repo)
+HANDOFF.md
