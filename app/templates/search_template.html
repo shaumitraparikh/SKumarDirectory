@@ -160,7 +160,7 @@
                             <div class="lookup-input-row">
                                 <input type="search" id="customerLookup" autocomplete="off" placeholder="Search by name, business, phone, or GSTIN to auto-fill...">
                                 <button type="button" class="load-clients-btn" id="saveClientButton" title="Save customer details for future auto-fill">💾 Save / Update</button>
-                                <button type="button" class="load-clients-btn clear-client-btn" id="clearCustomerButton" title="Clear customer details">✕ Clear</button>
+                                <button type="button" class="load-clients-btn clear-client-btn" id="clearCustomerButton" title="Clear customer details" onclick="clearCustomerDetails(); showToast('Customer details cleared.')">✕ Clear</button>
                             </div>
                             <div id="customerSearchResults" class="customer-search-dropdown" style="display: none;" role="listbox" aria-label="Customer suggestions"></div>
                             <span class="client-directory-status" id="clientDirectoryStatus" role="status">Search by name, phone, or GSTIN to auto-fill, or enter details below.</span>

@@ -2502,10 +2502,4 @@ function clearCustomerDetails() {
   if (enterBtn) enterBtn.style.display = "inline-flex";
 }
 
-const clearBtn = document.getElementById("clearCustomerButton");
-if (clearBtn) {
-  clearBtn.addEventListener("click", () => {
-    clearCustomerDetails();
-    showToast("Customer details cleared.");
-  });
 }
