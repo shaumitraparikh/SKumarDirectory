@@ -2304,3 +2304,55 @@ details[open] > .order-summary-toggle::after {
     min-width: 0;
   }
 }
+
+/* UX Enhancements for Virtualized Grid */
+.card-img-container {
+    aspect-ratio: 1/1;
+    background: #e2e8f0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shimmer Effect for Loading Placeholders */
+.card-img-container::before {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.4) 20%,
+        rgba(255, 255, 255, 0.6) 60%,
+        rgba(255, 255, 255, 0)
+    );
+    animation: shimmer 2s infinite;
+    z-index: 1;
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.card-img-container img {
+    position: relative;
+    z-index: 2;
+    background: #fff; /* Hide shimmer when loaded */
+}
+
+.catalog-empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 2px dashed #cbd5e1;
+}
+
+#searchResultCount {
+    font-size: 14px;
+    color: #475569;
+    font-weight: 600;
+}

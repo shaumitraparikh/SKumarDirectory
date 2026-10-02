@@ -1015,6 +1015,8 @@ function createCard(item) {
       ? "Representative image for " + item.category
       : item.item_name;
     img.loading = "lazy";
+    img.decoding = "async";
+
     img.style.cursor = "zoom-in";
     img.onclick = (e) => {
       e.stopPropagation();
@@ -1309,18 +1311,14 @@ function initCatalogCacheAndPrefs() {
   }
 }
 
+let currentMatchingEntries = [];
+let renderBatchIndex = 0;
+const BATCH_SIZE = 48;
+let gridObserver = null;
+
 function filterCatalog() {
   const grid = document.getElementById("catalogGrid");
   if (!grid) return;
-
-  if (catalogSearchIndex.length > 0 && !catalogSearchIndex[0].card) {
-    const fragment = document.createDocumentFragment();
-    catalogSearchIndex.forEach((entry) => {
-      entry.card = createCard(entry.item);
-      fragment.appendChild(entry.card);
-    });
-    grid.appendChild(fragment);
-  }
 
   const searchInputEl = document.getElementById("searchInput");
   const input = normalizeSearchText(searchInputEl ? searchInputEl.value : "");
@@ -1329,19 +1327,23 @@ function filterCatalog() {
   const sortBySelect = document.getElementById("sortBy");
   const sortBy = sortBySelect ? sortBySelect.value : "default";
 
+  // URL Sync
+  const url = new URL(window.location);
+  if (input) url.searchParams.set("q", input); else url.searchParams.delete("q");
+  if (selectedCategory) url.searchParams.set("category", selectedCategory); else url.searchParams.delete("category");
+  window.history.replaceState({}, "", url);
+
   let matchCount = 0;
-  const matchingEntries = [];
+  matchingEntries = []; // We use a local variable matchingEntries
 
   catalogSearchIndex.forEach((entry) => {
-    const matchesCategory =
-      !selectedCategory || entry.item.category === selectedCategory;
+    const matchesCategory = !selectedCategory || entry.item.category === selectedCategory;
     if (!matchesCategory) {
       entry.score = 0;
-      entry.card.style.display = "none";
+      if(entry.card) entry.card.style.display = "none";
       return;
     }
 
-    // Empty search + All Categories (or a chosen category) shows every matching product.
     if (input) {
       entry.score = fuzzyScore(entry.searchableText, input);
     } else {
@@ -1350,40 +1352,31 @@ function filterCatalog() {
 
     if (entry.score >= 0.4) {
       matchCount++;
-      entry.card.style.display = "flex";
       matchingEntries.push(entry);
     } else {
-      entry.card.style.display = "none";
+      if(entry.card) entry.card.style.display = "none";
     }
   });
 
-  // Apply sorting to matching items
   if (sortBy === "price-asc") {
     matchingEntries.sort((a, b) => {
-      if (a.numericPrice === null && b.numericPrice === null)
-        return a.originalIndex - b.originalIndex;
+      if (a.numericPrice === null && b.numericPrice === null) return a.originalIndex - b.originalIndex;
       if (a.numericPrice === null) return 1;
       if (b.numericPrice === null) return -1;
-      if (a.numericPrice !== b.numericPrice)
-        return a.numericPrice - b.numericPrice;
+      if (a.numericPrice !== b.numericPrice) return a.numericPrice - b.numericPrice;
       return a.originalIndex - b.originalIndex;
     });
   } else if (sortBy === "price-desc") {
     matchingEntries.sort((a, b) => {
-      if (a.numericPrice === null && b.numericPrice === null)
-        return a.originalIndex - b.originalIndex;
+      if (a.numericPrice === null && b.numericPrice === null) return a.originalIndex - b.originalIndex;
       if (a.numericPrice === null) return 1;
       if (b.numericPrice === null) return -1;
-      if (a.numericPrice !== b.numericPrice)
-        return b.numericPrice - a.numericPrice;
+      if (a.numericPrice !== b.numericPrice) return b.numericPrice - a.numericPrice;
       return a.originalIndex - b.originalIndex;
     });
   } else if (sortBy === "name-asc") {
-    matchingEntries.sort((a, b) =>
-      (a.item.item_name || "").localeCompare(b.item.item_name || ""),
-    );
+    matchingEntries.sort((a, b) => (a.item.item_name || "").localeCompare(b.item.item_name || ""));
   } else {
-    // Default: relevance score when search query is entered, else original catalog order
     if (input) {
       matchingEntries.sort((a, b) => b.score - a.score);
     } else {
@@ -1391,28 +1384,89 @@ function filterCatalog() {
     }
   }
 
-  // Single DOM update using DocumentFragment
-  const fragment = document.createDocumentFragment();
-  matchingEntries.forEach((entry) => {
-    fragment.appendChild(entry.card);
-  });
-  grid.appendChild(fragment);
-
   const countIndicator = document.getElementById("searchResultCount");
   if (countIndicator) {
     let sortLabel = "";
     if (sortBy === "price-asc") sortLabel = " · Sorted: Price Low to High";
-    else if (sortBy === "price-desc")
-      sortLabel = " · Sorted: Price High to Low";
+    else if (sortBy === "price-desc") sortLabel = " · Sorted: Price High to Low";
     else if (sortBy === "name-asc") sortLabel = " · Sorted: Name A to Z";
 
-    let catLabel = selectedCategory
-      ? ` in "${selectedCategory}"`
-      : " in All Categories";
-    countIndicator.textContent = `Showing ${matchCount} of ${catalogSearchIndex.length} products${catLabel}${sortLabel}`;
+    let catLabel = selectedCategory ? ` in "${selectedCategory}"` : "";
+    
+    if (matchCount === 0) {
+      countIndicator.textContent = "No items match your criteria.";
+    } else {
+      countIndicator.textContent = `Showing ${matchCount} of ${catalogSearchIndex.length} items${catLabel}${sortLabel}`;
+    }
   }
+
+  // DOM Virtualization logic
+  currentMatchingEntries = matchingEntries;
+  renderBatchIndex = 0;
+  
+  // Detach all existing cards efficiently instead of empty loop
+  grid.replaceChildren();
+
+  if (matchCount === 0) {
+    const emptyState = document.createElement("div");
+    emptyState.className = "catalog-empty-state";
+    emptyState.innerHTML = `
+      <h2 style="font-size: 20px; margin-bottom: 15px;">No items match your criteria.</h2>
+      <p style="color: #64748b; margin-bottom: 20px;">Try adjusting your search or filter.</p>
+      <button class="mode-toggle-btn mode-toggle-customer" onclick="resetAllFilters()" style="display:inline-flex;">Browse All Inventory</button>
+    `;
+    grid.appendChild(emptyState);
+    return;
+  }
+
+  renderNextBatch();
+  setupGridObserver();
 }
 
+function resetAllFilters() {
+  const searchInputEl = document.getElementById("searchInput");
+  if(searchInputEl) searchInputEl.value = "";
+  const categoryFilter = document.getElementById("categoryFilter");
+  if(categoryFilter) categoryFilter.value = "";
+  const sortBySelect = document.getElementById("sortBy");
+  if(sortBySelect) sortBySelect.value = "default";
+  filterCatalog();
+}
+
+function renderNextBatch() {
+  const grid = document.getElementById("catalogGrid");
+  if (!grid) return;
+  const fragment = document.createDocumentFragment();
+  const end = Math.min(renderBatchIndex + BATCH_SIZE, currentMatchingEntries.length);
+  for (let i = renderBatchIndex; i < end; i++) {
+    const entry = currentMatchingEntries[i];
+    if (!entry.card) {
+      entry.card = createCard(entry.item);
+    }
+    entry.card.style.display = "flex";
+    fragment.appendChild(entry.card);
+  }
+  grid.appendChild(fragment);
+  renderBatchIndex = end;
+}
+
+function setupGridObserver() {
+  if (gridObserver) return;
+  const grid = document.getElementById("catalogGrid");
+  if (!grid) return;
+  
+  const sentinel = document.createElement('div');
+  sentinel.id = "gridBottomSentinel";
+  sentinel.style.height = "1px";
+  grid.parentNode.appendChild(sentinel);
+
+  gridObserver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && renderBatchIndex < currentMatchingEntries.length) {
+      renderNextBatch();
+    }
+  }, { rootMargin: '200px' });
+  gridObserver.observe(sentinel);
+}
 function readProduct(sr_number, qty, discountPct) {
   const row = rawCatalog.find(
     (item) => String(item.sr_number) === String(sr_number),
@@ -2218,22 +2272,23 @@ initCartProductSearch();
 restoreCart();
 renderCart();
 
-// Deep link from photo catalog: index.html?category=Capacitors
-const categoryParam = new URLSearchParams(location.search).get("category");
-if (categoryParam && typeof window.selectCategory === "function") {
-  const nativeSelect = document.getElementById("categoryFilter");
-  const hasOption =
-    nativeSelect &&
-    Array.from(nativeSelect.options).some((opt) => opt.value === categoryParam);
-  if (hasOption) {
-    window.selectCategory(categoryParam);
-  } else {
-    filterCatalog();
-  }
-} else {
-  filterCatalog();
+// Read initial URL params
+const params = new URLSearchParams(window.location.search);
+const initialQ = params.get("q");
+const initialCat = params.get("category");
+if (initialQ) {
+  const searchInputEl = document.getElementById("searchInput");
+  if (searchInputEl) searchInputEl.value = initialQ;
 }
-
+if (initialCat) {
+  const categoryFilter = document.getElementById("categoryFilter");
+  if (categoryFilter) {
+    const hasOption = Array.from(categoryFilter.options).some(opt => opt.value === initialCat);
+    if (hasOption) categoryFilter.value = initialCat;
+  }
+}
+filterCatalog();
+// Lightbox logic
 // Lightbox logic
 function setupLightboxListeners() {
   const dialog = document.getElementById("imageLightbox");
