@@ -19,7 +19,7 @@
 <link rel="apple-touch-icon" href="app/assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="app/site.webmanifest">
 <link rel="stylesheet" href="app/assets/css/search_catalog.css">
-<link rel="stylesheet" href="tools/seller/seller_editor.css" id="sellerCss" disabled>
+<link rel="stylesheet" href="src/seller/seller_editor.css" id="sellerCss" disabled>
 </head>
 <body data-catalog-version="2dece8efcc">
 <section class="seller-tools" id="sellerTools" style="display: none;" aria-label="Seller catalog controls">
@@ -1123,7 +1123,7 @@
     if (isEditMode) {
         document.getElementById("sellerTools").style.display = "block";
         var script = document.createElement("script");
-        script.src = "tools/seller/seller_editor.js?v=2dece8efcc";
+        script.src = "src/seller/seller_editor.js?v=2dece8efcc";
         document.body.appendChild(script);
         var cartBtn = document.querySelector(".cart-toggle-btn");
         if (cartBtn) cartBtn.style.display = "none";
