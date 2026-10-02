@@ -410,6 +410,19 @@ class SellerHandler(SimpleHTTPRequestHandler):
                 added = append_bill(payload)
                 self.send_json(200, {"success": True, "added": added})
                 return
+            if self.path == "/api/bills/export":
+                month = payload.get("month")
+                if not month:
+                    self.send_json(400, {"success": False, "error": "month required"})
+                    return
+                try:
+                    import subprocess
+                    subprocess.run(["python", str(ROOT / "tools" / "seller" / "export_tally.py"), month], check=True)
+                    self.send_json(200, {"success": True, "message": f"Exported successfully for {month}"})
+                except Exception as e:
+                    self.send_json(500, {"success": False, "error": str(e)})
+                return
+
             if self.path == "/api/catalog/save":
                 fields, rows, revision = update_catalog(payload["rows"], payload["revision"])
                 try:

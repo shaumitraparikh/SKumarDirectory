@@ -11,3 +11,5 @@ images/sr_*
 .env
 .vscode/
 *.code-workspace
+data/bills/
+data/monthly_reports/
