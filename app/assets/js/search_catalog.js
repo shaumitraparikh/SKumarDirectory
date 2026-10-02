@@ -2548,6 +2548,10 @@ const DEFAULT_ORGS = [
     id: "skumar",
     prefix: "S",
     name: "S. Kumar & Bros",
+    legal_name: "Shaumitra G. Parikh",
+    tagline: "All under one roof...",
+    address: "3rd Central Building, Grd. Floor, Kalbadevi, Mumbai - 400002",
+    phone: "022 2200 4825",
     gstin: "27AAGPP1621C1Z5",
     contact_name: "Shaumitra G. Parikh",
     mobile: "9821361314",
@@ -2556,6 +2560,10 @@ const DEFAULT_ORGS = [
     id: "gsc",
     prefix: "G",
     name: "General Supply Corporation",
+    legal_name: "Amit G. Parikh",
+    tagline: "",
+    address: "3rd Central Building, Grd. Floor, Kalbadevi, Mumbai - 400002",
+    phone: "",
     gstin: "27ACJPP2955J1Z4",
     contact_name: "Amit G. Parikh",
     mobile: "9869905779",
@@ -2594,7 +2602,21 @@ function applyOrgToProforma() {
   const org = getOrgById(getSelectedOrgId());
   if (!org) return;
   const titleEl = document.getElementById("pBrandTitle");
-  if (titleEl) titleEl.textContent = org.name;
+  if (titleEl) titleEl.textContent = org.name || "";
+  const legalNameEl = document.getElementById("pBrandLegalName");
+  if (legalNameEl) legalNameEl.textContent = org.legal_name || "";
+  const taglineEl = document.getElementById("pBrandTagline");
+  if (taglineEl) {
+    taglineEl.textContent = org.tagline || "";
+    taglineEl.hidden = !org.tagline;
+  }
+  const addressEl = document.getElementById("pBrandAddress");
+  if (addressEl) addressEl.textContent = org.address || "";
+  const phoneEl = document.getElementById("pBrandPhone");
+  if (phoneEl) {
+    phoneEl.textContent = org.phone ? `Office phone: ${org.phone}` : "";
+    phoneEl.hidden = !org.phone;
+  }
   const gstinEl = document.getElementById("pBrandGstin");
   if (gstinEl) {
     gstinEl.textContent = org.gstin ? `GSTIN: ${org.gstin}` : "";
