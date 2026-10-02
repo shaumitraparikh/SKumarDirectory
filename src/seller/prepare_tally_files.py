@@ -189,14 +189,27 @@ def _amounts(order: dict) -> dict:
 
 
 def _bill_rate(amounts: dict):
-    """Combined GST rate applied to the bill (9% CGST + 9% SGST -> 18)."""
+    """Combined GST rate applied to the bill (9% CGST + 9% SGST → 18).
+
+    Tries explicit rate fields first (set by older code paths), then falls back
+    to deriving the rate from grandTotal vs subTotal when those are absent (the
+    standard output of the POS cart which only stores subTotal + grandTotal).
+    """
     try:
         cgst = float(amounts.get("cgst_rate", 0) or 0)
         sgst = float(amounts.get("sgst_rate", 0) or 0)
+        rate = round(cgst + sgst, 4)
+        if rate > 0:
+            return rate
+        # Fallback: derive from grand total − sub total
+        sub   = float(amounts.get("subTotal",    amounts.get("taxable_subtotal", 0)) or 0)
+        grand = float(amounts.get("grandTotal",  amounts.get("estimated_total",  0)) or 0)
+        if sub > 0 and grand > sub:
+            derived = round((grand - sub) / sub * 100, 4)
+            return derived if derived > 0 else None
+        return None
     except (TypeError, ValueError):
         return None
-    rate = round(cgst + sgst, 4)
-    return rate if rate > 0 else None
 
 
 def _default_rate(orders: list, which: str) -> float:
@@ -260,7 +273,7 @@ def build_daybook_rows(orders: list, org_id: str):
             skip("no_tax_rate")
             continue
 
-        date = _parse_date(order.get("created_at"))
+        date = _parse_date(order.get("created_at") or order.get("createdAt"))
         if date is None:
             skip("bad_date")
             continue

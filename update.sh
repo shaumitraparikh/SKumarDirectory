@@ -2,9 +2,37 @@
 set -e
 
 # Usage:
-#   ./update.sh           pull, rebuild, test, restart the local seller server
-#   ./update.sh --local   rebuild + test only (no git pull, no server restart)
-#                         -- used by CI and when you just changed data/templates.
+#   ./update.sh                       pull, rebuild, test, restart local server
+#   ./update.sh --local               rebuild + test only (no git pull / server)
+#   ./update.sh --export-gst YYYY-MM  export one month of bills → Tally/GST files
+#   ./update.sh --export-gst all      export every saved month → Tally/GST files
+
+# ── GST export shortcut ────────────────────────────────────────────────────────
+if [ "${1:-}" = "--export-gst" ]; then
+    MONTH="${2:-}"
+    if [ -z "$MONTH" ]; then
+        echo "Usage: ./update.sh --export-gst YYYY-MM   (or 'all' for every month)"
+        exit 1
+    fi
+    echo "======================================================="
+    echo "  S. KUMAR & BROS - GST EXPORT"
+    echo "======================================================="
+    if [ "$MONTH" = "all" ]; then
+        echo "Exporting ALL saved months → Tally DayBook → GST JSON..."
+        python3 src/seller/prepare_tally_files.py --all
+    else
+        echo "Exporting $MONTH → Tally DayBook → GST JSON..."
+        python3 src/seller/prepare_tally_files.py --month "$MONTH"
+    fi
+    echo ""
+    echo "======================================================="
+    echo "  EXPORT COMPLETE!"
+    echo "  GST files: TallyToOutputsForGST/output/"
+    echo "  Upload the .json to https://gst.gov.in (GSTR-1)"
+    echo "======================================================="
+    exit 0
+fi
+
 LOCAL_ONLY=false
 if [ "${1:-}" = "--local" ]; then
     LOCAL_ONLY=true
