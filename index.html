@@ -80,7 +80,7 @@
       disabled
     />
   </head>
-  <body data-catalog-version="5ea0bb0233">
+  <body data-catalog-version="52423e3af8">
     <section
       class="seller-tools"
       id="sellerTools"
@@ -140,6 +140,7 @@
       </form>
     </dialog>
 
+    <div class="super-sticky-wrapper" style="position: sticky; top: 0; z-index: 9999; display: flex; flex-direction: column; background: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
     <nav
       class="global-nav"
       style="
@@ -148,10 +149,8 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 9999;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 1;
         font-family: &quot;Segoe UI&quot;, system-ui, sans-serif;
       "
     >
@@ -1366,6 +1365,7 @@
         Cart <span class="cart-badge" id="cartCountBadge">0</span>
       </button>
     </div>
+    </div>
     <div
       style="
         text-align: center;
@@ -2142,8 +2142,8 @@
           <p id="pBrandGstin"></p>
         </div>
         <div class="inv-title">
-          <h2 id="pDocumentType">PROFORMA<br />INVOICE</h2>
-          <span id="pDocumentDesc">Quotation / order summary</span>
+          <h2>PROFORMA<br />INVOICE</h2>
+          <span>Quotation / order summary</span>
         </div>
       </div>
       <div class="inv-meta">
@@ -2254,7 +2254,7 @@
           // Edit mode: full seller workspace, cart hidden (use seller editor instead)
           document.getElementById("sellerTools").style.display = "block";
           var script = document.createElement("script");
-          script.src = "src/seller/seller_editor.js?v=5ea0bb0233";
+          script.src = "src/seller/seller_editor.js?v=52423e3af8";
           document.body.appendChild(script);
           var cartBtn = document.querySelector(".cart-toggle-btn");
           if (cartBtn) cartBtn.style.display = "none";
@@ -2271,7 +2271,7 @@
       })();
     </script>
 
-    <script src="app/assets/js/search_catalog.js?v=5ea0bb0233"></script>
+    <script src="app/assets/js/search_catalog.js?v=52423e3af8"></script>
     <script>
       if (
         "serviceWorker" in navigator &&
@@ -2279,7 +2279,7 @@
       ) {
         window.addEventListener("load", function () {
           navigator.serviceWorker
-            .register("app/sw.js?v=5ea0bb0233")
+            .register("app/sw.js?v=52423e3af8")
             .then(function (reg) {
               reg.onupdatefound = function () {
                 var installing = reg.installing;

@@ -140,6 +140,7 @@
       </form>
     </dialog>
 
+    <div class="super-sticky-wrapper" style="position: sticky; top: 0; z-index: 9999; display: flex; flex-direction: column; background: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
     <nav
       class="global-nav"
       style="
@@ -148,10 +149,8 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 9999;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 1;
         font-family: &quot;Segoe UI&quot;, system-ui, sans-serif;
       "
     >
@@ -352,6 +351,7 @@
       >
         Cart <span class="cart-badge" id="cartCountBadge">0</span>
       </button>
+    </div>
     </div>
     <div
       style="
@@ -1129,8 +1129,8 @@
           <p id="pBrandGstin"></p>
         </div>
         <div class="inv-title">
-          <h2 id="pDocumentType">PROFORMA<br />INVOICE</h2>
-          <span id="pDocumentDesc">Quotation / order summary</span>
+          <h2>PROFORMA<br />INVOICE</h2>
+          <span>Quotation / order summary</span>
         </div>
       </div>
       <div class="inv-meta">
