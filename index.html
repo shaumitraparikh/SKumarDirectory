@@ -80,7 +80,7 @@
       disabled
     />
   </head>
-  <body data-catalog-version="73685d26f9">
+  <body data-catalog-version="5ea0bb0233">
     <section
       class="seller-tools"
       id="sellerTools"
@@ -2131,19 +2131,19 @@
       <div class="inv-topline"></div>
       <div class="inv-header">
         <div class="inv-brand">
-          <p class="legal-name" id="pBrandLegalName">S. Kumar &amp; Bros</p>
+          <p class="legal-name">S. Kumar &amp; Bros</p>
           <h1 id="pBrandTitle">S. Kumar &amp; Bros</h1>
-          <p class="tagline" id="pBrandTagline">Manufacturers, Importers &amp; Stockist of Insulating Materials &amp; Electrical Accessories</p>
-          <p id="pBrandAddress">3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.</p>
-          <p id="pBrandPhone">
+          <p class="tagline">Manufacturers, Importers &amp; Stockist of Insulating Materials &amp; Electrical Accessories</p>
+          <p>3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.</p>
+          <p>
             Office phone: 022-49233982
           </p>
           <p class="inv-contact" id="pBrandContact"></p>
           <p id="pBrandGstin"></p>
         </div>
         <div class="inv-title">
-          <h2>PROFORMA<br />INVOICE</h2>
-          <span>Quotation / order summary</span>
+          <h2 id="pDocumentType">PROFORMA<br />INVOICE</h2>
+          <span id="pDocumentDesc">Quotation / order summary</span>
         </div>
       </div>
       <div class="inv-meta">
@@ -2254,7 +2254,7 @@
           // Edit mode: full seller workspace, cart hidden (use seller editor instead)
           document.getElementById("sellerTools").style.display = "block";
           var script = document.createElement("script");
-          script.src = "src/seller/seller_editor.js?v=73685d26f9";
+          script.src = "src/seller/seller_editor.js?v=5ea0bb0233";
           document.body.appendChild(script);
           var cartBtn = document.querySelector(".cart-toggle-btn");
           if (cartBtn) cartBtn.style.display = "none";
@@ -2271,7 +2271,7 @@
       })();
     </script>
 
-    <script src="app/assets/js/search_catalog.js?v=73685d26f9"></script>
+    <script src="app/assets/js/search_catalog.js?v=5ea0bb0233"></script>
     <script>
       if (
         "serviceWorker" in navigator &&
@@ -2279,7 +2279,7 @@
       ) {
         window.addEventListener("load", function () {
           navigator.serviceWorker
-            .register("app/sw.js?v=73685d26f9")
+            .register("app/sw.js?v=5ea0bb0233")
             .then(function (reg) {
               reg.onupdatefound = function () {
                 var installing = reg.installing;

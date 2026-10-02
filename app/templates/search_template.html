@@ -1118,19 +1118,19 @@
       <div class="inv-topline"></div>
       <div class="inv-header">
         <div class="inv-brand">
-          <p class="legal-name" id="pBrandLegalName">{{ company.legal_name }}</p>
+          <p class="legal-name">{{ company.legal_name }}</p>
           <h1 id="pBrandTitle">{{ company.name }}</h1>
-          <p class="tagline" id="pBrandTagline">{{ company.tagline }}</p>
-          <p id="pBrandAddress">{{ billing.address }}</p>
-          <p id="pBrandPhone">
+          <p class="tagline">{{ company.tagline }}</p>
+          <p>{{ billing.address }}</p>
+          <p>
             {% if billing.phone %}Office phone: {{ billing.phone }}{% endif %}
           </p>
           <p class="inv-contact" id="pBrandContact"></p>
           <p id="pBrandGstin"></p>
         </div>
         <div class="inv-title">
-          <h2>PROFORMA<br />INVOICE</h2>
-          <span>Quotation / order summary</span>
+          <h2 id="pDocumentType">PROFORMA<br />INVOICE</h2>
+          <span id="pDocumentDesc">Quotation / order summary</span>
         </div>
       </div>
       <div class="inv-meta">

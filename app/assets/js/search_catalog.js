@@ -2158,6 +2158,16 @@ function generateBill(options = {}) {
     : `${billPrefix()}-${dateCode}-${String(Math.floor(Math.random() * 1000000)).padStart(6, "0")}`;
   applyOrgToProforma();
 
+  const docTypeEl = document.getElementById("pDocumentType");
+  const docDescEl = document.getElementById("pDocumentDesc");
+  if (viewModeOrder) {
+    if (docTypeEl) docTypeEl.innerHTML = "ORDER<br />INQUIRY";
+    if (docDescEl) docDescEl.textContent = "Product inquiry list";
+  } else {
+    if (docTypeEl) docTypeEl.innerHTML = "PROFORMA<br />INVOICE";
+    if (docDescEl) docDescEl.textContent = "Quotation / order summary";
+  }
+
   const tbody = document.getElementById("pTableBody");
   tbody.replaceChildren();
 
