@@ -81,6 +81,7 @@
     />
   </head>
   <body data-catalog-version="{{ catalog_version }}">
+    <div class="super-sticky-wrapper" style="position: sticky; top: 0; z-index: 9999; display: flex; flex-direction: column; background: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
     <section
       class="seller-tools"
       id="sellerTools"
@@ -121,7 +122,6 @@
     <dialog
       class="seller-editor-dialog"
       id="sellerEditorDialog"
-      style="display: none"
       aria-labelledby="sellerEditorTitle"
     >
       <form id="sellerEditorForm">
@@ -133,7 +133,7 @@
           <button id="sellerEditorCancel" type="button" class="btn-cancel">
             Cancel
           </button>
-          <button id="sellerEditorClose" type="button" class="btn-save">
+          <button id="sellerEditorApply" type="submit" class="btn-save">
             Apply changes
           </button>
         </div>
@@ -148,10 +148,8 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 9999;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 1;
         font-family: &quot;Segoe UI&quot;, system-ui, sans-serif;
       "
     >
@@ -349,6 +347,7 @@
       >
         Cart <span class="cart-badge" id="cartCountBadge">0</span>
       </button>
+    </div>
     </div>
     <div
       style="
@@ -1245,6 +1244,10 @@
         if (window.isEditMode) {
           // Edit mode: full seller workspace, cart hidden (use seller editor instead)
           document.getElementById("sellerTools").style.display = "block";
+          var link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = "src/seller/seller_editor.css?v={{ catalog_version }}";
+          document.head.appendChild(link);
           var script = document.createElement("script");
           script.src = "src/seller/seller_editor.js?v={{ catalog_version }}";
           document.body.appendChild(script);
