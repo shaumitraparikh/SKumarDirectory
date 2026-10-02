@@ -2719,3 +2719,4 @@ async function prepareGstFiles() {
 document.getElementById("prepareGstButton")?.addEventListener("click", () => {
   prepareGstFiles().catch(() => {});
 });
+window.exportDayBook = prepareGstFiles;
