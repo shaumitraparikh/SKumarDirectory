@@ -17,8 +17,8 @@ def load_tool(name, relative_path):
     return module
 
 
-seller = load_tool("local_seller_tool", "tools/seller/local_seller.py")
-actions_budget = load_tool("actions_budget_tool", "tools/seller/actions_budget.py")
+seller = load_tool("local_seller_tool", "src/seller/local_seller.py")
+actions_budget = load_tool("actions_budget_tool", "src/seller/actions_budget.py")
 
 
 class SellerEditorTests(unittest.TestCase):
@@ -73,7 +73,7 @@ class SellerEditorTests(unittest.TestCase):
 
     def test_local_service_is_loopback_only(self):
         self.assertEqual(seller.HOST, "127.0.0.1")
-        source = (ROOT / "tools" / "seller" / "local_seller.py").read_text(encoding="utf-8")
+        source = (ROOT / "src" / "seller" / "local_seller.py").read_text(encoding="utf-8")
         self.assertIn("authorized_local_request", source)
         self.assertIn("SKUMAR_SELLER_ALLOW_NONLOOPBACK", source)
 

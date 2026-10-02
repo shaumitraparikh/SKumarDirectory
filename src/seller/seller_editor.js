@@ -37,7 +37,7 @@
                 var data;
                 try { data = JSON.parse(text); } catch(e) {}
                 if (!response.ok) {
-                    throw new Error(data && data.error ? data.error : ('Local seller API failed (' + response.status + '). Ensure start_seller.bat is running.'));
+                    throw new Error(data && data.error ? data.error : ('Local seller API failed (' + response.status + '). Ensure ./update.sh has started the local seller server.'));
                 }
                                 if (!data) throw new Error('Received an invalid response from the seller server.');
                 return data;
@@ -451,6 +451,6 @@
     }).catch(function (error) {
         document.getElementById('sellerAddButton').disabled = true;
         document.getElementById('sellerSaveButton').disabled = true;
-        status.textContent = error.message + ' Start tools/seller/start_seller.bat.';
+        status.textContent = error.message + ' Run ./update.sh to start the local server.';
     });
 }());

@@ -1,537 +1,1219 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
+  <head>
     <script>
-        var isLocal = (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost");
-        var isEditMode = isLocal && window.location.search.indexOf("edit=true") > -1;
-        if (!isLocal) {
-            document.write("<style>.cart-toggle-btn, .cart-drawer, .cart-layout, #sellerTools { display: none !important; }</style>");
-        }
+      var isLocal =
+        window.location.hostname === "127.0.0.1" ||
+        window.location.hostname === "localhost";
+      var isEditMode =
+        isLocal && window.location.search.indexOf("edit=true") > -1;
+      if (!isLocal) {
+        document.write(
+          "<style>.cart-toggle-btn, .cart-drawer, .cart-layout, #sellerTools { display: none !important; }</style>",
+        );
+      }
     </script>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Search the S. Kumar & Bros insulating materials and electrical accessories catalog and request an order.">
-<meta name="theme-color" content="#102a43">
-<title>{{ company.name }} - POS / Search Catalog</title>
-<link rel="icon" type="image/svg+xml" href="app/assets/icons/favicon.svg">
-<link rel="alternate icon" type="image/png" href="app/assets/icons/favicon.png">
-<link rel="apple-touch-icon" href="app/assets/icons/apple-touch-icon.png">
-<link rel="manifest" href="app/site.webmanifest">
-<link rel="stylesheet" href="app/assets/css/search_catalog.css">
-<link rel="stylesheet" href="src/seller/seller_editor.css" id="sellerCss" disabled>
-</head>
-<body data-catalog-version="{{ catalog_version }}">
-<section class="seller-tools" id="sellerTools" style="display: none;" aria-label="Seller catalog controls">
-    <div class="seller-tools-title">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Search the S. Kumar & Bros insulating materials and electrical accessories catalog and request an order."
+    />
+    <meta name="theme-color" content="#102a43" />
+    <title>{{ company.name }} - POS / Search Catalog</title>
+    <link rel="icon" type="image/svg+xml" href="app/assets/icons/favicon.svg" />
+    <link
+      rel="alternate icon"
+      type="image/png"
+      href="app/assets/icons/favicon.png"
+    />
+    <link rel="apple-touch-icon" href="app/assets/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="app/site.webmanifest" />
+    <link rel="stylesheet" href="app/assets/css/search_catalog.css" />
+    <link
+      rel="stylesheet"
+      href="src/seller/seller_editor.css"
+      id="sellerCss"
+      disabled
+    />
+  </head>
+  <body data-catalog-version="{{ catalog_version }}">
+    <section
+      class="seller-tools"
+      id="sellerTools"
+      style="display: none"
+      aria-label="Seller catalog controls"
+    >
+      <div class="seller-tools-title">
         <strong>Seller workspace</strong>
         <span>This editor runs only from the local seller server.</span>
-    </div>
-    <div class="seller-tools-actions">
-        <button id="sellerAddButton" type="button" disabled>➕ Add product</button>
-        <button id="sellerUndoButton" type="button" disabled title="Undo last change">↩️ Undo</button>
-        <button id="sellerSaveButton" type="button" disabled>💾 Save changes (0)</button>
-        <button id="sellerExportButton" type="button" title="Export monthly daybook to Excel" onclick="exportDayBook()">📊 Export DayBook</button>
-        <span id="sellerStatus" role="status" aria-live="polite">Connecting to local editor…</span>
-    </div>
-</section>
-<dialog class="seller-editor-dialog" id="sellerEditorDialog" style="display:none;" aria-labelledby="sellerEditorTitle">
-    <form id="sellerEditorForm">
+      </div>
+      <div class="seller-tools-actions">
+        <button id="sellerAddButton" type="button" disabled>
+          ➕ Add product
+        </button>
+        <button
+          id="sellerUndoButton"
+          type="button"
+          disabled
+          title="Undo last change"
+        >
+          ↩️ Undo
+        </button>
+        <button id="sellerSaveButton" type="button" disabled>
+          💾 Save changes (0)
+        </button>
+        <button
+          id="sellerExportButton"
+          type="button"
+          title="Export monthly daybook to Excel"
+          onclick="exportDayBook()"
+        >
+          📊 Export DayBook
+        </button>
+        <span id="sellerStatus" role="status" aria-live="polite"
+          >Connecting to local editor…</span
+        >
+      </div>
+    </section>
+    <dialog
+      class="seller-editor-dialog"
+      id="sellerEditorDialog"
+      style="display: none"
+      aria-labelledby="sellerEditorTitle"
+    >
+      <form id="sellerEditorForm">
         <div class="seller-editor-heading">
-            <h2 id="sellerEditorTitle">Edit catalog item</h2>
+          <h2 id="sellerEditorTitle">Edit catalog item</h2>
         </div>
         <div class="seller-editor-fields" id="sellerEditorFields"></div>
         <div class="seller-editor-actions">
-            <button id="sellerEditorCancel" type="button" class="btn-cancel">Cancel</button>
-            <button id="sellerEditorClose" type="button" class="btn-save">Apply changes</button>
+          <button id="sellerEditorCancel" type="button" class="btn-cancel">
+            Cancel
+          </button>
+          <button id="sellerEditorClose" type="button" class="btn-save">
+            Apply changes
+          </button>
         </div>
-    </form>
-</dialog>
+      </form>
+    </dialog>
 
+    <nav
+      class="global-nav"
+      style="
+        background: #102a43;
+        padding: 6px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        font-family: &quot;Segoe UI&quot;, system-ui, sans-serif;
+      "
+    >
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 0 auto">
+        <a
+          href="index.html"
+          style="
+            text-decoration: none;
+            padding: 6px 12px;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+            transition: background 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+          "
+          >🛒 POS & Search</a
+        >
+        <a
+          href="print_catalog.html"
+          style="
+            text-decoration: none;
+            padding: 6px 12px;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+            transition: background 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+          "
+          >📄 Price List</a
+        >
+        <a
+          href="photo_catalog.html"
+          style="
+            text-decoration: none;
+            padding: 6px 12px;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+            transition: background 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+          "
+          >🖼️ Photo Gallery</a
+        >
+        <a
+          href="Google_Review_QR.png"
+          target="_blank"
+          style="
+            text-decoration: none;
+            padding: 6px 12px;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+            transition: background 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+          "
+          >⭐ Google Review</a
+        >
+      </div>
+    </nav>
 
-<nav class="global-nav" style="background: #102a43; padding: 6px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 9999; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-family: 'Segoe UI', system-ui, sans-serif;">
-    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 0 auto;">
-        <a href="index.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🛒 POS & Search</a>
-        <a href="print_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">📄 Price List</a>
-        <a href="photo_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🖼️ Photo Gallery</a>
-        <a href="Google_Review_QR.png" target="_blank" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">⭐ Google Review</a>
-    </div>
-</nav>
+    {% include "partials/_header.html" %}
 
-{% include "partials/_header.html" %}
-
-
-<div class="sticky-bar" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-        
-    <!-- Searchable Category Selector with Search Inside -->
-    <div class="category-picker-wrap" id="categoryPickerWrap">
-        <button type="button" class="category-picker-btn" id="categoryPickerBtn" aria-haspopup="listbox" aria-expanded="false" title="Filter by category">
-            <span class="cat-icon">📂</span>
-            <span class="cat-label" id="categoryPickerLabel">All Categories</span>
-            <span class="cat-arrow">▾</span>
+    <div
+      class="sticky-bar"
+      style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center"
+    >
+      <!-- Searchable Category Selector with Search Inside -->
+      <div class="category-picker-wrap" id="categoryPickerWrap">
+        <button
+          type="button"
+          class="category-picker-btn"
+          id="categoryPickerBtn"
+          aria-haspopup="listbox"
+          aria-expanded="false"
+          title="Filter by category"
+        >
+          <span class="cat-icon">📂</span>
+          <span class="cat-label" id="categoryPickerLabel">All Categories</span>
+          <span class="cat-arrow">▾</span>
         </button>
         <div class="category-dropdown-panel" id="categoryDropdownPanel" hidden>
-            <div class="category-search-box">
-                <input type="search" id="categorySearchInput" class="category-search-input" placeholder="🔍 Search inside categories..." autocomplete="off">
-            </div>
-            <div class="category-list-scroll" id="categoryOptionsList" role="listbox">
-                <button type="button" class="category-opt-item active" data-category="" role="option" aria-selected="true">
-                    <span class="opt-name">All Categories</span>
-                    <span class="opt-count">{{ catalog_data|length }}</span>
-                </button>
-                {% for cat in sorted_categories %}
-                <button type="button" class="category-opt-item" data-category="{{ cat.name }}" role="option" aria-selected="false">
-                    <span class="opt-name">{{ cat.name }}</span>
-                    <span class="opt-count">{{ cat.products|length }}</span>
-                </button>
-                {% endfor %}
-            </div>
+          <div class="category-search-box">
+            <input
+              type="search"
+              id="categorySearchInput"
+              class="category-search-input"
+              placeholder="🔍 Search inside categories..."
+              autocomplete="off"
+            />
+          </div>
+          <div
+            class="category-list-scroll"
+            id="categoryOptionsList"
+            role="listbox"
+          >
+            <button
+              type="button"
+              class="category-opt-item active"
+              data-category=""
+              role="option"
+              aria-selected="true"
+            >
+              <span class="opt-name">All Categories</span>
+              <span class="opt-count">{{ catalog_data|length }}</span>
+            </button>
+            {% for cat in sorted_categories %}
+            <button
+              type="button"
+              class="category-opt-item"
+              data-category="{{ cat.name }}"
+              role="option"
+              aria-selected="false"
+            >
+              <span class="opt-name">{{ cat.name }}</span>
+              <span class="opt-count">{{ cat.products|length }}</span>
+            </button>
+            {% endfor %}
+          </div>
         </div>
         <!-- Standard select maintained for full compatibility with scripts -->
-    <a href="?edit=false" class="mode-toggle-btn mode-toggle-customer" id="customerViewBtn" style="display: none;">&#x1F441; Customer View</a>
-    <a href="?edit=true" class="mode-toggle-btn mode-toggle-edit" id="editModeBtn" style="display: none;">&#x270F;&#xFE0F; Edit Mode</a>
-    <script>
-        if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+        <a
+          href="?edit=false"
+          class="mode-toggle-btn mode-toggle-customer"
+          id="customerViewBtn"
+          style="display: none"
+          >&#x1F441; Customer View</a
+        >
+        <a
+          href="?edit=true"
+          class="mode-toggle-btn mode-toggle-edit"
+          id="editModeBtn"
+          style="display: none"
+          >&#x270F;&#xFE0F; Edit Mode</a
+        >
+        <script>
+          if (
+            location.hostname === "127.0.0.1" ||
+            location.hostname === "localhost"
+          ) {
             if (typeof isEditMode !== "undefined" && isEditMode) {
-                document.getElementById("customerViewBtn").style.display = "inline-flex";
+              document.getElementById("customerViewBtn").style.display =
+                "inline-flex";
             } else {
-                document.getElementById("editModeBtn").style.display = "inline-flex";
+              document.getElementById("editModeBtn").style.display =
+                "inline-flex";
             }
-        }
-    </script>
+          }
+        </script>
 
-        <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" class="search-dropdown" style="display: none;">
-            <option value="">All Categories</option>
-            {% for cat in sorted_categories %}
-            <option value="{{ cat.name }}">{{ cat.name }}</option>
-            {% endfor %}
+        <select
+          id="categoryFilter"
+          aria-label="Filter by category"
+          onchange="filterCatalog()"
+          class="search-dropdown"
+          style="display: none"
+        >
+          <option value="">All Categories</option>
+          {% for cat in sorted_categories %}
+          <option value="{{ cat.name }}">{{ cat.name }}</option>
+          {% endfor %}
         </select>
-    </div>
+      </div>
 
-    <!-- Sort by Price / Default -->
-    <select id="sortBy" aria-label="Sort products" onchange="filterCatalog()" class="search-dropdown">
+      <!-- Sort by Price / Default -->
+      <select
+        id="sortBy"
+        aria-label="Sort products"
+        onchange="filterCatalog()"
+        class="search-dropdown"
+      >
         <option value="default">Sort: Default</option>
         <option value="price-asc">Price: Low to High (₹ ↑)</option>
         <option value="price-desc">Price: High to Low (₹ ↓)</option>
         <option value="name-asc">Name: A to Z</option>
-    </select>
-    <input type="search" id="searchInput" aria-label="Search products" placeholder="Search by part, size, category, HSN..." oninput="filterCatalog()" class="search-input-main">
-    <button class="cart-toggle-btn" onclick="toggleCart()" aria-controls="cartDropdown" aria-expanded="false" style="flex: 0 0 auto;">
+      </select>
+      <input
+        type="search"
+        id="searchInput"
+        aria-label="Search products"
+        placeholder="Search by part, size, category, HSN..."
+        oninput="filterCatalog()"
+        class="search-input-main"
+      />
+      <button
+        class="cart-toggle-btn"
+        onclick="toggleCart()"
+        aria-controls="cartDropdown"
+        aria-expanded="false"
+        style="flex: 0 0 auto"
+      >
         Cart <span class="cart-badge" id="cartCountBadge">0</span>
-    </button>
-</div>
-<div style="text-align: center; margin-top: 10px; font-size: 12px; color: #627d98;" id="searchResultCount"></div>
-
-<div class="cart-backdrop" id="cartBackdrop" onclick="toggleCart(false)" aria-hidden="true"></div>
-<aside class="cart-drawer" id="cartDropdown" role="dialog" aria-modal="true" aria-labelledby="cartTitle" aria-hidden="true">
-    <div class="cart-header">
-        <div class="cart-header-title">
-            <h2 class="cart-heading" id="cartTitle">🛒 Checkout &amp; Order Request</h2>
-            <div class="cart-subtitle">Review items, enter customer details, or print a proforma bill</div>
-        </div>
-        <button class="close-cart" onclick="toggleCart(false)" aria-label="Close cart">✕</button>
+      </button>
     </div>
+    <div
+      style="
+        text-align: center;
+        margin-top: 10px;
+        font-size: 12px;
+        color: #627d98;
+      "
+      id="searchResultCount"
+    ></div>
 
-    <div class="cart-layout">
+    <div
+      class="cart-backdrop"
+      id="cartBackdrop"
+      onclick="toggleCart(false)"
+      aria-hidden="true"
+    ></div>
+    <aside
+      class="cart-drawer"
+      id="cartDropdown"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cartTitle"
+      aria-hidden="true"
+    >
+      <div class="cart-header">
+        <div class="cart-header-title">
+          <h2 class="cart-heading" id="cartTitle">
+            🛒 Checkout &amp; Order Request
+          </h2>
+          <div class="cart-subtitle">
+            Review items, enter customer details, or print a proforma bill
+          </div>
+        </div>
+        <button
+          class="close-cart"
+          onclick="toggleCart(false)"
+          aria-label="Close cart"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="cart-layout">
         <!-- Left Column: Customer details & Cart Items -->
         <div class="cart-main-col">
-            <!-- Customer Details Card -->
-            <div class="checkout-card" id="buyerDetailsCard">
-                <details class="buyer-info" id="buyerDetails" open>
-                    <summary class="buyer-summary">
-                        <div class="summary-title-wrap">
+          <!-- Customer Details Card -->
+          <div class="checkout-card" id="buyerDetailsCard">
+            <details class="buyer-info" id="buyerDetails" open>
+              <summary class="buyer-summary">
+                <div class="summary-title-wrap">
+                  <span class="summary-icon">👤</span>
+                  <div>
+                    <span class="summary-main-title"
+                      >Customer &amp; Delivery Details</span
+                    >
+                    <span class="disclosure-hint"
+                      >Choose an existing customer or enter details
+                      manually</span
+                    >
+                  </div>
+                </div>
+              </summary>
+              <div class="buyer-fields-wrap">
+                <div
+                  style="
+                    margin-bottom: 12px;
+                    padding: 10px;
+                    background: #fffbeb;
+                    border: 1px solid #fde68a;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                  "
+                >
+                  <input
+                    type="checkbox"
+                    id="isEstimateToggle"
+                    style="
+                      width: 18px;
+                      height: 18px;
+                      accent-color: #d97706;
+                      cursor: pointer;
+                    "
+                    onchange="toggleEstimateMode(this)"
+                  />
+                  <label
+                    for="isEstimateToggle"
+                    style="
+                      cursor: pointer;
+                      color: #92400e;
+                      font-size: 14px;
+                      margin: 0;
+                    "
+                    >Non-Billed (Estimate / Challan Mode)</label
+                  >
+                </div>
 
-                            <span class="summary-icon">👤</span>
-                            <div>
-                                <span class="summary-main-title">Customer &amp; Delivery Details</span>
-                                <span class="disclosure-hint">Choose an existing customer or enter details manually</span>
-                            </div>
-                        </div>
-                    </summary>
-                    <div class="buyer-fields-wrap">
-                    <div style="margin-bottom: 12px; padding: 10px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; font-weight: 600; display:flex; align-items:center; gap: 8px;">
-                        <input type="checkbox" id="isEstimateToggle" style="width: 18px; height: 18px; accent-color: #d97706; cursor:pointer;" onchange="toggleEstimateMode(this)">
-                        <label for="isEstimateToggle" style="cursor:pointer; color: #92400e; font-size:14px; margin:0;">Non-Billed (Estimate / Challan Mode)</label>
-                    </div>
+                <!-- Billing company selector: files the bill under S. Kumar (S-) or GSC (G-) -->
+                <div
+                  style="
+                    margin-bottom: 12px;
+                    padding: 10px;
+                    background: #eff6ff;
+                    border: 1px solid #bfdbfe;
+                    border-radius: 6px;
+                  "
+                >
+                  <span
+                    style="
+                      display: block;
+                      font-weight: 600;
+                      color: #1e3a8a;
+                      font-size: 13px;
+                      margin-bottom: 6px;
+                    "
+                    >Billing company / GSTIN</span
+                  >
+                  <div style="display: flex; flex-wrap: wrap; gap: 14px">
+                    <label
+                      style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        color: #0f172a;
+                      "
+                    >
+                      <input
+                        type="radio"
+                        name="billOrg"
+                        value="skumar"
+                        checked
+                        style="
+                          width: 16px;
+                          height: 16px;
+                          accent-color: #1e3a8a;
+                        "
+                      />
+                      S. Kumar &amp; Bros (S-)
+                    </label>
+                    <label
+                      style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        color: #0f172a;
+                      "
+                    >
+                      <input
+                        type="radio"
+                        name="billOrg"
+                        value="gsc"
+                        style="
+                          width: 16px;
+                          height: 16px;
+                          accent-color: #1e3a8a;
+                        "
+                      />
+                      General Supply Corp. (G-)
+                    </label>
+                  </div>
+                </div>
 
-                        <!-- Quick Customer Lookup Bar -->
-                        <div class="customer-lookup-box">
-                            <label for="customerLookup" class="lookup-label">🔍 Find existing customer (optional)</label>
-                            <div class="lookup-input-row">
-                                <input type="search" id="customerLookup" autocomplete="off" placeholder="Search by name, business, phone, or GSTIN to auto-fill...">
-                                <button type="button" class="load-clients-btn" id="saveClientButton" title="Save customer details for future auto-fill">💾 Save / Update</button>
-                                <button type="button" class="load-clients-btn clear-client-btn" id="clearCustomerButton" title="Clear customer details" onclick="clearCustomerDetails(); showToast('Customer details cleared.')">✕ Clear</button>
-                            </div>
-                            <div id="customerSearchResults" class="customer-search-dropdown" style="display: none;" role="listbox" aria-label="Customer suggestions"></div>
-                            <span class="client-directory-status" id="clientDirectoryStatus" role="status">Search by name, phone, or GSTIN to auto-fill, or enter details below.</span>
-                        </div>
+                <!-- Quick Customer Lookup Bar -->
+                <div class="customer-lookup-box">
+                  <label for="customerLookup" class="lookup-label"
+                    >🔍 Find existing customer (optional)</label
+                  >
+                  <div class="lookup-input-row">
+                    <input
+                      type="search"
+                      id="customerLookup"
+                      autocomplete="off"
+                      placeholder="Search by name, business, phone, or GSTIN to auto-fill..."
+                    />
+                    <button
+                      type="button"
+                      class="load-clients-btn"
+                      id="saveClientButton"
+                      title="Save customer details for future auto-fill"
+                    >
+                      💾 Save / Update
+                    </button>
+                    <button
+                      type="button"
+                      class="load-clients-btn clear-client-btn"
+                      id="clearCustomerButton"
+                      title="Clear customer details"
+                    >
+                      ✕ Clear
+                    </button>
+                  </div>
+                  <div
+                    id="customerSearchResults"
+                    class="customer-search-dropdown"
+                    style="display: none"
+                    role="listbox"
+                    aria-label="Customer suggestions"
+                  ></div>
+                  <span
+                    class="client-directory-status"
+                    id="clientDirectoryStatus"
+                    role="status"
+                    >Search by name, phone, or GSTIN to auto-fill, or enter
+                    details below.</span
+                  >
+                </div>
 
-                        <!-- 2-Column Form Fields -->
-                        <div style="text-align:center; margin: 10px 0;"><button type="button" id="enterManualBtn" class="mode-toggle-btn" style="background:#64748b; font-size:12px; padding:6px 12px;" onclick="document.getElementById('manualBuyerForm').style.display='grid'; this.style.display='none';">+ Enter Manually</button></div>
+                <!-- 2-Column Form Fields -->
+                <div style="text-align: center; margin: 10px 0">
+                  <button
+                    type="button"
+                    id="enterManualBtn"
+                    class="mode-toggle-btn"
+                    style="
+                      background: #64748b;
+                      font-size: 12px;
+                      padding: 6px 12px;
+                    "
+                    onclick="
+                      document.getElementById('manualBuyerForm').style.display =
+                        'grid';
+                      this.style.display = 'none';
+                    "
+                  >
+                    + Enter Manually
+                  </button>
+                </div>
 
-                        <div class="buyer-form-grid" id="manualBuyerForm" style="display:none;">
-                            <div class="form-group span-2">
-                                <label for="buyerName">Name / Business Name <span class="required-star">*</span></label>
-                                <input type="text" id="buyerName" autocomplete="name" maxlength="120" placeholder="Customer or company name" required>
-                            </div>
+                <div
+                  class="buyer-form-grid"
+                  id="manualBuyerForm"
+                  style="display: none"
+                >
+                  <div class="form-group span-2">
+                    <label for="buyerName"
+                      >Name / Business Name
+                      <span class="required-star">*</span></label
+                    >
+                    <input
+                      type="text"
+                      id="buyerName"
+                      autocomplete="name"
+                      maxlength="120"
+                      placeholder="Customer or company name"
+                      required
+                    />
+                  </div>
 
-                            <div class="form-group">
-                                <label for="buyerPhone">Indian Mobile / WhatsApp</label>
-                                <input type="tel" id="buyerPhone" autocomplete="tel-national" inputmode="tel" maxlength="20" placeholder="10-digit mobile number">
-                            </div>
+                  <div class="form-group">
+                    <label for="buyerPhone">Indian Mobile / WhatsApp</label>
+                    <input
+                      type="tel"
+                      id="buyerPhone"
+                      autocomplete="tel-national"
+                      inputmode="tel"
+                      maxlength="20"
+                      placeholder="10-digit mobile number"
+                    />
+                  </div>
 
-                            <div class="form-group">
-                                <label for="buyerEmail">Email Address (optional)</label>
-                                <input type="email" id="buyerEmail" autocomplete="email" maxlength="254" placeholder="name@example.com">
-                            </div>
+                  <div class="form-group">
+                    <label for="buyerEmail">Email Address (optional)</label>
+                    <input
+                      type="email"
+                      id="buyerEmail"
+                      autocomplete="email"
+                      maxlength="254"
+                      placeholder="name@example.com"
+                    />
+                  </div>
 
-                            <div class="form-group span-2">
-                                <label for="buyerAddress">Delivery Address</label>
-                                <textarea id="buyerAddress" autocomplete="street-address" maxlength="400" placeholder="Building, street, area, city" rows="2"></textarea>
-                            </div>
+                  <div class="form-group span-2">
+                    <label for="buyerAddress">Delivery Address</label>
+                    <textarea
+                      id="buyerAddress"
+                      autocomplete="street-address"
+                      maxlength="400"
+                      placeholder="Building, street, area, city"
+                      rows="2"
+                    ></textarea>
+                  </div>
 
-                            <div class="form-group">
-                                <label for="buyerState">State / Union Territory</label>
-                                <select id="buyerState" autocomplete="address-level1">
-                                    <option value="">Select state / UT</option>
-                                    <option>Andaman and Nicobar Islands</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
-                                    <option>Assam</option><option>Bihar</option><option>Chandigarh</option><option>Chhattisgarh</option>
-                                    <option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Goa</option>
-                                    <option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jammu and Kashmir</option>
-                                    <option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Ladakh</option>
-                                    <option>Lakshadweep</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
-                                    <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option>
-                                    <option>Puducherry</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option>
-                                    <option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option>
-                                    <option>Uttarakhand</option><option>West Bengal</option>
-                                </select>
-                            </div>
+                  <div class="form-group">
+                    <label for="buyerState">State / Union Territory</label>
+                    <select id="buyerState" autocomplete="address-level1">
+                      <option value="">Select state / UT</option>
+                      <option>Andaman and Nicobar Islands</option>
+                      <option>Andhra Pradesh</option>
+                      <option>Arunachal Pradesh</option>
+                      <option>Assam</option>
+                      <option>Bihar</option>
+                      <option>Chandigarh</option>
+                      <option>Chhattisgarh</option>
+                      <option>Dadra and Nagar Haveli and Daman and Diu</option>
+                      <option>Delhi</option>
+                      <option>Goa</option>
+                      <option>Gujarat</option>
+                      <option>Haryana</option>
+                      <option>Himachal Pradesh</option>
+                      <option>Jammu and Kashmir</option>
+                      <option>Jharkhand</option>
+                      <option>Karnataka</option>
+                      <option>Kerala</option>
+                      <option>Ladakh</option>
+                      <option>Lakshadweep</option>
+                      <option>Madhya Pradesh</option>
+                      <option>Maharashtra</option>
+                      <option>Manipur</option>
+                      <option>Meghalaya</option>
+                      <option>Mizoram</option>
+                      <option>Nagaland</option>
+                      <option>Odisha</option>
+                      <option>Puducherry</option>
+                      <option>Punjab</option>
+                      <option>Rajasthan</option>
+                      <option>Sikkim</option>
+                      <option>Tamil Nadu</option>
+                      <option>Telangana</option>
+                      <option>Tripura</option>
+                      <option>Uttar Pradesh</option>
+                      <option>Uttarakhand</option>
+                      <option>West Bengal</option>
+                    </select>
+                  </div>
 
-                            <div class="form-group">
-                                <label for="buyerPincode">PIN Code</label>
-                                <input type="text" id="buyerPincode" autocomplete="postal-code" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="6-digit PIN">
-                            </div>
+                  <div class="form-group">
+                    <label for="buyerPincode">PIN Code</label>
+                    <input
+                      type="text"
+                      id="buyerPincode"
+                      autocomplete="postal-code"
+                      inputmode="numeric"
+                      maxlength="6"
+                      pattern="[1-9][0-9]{5}"
+                      placeholder="6-digit PIN"
+                    />
+                  </div>
 
-                            <div class="form-group span-2">
-                                <label for="buyerGstin">Customer GSTIN (optional)</label>
-                                <input type="text" id="buyerGstin" maxlength="15" autocapitalize="characters" placeholder="15-character GSTIN">
-                            </div>
-                        </div>
-                    </div>
-                </details>
-            </div>
+                  <div class="form-group span-2">
+                    <label for="buyerGstin">Customer GSTIN (optional)</label>
+                    <input
+                      type="text"
+                      id="buyerGstin"
+                      maxlength="15"
+                      autocapitalize="characters"
+                      placeholder="15-character GSTIN"
+                    />
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
 
-            <!-- Items in Cart Card -->
-            <div class="checkout-card" id="cartItemsCard">
-                <details class="cart-items-section" id="orderSummaryDetails" open>
-                    <summary class="order-summary-toggle">
-                        <div class="summary-title-wrap">
-
-                            <span class="summary-icon">📦</span>
-                            <div>
-                                <span class="summary-main-title">Selected Products</span>
-                                <span class="disclosure-hint">Review items, quantities, and discounts</span>
-                            </div>
-                        </div>
-                        <span id="orderSummaryCount" class="badge-pill">0 items</span>
-                    </summary>
-                    <div class="cart-items-container">
-                        <div class="cart-product-search-wrap">
-                            <div class="cart-product-search-bar">
-                                <span class="cart-product-search-icon">🔍</span>
-                                <input type="search" id="cartProductSearch" class="cart-product-search-input" placeholder="Quick search catalog to add items..." autocomplete="off">
-                            </div>
-                            <div id="cartProductSearchResults" class="cart-product-search-dropdown" style="display: none;" role="listbox" aria-label="Catalog item suggestions"></div>
-                        </div>
-                        <div class="cart-items" id="cartItems" aria-live="polite">
-                            <div class="cart-empty">
-                                <div class="empty-icon">🛒</div>
-                                <strong>Your cart is empty</strong>
-                                <p>Add products from the catalog to begin your order request or generate an invoice.</p>
-                                <button type="button" class="browse-catalog-btn" onclick="toggleCart(false)">← Browse Catalog</button>
-                            </div>
-                        </div>
-                    </div>
-                </details>
-            </div>
+          <!-- Items in Cart Card -->
+          <div class="checkout-card" id="cartItemsCard">
+            <details class="cart-items-section" id="orderSummaryDetails" open>
+              <summary class="order-summary-toggle">
+                <div class="summary-title-wrap">
+                  <span class="summary-icon">📦</span>
+                  <div>
+                    <span class="summary-main-title">Selected Products</span>
+                    <span class="disclosure-hint"
+                      >Review items, quantities, and discounts</span
+                    >
+                  </div>
+                </div>
+                <span id="orderSummaryCount" class="badge-pill">0 items</span>
+              </summary>
+              <div class="cart-items-container">
+                <div class="cart-product-search-wrap">
+                  <div class="cart-product-search-bar">
+                    <span class="cart-product-search-icon">🔍</span>
+                    <input
+                      type="search"
+                      id="cartProductSearch"
+                      class="cart-product-search-input"
+                      placeholder="Quick search catalog to add items..."
+                      autocomplete="off"
+                    />
+                  </div>
+                  <div
+                    id="cartProductSearchResults"
+                    class="cart-product-search-dropdown"
+                    style="display: none"
+                    role="listbox"
+                    aria-label="Catalog item suggestions"
+                  ></div>
+                </div>
+                <div class="cart-items" id="cartItems" aria-live="polite">
+                  <div class="cart-empty">
+                    <div class="empty-icon">🛒</div>
+                    <strong>Your cart is empty</strong>
+                    <p>
+                      Add products from the catalog to begin your order request
+                      or generate an invoice.
+                    </p>
+                    <button
+                      type="button"
+                      class="browse-catalog-btn"
+                      onclick="toggleCart(false)"
+                    >
+                      ← Browse Catalog
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
         </div>
 
         <!-- Right Column: Order Summary & Actions -->
         <aside class="cart-summary-col cart-summary">
-            <div class="summary-sticky-wrap">
-                <div class="summary-panel-header">
-                    <h3>Order Breakdown</h3>
-                    <span class="summary-status-pill">Proforma Estimate</span>
-                </div>
-
-                <div class="summary-calc-box">
-                    <div class="calc-row subtotal-row">
-                        <span>Items Subtotal</span>
-                        <strong>₹<span id="itemsSubtotalSummary">0.00</span></strong>
-                    </div>
-
-                    <details class="price-breakdown" id="priceBreakdown">
-                        <summary class="price-breakdown-toggle">
-                            <span>Taxes &amp; Discounts</span>
-                        </summary>
-                        <div class="price-breakdown-content">
-                            <div class="summary-row summary-items-subtotal">
-                                <span>Priced items subtotal</span>
-                                <span>₹<span id="itemsSubtotal">0.00</span></span>
-                            </div>
-                            <div class="summary-row summary-discount">
-                                <span>Item discounts</span>
-                                <span>−₹<span id="discountTotal">0.00</span></span>
-                            </div>
-                            <div class="summary-row summary-subtotal">
-                                <span>Taxable subtotal</span>
-                                <span>₹<span id="subTotal">0.00</span></span>
-                            </div>
-                            <div class="tax-row summary-row">
-                                <label for="cgstRate">CGST (<input type="number" id="cgstRate" class="tax-input" value="9" min="0" max="100" step="0.01" required onchange="renderCart()">%)</label>
-                                <span>₹<span id="cgstAmount">0.00</span></span>
-                            </div>
-                            <div class="tax-row summary-row">
-                                <label for="sgstRate">SGST (<input type="number" id="sgstRate" class="tax-input" value="9" min="0" max="100" step="0.01" required onchange="renderCart()">%)</label>
-                                <span>₹<span id="sgstAmount">0.00</span></span>
-                            </div>
-                            <div class="tax-row summary-row">
-                                <span>Total Tax (<span id="totalTaxRate">18</span>%)</span>
-                                <span>₹<span id="taxAmount">0.00</span></span>
-                            </div>
-                        </div>
-                    </details>
-
-                    <div class="calc-row grand-total-row">
-                        <div>
-                            <span class="total-label">Estimated Total</span>
-                            <small class="total-gst-tag">(Incl. GST)</small>
-                        </div>
-                        <strong class="grand-total-amount">₹<span id="grandTotal">0.00</span></strong>
-                    </div>
-                </div>
-
-                <div class="estimate-disclaimers">
-                    <p class="estimate-note" id="quoteItemsNote" hidden>⚠️ Price-on-request items, stock, delivery and final GST are confirmed by sales and may change this estimate.</p>
-                    <p class="estimate-note">ℹ️ This is an order request only. No payment is collected here; prices, tax and delivery are confirmed by sales.</p>
-                </div>
-
-                <div class="checkout-actions-group">
-                    <button class="print-btn" type="button" onclick="saveBillRequest()">
-                        <span>💾 Save Proforma Bill</span>
-                    </button>
-                    <button class="print-btn" id="printBillBtn" type="button" onclick="generateBill()" style="display: none; background: #627d98; margin-top: 8px;">
-                        <span>🖨️ Print Current Bill</span>
-                    </button>
-
-                    <div class="secondary-btn-row">
-                        <button class="archive-btn" id="openBillsButton" type="button">
-                            <span>📁 Saved Bills</span>
-                        </button>
-                        <button class="order-copy-btn" id="orderCopyButton" type="button" onclick="downloadOrderCopy()" hidden>
-                            <span>📥 Order Copy</span>
-                        </button>
-                    </div>
-
-                    <button class="close-cart-bottom-btn" type="button" onclick="toggleCart(false)" title="Close cart">
-                        <span>✕ Close Cart &amp; Continue Browsing</span>
-                    </button>
-                </div>
+          <div class="summary-sticky-wrap">
+            <div class="summary-panel-header">
+              <h3>Order Breakdown</h3>
+              <span class="summary-status-pill">Proforma Estimate</span>
             </div>
-        </aside>
-    </div>
-</aside>
 
-<dialog class="bill-archive-dialog" id="billArchiveDialog" aria-labelledby="billArchiveTitle">
-    <div class="bill-archive-header">
+            <div class="summary-calc-box">
+              <div class="calc-row subtotal-row">
+                <span>Items Subtotal</span>
+                <strong>₹<span id="itemsSubtotalSummary">0.00</span></strong>
+              </div>
+
+              <details class="price-breakdown" id="priceBreakdown">
+                <summary class="price-breakdown-toggle">
+                  <span>Taxes &amp; Discounts</span>
+                </summary>
+                <div class="price-breakdown-content">
+                  <div class="summary-row summary-items-subtotal">
+                    <span>Priced items subtotal</span>
+                    <span>₹<span id="itemsSubtotal">0.00</span></span>
+                  </div>
+                  <div class="summary-row summary-discount">
+                    <span>Item discounts</span>
+                    <span>−₹<span id="discountTotal">0.00</span></span>
+                  </div>
+                  <div class="summary-row summary-subtotal">
+                    <span>Taxable subtotal</span>
+                    <span>₹<span id="subTotal">0.00</span></span>
+                  </div>
+                  <div class="tax-row summary-row">
+                    <label for="cgstRate"
+                      >CGST (<input
+                        type="number"
+                        id="cgstRate"
+                        class="tax-input"
+                        value="9"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        required
+                        onchange="renderCart()"
+                      />%)</label
+                    >
+                    <span>₹<span id="cgstAmount">0.00</span></span>
+                  </div>
+                  <div class="tax-row summary-row">
+                    <label for="sgstRate"
+                      >SGST (<input
+                        type="number"
+                        id="sgstRate"
+                        class="tax-input"
+                        value="9"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        required
+                        onchange="renderCart()"
+                      />%)</label
+                    >
+                    <span>₹<span id="sgstAmount">0.00</span></span>
+                  </div>
+                  <div class="tax-row summary-row">
+                    <span>Total Tax (<span id="totalTaxRate">18</span>%)</span>
+                    <span>₹<span id="taxAmount">0.00</span></span>
+                  </div>
+                </div>
+              </details>
+
+              <div class="calc-row grand-total-row">
+                <div>
+                  <span class="total-label">Estimated Total</span>
+                  <small class="total-gst-tag">(Incl. GST)</small>
+                </div>
+                <strong class="grand-total-amount"
+                  >₹<span id="grandTotal">0.00</span></strong
+                >
+              </div>
+            </div>
+
+            <div class="estimate-disclaimers">
+              <p class="estimate-note" id="quoteItemsNote" hidden>
+                ⚠️ Price-on-request items, stock, delivery and final GST are
+                confirmed by sales and may change this estimate.
+              </p>
+              <p class="estimate-note">
+                ℹ️ This is an order request only. No payment is collected here;
+                prices, tax and delivery are confirmed by sales.
+              </p>
+            </div>
+
+            <div class="checkout-actions-group">
+              <button
+                class="print-btn"
+                type="button"
+                onclick="saveBillRequest()"
+              >
+                <span>💾 Save Proforma Bill</span>
+              </button>
+              <button
+                class="print-btn"
+                id="printBillBtn"
+                type="button"
+                onclick="generateBill()"
+                style="display: none; background: #627d98; margin-top: 8px"
+              >
+                <span>🖨️ Print Current Bill</span>
+              </button>
+
+              <div class="secondary-btn-row">
+                <button class="archive-btn" id="clearCartButton" type="button">
+                  <span>🆕 Clear Cart &amp; New Bill</span>
+                </button>
+                <button class="archive-btn" id="openBillsButton" type="button">
+                  <span>📁 Saved Bills</span>
+                </button>
+                <button
+                  class="order-copy-btn"
+                  id="orderCopyButton"
+                  type="button"
+                  onclick="downloadOrderCopy()"
+                  hidden
+                >
+                  <span>📥 Order Copy</span>
+                </button>
+              </div>
+
+              <button
+                class="close-cart-bottom-btn"
+                type="button"
+                onclick="toggleCart(false)"
+                title="Close cart"
+              >
+                <span>✕ Close Cart &amp; Continue Browsing</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </aside>
+
+    <dialog
+      class="bill-archive-dialog"
+      id="billArchiveDialog"
+      aria-labelledby="billArchiveTitle"
+    >
+      <div class="bill-archive-header">
         <div class="bill-archive-header-text">
-            <h2 id="billArchiveTitle">📂 Saved Proforma Bills</h2>
-            <p class="bill-archive-subtitle">Organized by Year &amp; Month · Auto-saved in <code>generated_bills/</code></p>
+          <h2 id="billArchiveTitle">📂 Saved Proforma Bills</h2>
+          <p class="bill-archive-subtitle">
+            Organized by Year &amp; Month · Auto-saved in
+            <code>generated_bills/</code>
+          </p>
         </div>
-        <button class="close-cart bill-archive-close" id="closeBillArchiveButton" type="button" aria-label="Close saved bills">✕</button>
-    </div>
-    <div class="bill-archive-toolbar">
+        <button
+          class="close-cart bill-archive-close"
+          id="closeBillArchiveButton"
+          type="button"
+          aria-label="Close saved bills"
+        >
+          ✕
+        </button>
+      </div>
+      <div class="bill-archive-toolbar">
         <div class="bill-search-box">
-            <span class="bill-search-icon">🔍</span>
-            <input type="search" id="billSearchInput" class="bill-search-input" placeholder="Search bills by invoice no, customer, or YYYY-MM..." autocomplete="off">
+          <span class="bill-search-icon">🔍</span>
+          <input
+            type="search"
+            id="billSearchInput"
+            class="bill-search-input"
+            placeholder="Search bills by invoice no, customer, or YYYY-MM..."
+            autocomplete="off"
+          />
         </div>
         <div class="bill-filter-row">
-            <select id="billMonthFilter" class="bill-month-filter" aria-label="Filter by month">
-                <option value="all">📅 All Months &amp; Years</option>
-            </select>
-            <button class="folder-sync-btn" id="chooseBillsFolderButton" type="button" title="Sync with local generated_bills folder">
-                📁 Sync Local Folder
-            </button>
+          <select
+            id="billMonthFilter"
+            class="bill-month-filter"
+            aria-label="Filter by month"
+          >
+            <option value="all">📅 All Months &amp; Years</option>
+          </select>
+          <button
+            class="folder-sync-btn"
+            id="chooseBillsFolderButton"
+            type="button"
+            title="Sync with local generated_bills folder"
+          >
+            📁 Sync Local Folder
+          </button>
+          <button
+            class="folder-sync-btn"
+            id="prepareGstButton"
+            type="button"
+            title="Export this month's bills as per-company Tally DayBook/HSN files and run the GST converter"
+          >
+            🧾 Export &amp; Prepare GST
+          </button>
         </div>
         <div class="bill-archive-status-line">
-            <span id="billArchiveStatus" role="status" aria-live="polite">Loading saved bills…</span>
-            <span id="billCountBadge" class="bill-count-pill">0 bills</span>
+          <span id="billArchiveStatus" role="status" aria-live="polite"
+            >Loading saved bills…</span
+          >
+          <span id="billCountBadge" class="bill-count-pill">0 bills</span>
         </div>
-    </div>
-    <div class="bill-archive-list" id="billArchiveList" tabindex="0"></div>
-</dialog>
+        <div class="bill-archive-status-line">
+          <span id="gstPrepareStatus" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+      <div class="bill-archive-list" id="billArchiveList" tabindex="0"></div>
+    </dialog>
 
-<div class="catalog-wrapper">
-    <div class="grid" id="catalogGrid">
+    <div class="catalog-wrapper">
+      <div class="grid" id="catalogGrid">
         <!-- Cards are dynamically rendered by JavaScript based on search/catalogData -->
+      </div>
     </div>
-</div>
 
-<div id="toast">Item added to cart</div>
+    <div id="toast">Item added to cart</div>
 
-<dialog class="product-zoom-dialog" id="imageLightbox" aria-labelledby="lightboxTitle">
-    <div class="product-zoom-wrap">
+    <dialog
+      class="product-zoom-dialog"
+      id="imageLightbox"
+      aria-labelledby="lightboxTitle"
+    >
+      <div class="product-zoom-wrap">
         <div class="product-zoom-header">
-            <div class="product-zoom-tags">
-                <span id="lightboxCategory" class="product-zoom-badge category-badge"></span>
-                <span id="lightboxSrNumber" class="product-zoom-badge sr-badge"></span>
-                <span id="lightboxPage" class="product-zoom-badge" style="display:none;"></span>
-            </div>
-            <button type="button" class="product-zoom-close" onclick="document.getElementById('imageLightbox').close()" aria-label="Close">✕</button>
+          <div class="product-zoom-tags">
+            <span
+              id="lightboxCategory"
+              class="product-zoom-badge category-badge"
+            ></span>
+            <span
+              id="lightboxSrNumber"
+              class="product-zoom-badge sr-badge"
+            ></span>
+            <span
+              id="lightboxPage"
+              class="product-zoom-badge"
+              style="display: none"
+            ></span>
+          </div>
+          <button
+            type="button"
+            class="product-zoom-close"
+            onclick="document.getElementById('imageLightbox').close()"
+            aria-label="Close"
+          >
+            ✕
+          </button>
         </div>
 
         <div id="lightboxImgWrap" class="product-zoom-img-section">
-            <img id="lightboxImg" class="product-zoom-img" src="" alt="Product image">
-            <div id="lightboxRepNotice" class="representative-notice" style="display:none;">ℹ️ Representative category photo</div>
+          <img
+            id="lightboxImg"
+            class="product-zoom-img"
+            src=""
+            alt="Product image"
+          />
+          <div
+            id="lightboxRepNotice"
+            class="representative-notice"
+            style="display: none"
+          >
+            ℹ️ Representative category photo
+          </div>
         </div>
 
         <div class="product-zoom-body">
-            <div class="product-zoom-title-row">
-                <h3 id="lightboxTitle" class="product-zoom-title"></h3>
-                <div class="product-zoom-price-box">
-                    <div id="lightboxPrice" class="product-zoom-price"></div>
-                    <div id="lightboxUnit" class="product-zoom-price-unit"></div>
-                </div>
+          <div class="product-zoom-title-row">
+            <h3 id="lightboxTitle" class="product-zoom-title"></h3>
+            <div class="product-zoom-price-box">
+              <div id="lightboxPrice" class="product-zoom-price"></div>
+              <div id="lightboxUnit" class="product-zoom-price-unit"></div>
             </div>
+          </div>
 
-            <table class="product-specs-table" id="lightboxSpecsTable">
-                <tbody id="lightboxSpecsBody"></tbody>
-            </table>
+          <table class="product-specs-table" id="lightboxSpecsTable">
+            <tbody id="lightboxSpecsBody"></tbody>
+          </table>
 
-            <div class="product-zoom-actions">
-                <div class="product-zoom-qty-wrap">
-                    <button type="button" class="product-zoom-qty-btn" id="lightboxQtyMinus" aria-label="Decrease quantity">−</button>
-                    <input type="number" id="lightboxQty" class="product-zoom-qty-input" value="1" min="1" max="9999" aria-label="Quantity">
-                    <button type="button" class="product-zoom-qty-btn" id="lightboxQtyPlus" aria-label="Increase quantity">+</button>
-                </div>
-                <button type="button" id="lightboxAddBtn" class="product-zoom-add-btn">
-                    <span>🛒 Add to Cart</span>
-                </button>
+          <div class="product-zoom-actions">
+            <div class="product-zoom-qty-wrap">
+              <button
+                type="button"
+                class="product-zoom-qty-btn"
+                id="lightboxQtyMinus"
+                aria-label="Decrease quantity"
+              >
+                −
+              </button>
+              <input
+                type="number"
+                id="lightboxQty"
+                class="product-zoom-qty-input"
+                value="1"
+                min="1"
+                max="9999"
+                aria-label="Quantity"
+              />
+              <button
+                type="button"
+                class="product-zoom-qty-btn"
+                id="lightboxQtyPlus"
+                aria-label="Increase quantity"
+              >
+                +
+              </button>
             </div>
+            <button
+              type="button"
+              id="lightboxAddBtn"
+              class="product-zoom-add-btn"
+            >
+              <span>🛒 Add to Cart</span>
+            </button>
+          </div>
         </div>
-    </div>
-</dialog>
+      </div>
+    </dialog>
 
-<section id="printBill" aria-label="Proforma invoice">
-    <div class="inv-topline"></div>
-    <div class="inv-header">
+    <section id="printBill" aria-label="Proforma invoice">
+      <div class="inv-topline"></div>
+      <div class="inv-header">
         <div class="inv-brand">
-            <p class="legal-name">{{ company.legal_name }}</p>
-            <h1>{{ company.name }}</h1>
-            <p class="tagline">{{ company.tagline }}</p>
-            <p>{{ billing.address }}</p>
-            <p>{% if billing.phone %}Office phone: {{ billing.phone }}{% endif %}</p>
-{% for contact in company.sales_contacts %}
-            <p class="inv-contact">Sales contact: {{ contact.name }} · Mobile: {{ contact.mobile }} · Phone: {{ contact.phone }} · GSTIN: {{ contact.gstin }}</p>
-{% endfor %}
-{% if billing.gst and billing.gst != '[Add GST Number Here]' %}<p>GSTIN: {{ billing.gst }}</p>{% endif %}</div>
-        <div class="inv-title">
-            <h2>PROFORMA<br>INVOICE</h2>
-            <span>Quotation / order summary</span>
+          <p class="legal-name">{{ company.legal_name }}</p>
+          <h1 id="pBrandTitle">{{ company.name }}</h1>
+          <p class="tagline">{{ company.tagline }}</p>
+          <p>{{ billing.address }}</p>
+          <p>
+            {% if billing.phone %}Office phone: {{ billing.phone }}{% endif %}
+          </p>
+          <p class="inv-contact" id="pBrandContact"></p>
+          <p id="pBrandGstin"></p>
         </div>
-    </div>
-    <div class="inv-meta">
+        <div class="inv-title">
+          <h2>PROFORMA<br />INVOICE</h2>
+          <span>Quotation / order summary</span>
+        </div>
+      </div>
+      <div class="inv-meta">
         <div class="inv-card">
-            <div class="inv-card-label">Prepared for</div>
-            <div class="inv-buyer" id="pBuyerName">Cash customer</div>
-            <div class="inv-buyer-detail" id="pBuyerContact"></div>
-            <div class="inv-buyer-detail" id="pBuyerAddress"></div>
-            <div class="inv-buyer-detail" id="pBuyerGstin"></div>
+          <div class="inv-card-label">Prepared for</div>
+          <div class="inv-buyer" id="pBuyerName">Cash customer</div>
+          <div class="inv-buyer-detail" id="pBuyerContact"></div>
+          <div class="inv-buyer-detail" id="pBuyerAddress"></div>
+          <div class="inv-buyer-detail" id="pBuyerGstin"></div>
         </div>
         <div class="inv-card inv-facts">
-            <div class="inv-fact"><span>Document</span><strong>Proforma invoice</strong></div>
-            <div class="inv-fact"><span>Reference</span><strong id="pInvNo"></strong></div>
-            <div class="inv-fact"><span>Date</span><strong id="pDate"></strong></div>
+          <div class="inv-fact">
+            <span>Document</span><strong>Proforma invoice</strong>
+          </div>
+          <div class="inv-fact">
+            <span>Reference</span><strong id="pInvNo"></strong>
+          </div>
+          <div class="inv-fact">
+            <span>Date</span><strong id="pDate"></strong>
+          </div>
         </div>
-    </div>
-    <table class="inv-table" id="pTable">
+      </div>
+      <table class="inv-table" id="pTable">
         <thead>
-            <tr>
-                <th>Sr. no.</th>
-                <th>Particulars / specification</th>
-                <th>HSN Code</th>
-                <th class="num">Qty</th>
-                <th>Unit</th>
-                <th class="num">Rate (₹)</th>
-                <th class="num">Discount</th>
-                <th class="num">Amount (₹)</th>
-            </tr>
+          <tr>
+            <th>Sr. no.</th>
+            <th>Particulars / specification</th>
+            <th>HSN Code</th>
+            <th class="num">Qty</th>
+            <th>Unit</th>
+            <th class="num">Rate (₹)</th>
+            <th class="num">Discount</th>
+            <th class="num">Amount (₹)</th>
+          </tr>
         </thead>
         <tbody id="pTableBody"></tbody>
-    </table>
-    <div class="inv-summary">
+      </table>
+      <div class="inv-summary">
         <table>
-            <tr><td>Priced items subtotal</td><td class="num">₹<span id="pItemsSubtotal"></span></td></tr>
-            <tr><td>Item discounts</td><td class="num">−₹<span id="pDiscountTotal"></span></td></tr>
-            <tr><td>Taxable subtotal</td><td class="num">₹<span id="pSubTotal"></span></td></tr>
-            <tr><td>CGST (<span id="pCgstRate"></span>%)</td><td class="num">₹<span id="pCgstAmount"></span></td></tr>
-            <tr><td>SGST (<span id="pSgstRate"></span>%)</td><td class="num">₹<span id="pSgstAmount"></span></td></tr>
-            <tr><td>Total tax (<span id="pTaxRate"></span>%)</td><td class="num">₹<span id="pTaxAmount"></span></td></tr>
-            <tr class="total"><td>Estimated total</td><td class="num">₹<span id="pGrandTotal"></span></td></tr>
+          <tr>
+            <td>Priced items subtotal</td>
+            <td class="num">₹<span id="pItemsSubtotal"></span></td>
+          </tr>
+          <tr>
+            <td>Item discounts</td>
+            <td class="num">−₹<span id="pDiscountTotal"></span></td>
+          </tr>
+          <tr>
+            <td>Taxable subtotal</td>
+            <td class="num">₹<span id="pSubTotal"></span></td>
+          </tr>
+          <tr>
+            <td>CGST (<span id="pCgstRate"></span>%)</td>
+            <td class="num">₹<span id="pCgstAmount"></span></td>
+          </tr>
+          <tr>
+            <td>SGST (<span id="pSgstRate"></span>%)</td>
+            <td class="num">₹<span id="pSgstAmount"></span></td>
+          </tr>
+          <tr>
+            <td>Total tax (<span id="pTaxRate"></span>%)</td>
+            <td class="num">₹<span id="pTaxAmount"></span></td>
+          </tr>
+          <tr class="total">
+            <td>Estimated total</td>
+            <td class="num">₹<span id="pGrandTotal"></span></td>
+          </tr>
         </table>
-    </div>
-    <div class="inv-notes">
-        {% if billing.terms %}<strong>Terms:</strong> {{ billing.terms }}<br>{% endif %}
-        <span id="pQuoteNote" hidden>Price-on-request items are excluded from displayed estimates and require seller confirmation.<br></span>
-        Estimates and tax split require seller confirmation based on the applicable GST treatment and place of supply.<br>
+      </div>
+      <div class="inv-notes">
+        {% if billing.terms %}<strong>Terms:</strong> {{ billing.terms }}<br />{%
+        endif %}
+        <span id="pQuoteNote" hidden
+          >Price-on-request items are excluded from displayed estimates and
+          require seller confirmation.<br
+        /></span>
+        Estimates and tax split require seller confirmation based on the
+        applicable GST treatment and place of supply.<br />
         This is a computer-generated proforma invoice and is not a tax invoice.
-    </div>
-    <div class="inv-signoff">
+      </div>
+      <div class="inv-signoff">
         <span>We look forward to your order.</span>
-        <div class="inv-signature">For {{ company.name }}<br>Authorised signatory</div>
-    </div>
-    <div class="inv-footer">Thank you for your business.</div>
-</section>
+        <div class="inv-signature">
+          For {{ company.name }}<br />Authorised signatory
+        </div>
+      </div>
+      <div class="inv-footer">Thank you for your business.</div>
+    </section>
 
-<script src="app/assets/js/client_directory_core.js"></script>
-<script id="catalogData" type="application/json">{{ catalog_data | tojson }}</script>
-<script src="app/assets/js/commerce_core.js"></script>
-<script src="app/assets/js/bill_archive.js"></script>
-<script>window.INJECTED_CLIENT_DATA = {{ client_data | tojson }};</script>
-<script>window.INJECTED_SAVED_BILLS = {{ saved_bills | tojson }};</script>
-<script>
-    
-    if (isEditMode) {
+    <script src="app/assets/js/client_directory_core.js"></script>
+    <script id="catalogData" type="application/json">
+      {{ catalog_data | tojson }}
+    </script>
+    <script src="app/assets/js/commerce_core.js"></script>
+    <script src="app/assets/js/bill_archive.js"></script>
+    <script>
+      window.INJECTED_CLIENT_DATA = {{ client_data | tojson }};
+    </script>
+    <script>
+      window.INJECTED_SAVED_BILLS = {{ saved_bills | tojson }};
+    </script>
+    <script>
+      window.INJECTED_ORGS = {{ organizations | tojson }};
+    </script>
+    <script>
+      if (isEditMode) {
         document.getElementById("sellerTools").style.display = "block";
         var script = document.createElement("script");
         script.src = "src/seller/seller_editor.js?v={{ catalog_version }}";
         document.body.appendChild(script);
         var cartBtn = document.querySelector(".cart-toggle-btn");
         if (cartBtn) cartBtn.style.display = "none";
-    }
-</script>
+      }
+    </script>
 
-<script src="app/assets/js/search_catalog.js?v={{ catalog_version }}"></script>
-<script>
-    if ('serviceWorker' in navigator  && location.protocol.startsWith('http')) {
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('app/sw.js?v={{ catalog_version }}').then(function(reg) {
-                reg.onupdatefound = function() {
-                    var installing = reg.installing;
-                    if (installing) {
-                        installing.onstatechange = function() {
-                            if (installing.state === 'installed' && navigator.serviceWorker.controller) {
-                                console.log('S. Kumar Catalog updated to latest version.');
-                            }
-                        };
+    <script src="app/assets/js/search_catalog.js?v={{ catalog_version }}"></script>
+    <script>
+      if (
+        "serviceWorker" in navigator &&
+        location.protocol.startsWith("http")
+      ) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker
+            .register("app/sw.js?v={{ catalog_version }}")
+            .then(function (reg) {
+              reg.onupdatefound = function () {
+                var installing = reg.installing;
+                if (installing) {
+                  installing.onstatechange = function () {
+                    if (
+                      installing.state === "installed" &&
+                      navigator.serviceWorker.controller
+                    ) {
+                      console.log(
+                        "S. Kumar Catalog updated to latest version.",
+                      );
                     }
-                };
-            }).catch(function(err) {
-                console.log('SW registration note:', err);
+                  };
+                }
+              };
+            })
+            .catch(function (err) {
+              console.log("SW registration note:", err);
             });
         });
-    }
-</script>
-{% include "partials/_footer.html" %}
-</body>
+      }
+    </script>
+    {% include "partials/_footer.html" %}
+  </body>
 </html>

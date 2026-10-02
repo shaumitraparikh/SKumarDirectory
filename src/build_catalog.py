@@ -382,9 +382,14 @@ def compute_catalog_version():
         hasher.update(DATA_FILE.read_bytes())
     if CONFIG_FILE.exists():
         hasher.update(CONFIG_FILE.read_bytes())
-    js_file = SCRIPT_DIR / "app" / "assets" / "js" / "search_catalog.js"
-    if js_file.exists():
-        hasher.update(js_file.read_bytes())
+    # Hash the front-end assets too, so CSS-only edits still bust browser caches.
+    for rel_asset in (
+        ("app", "assets", "js", "search_catalog.js"),
+        ("app", "assets", "css", "search_catalog.css"),
+    ):
+        asset_file = SCRIPT_DIR.joinpath(*rel_asset)
+        if asset_file.exists():
+            hasher.update(asset_file.read_bytes())
     return hasher.hexdigest()[:10]
 
 
@@ -463,6 +468,7 @@ def build_search_catalog(config, categories, items, env):
     html = template.render(
         client_data=client_data,
         saved_bills=saved_bills,
+        organizations=config.get("organizations", []),
         company=config['company'],
         billing=config,
         categories=categories,

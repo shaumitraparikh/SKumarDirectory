@@ -1915,7 +1915,7 @@ function createOrderReference() {
   const suffix = Math.floor(Math.random() * 1000000)
     .toString()
     .padStart(6, "0");
-  return `SK-${date}-${suffix}`;
+  return `${orgPrefix()}-${date}-${suffix}`;
 }
 
 function readBuyerDetails() {
@@ -2030,6 +2030,7 @@ function archiveCurrentBill(date) {
                 createdAt: date.toISOString(),
                 buyer: readBuyerDetails(),
                 items: cart,
+                rates: getTaxRates() || { cgstRate: 9, sgstRate: 9 },
                 totals: {
                     subTotal: getSubTotal(),
                     grandTotal: getSubTotal() + Object.values(getTaxBreakdown(getSubTotal())).reduce((a, b) => a + b, 0)
@@ -2037,6 +2038,7 @@ function archiveCurrentBill(date) {
             });
             order.html = html;
             order.isEstimate = document.getElementById("isEstimateToggle")?.checked || false;
+            order.org = getSelectedOrgId();
 
             return fetch("/api/bills/add", {
                 method: "POST",
@@ -2081,6 +2083,7 @@ async function saveBillRequest() {
     createdAt: now.toISOString(),
     buyer: readBuyerDetails(),
     items: cart,
+    rates: taxRates,
     totals: {
       subTotal: getSubTotal(),
       grandTotal:
@@ -2146,7 +2149,8 @@ function generateBill(options = {}) {
     String(now.getDate()).padStart(2, "0"),
   ].join("");
   document.getElementById("pInvNo").innerText =
-    `PI-${dateCode}-${String(Math.floor(Math.random() * 1000000)).padStart(6, "0")}`;
+    `${billPrefix()}-${dateCode}-${String(Math.floor(Math.random() * 1000000)).padStart(6, "0")}`;
+  applyOrgToProforma();
 
   const tbody = document.getElementById("pTableBody");
   tbody.replaceChildren();
@@ -2502,4 +2506,150 @@ function clearCustomerDetails() {
   if (enterBtn) enterBtn.style.display = "inline-flex";
 }
 
+// ---------------------------------------------------------------------------
+// Billing organization selection (S. Kumar & Bros "S-" vs GSC "G-")
+// ---------------------------------------------------------------------------
+const DEFAULT_ORGS = [
+  {
+    id: "skumar",
+    prefix: "S",
+    name: "S. Kumar & Bros",
+    gstin: "27AAGPP1621C1Z5",
+    contact_name: "Shaumitra G. Parikh",
+    mobile: "9821361314",
+  },
+  {
+    id: "gsc",
+    prefix: "G",
+    name: "General Supply Corporation",
+    gstin: "27ACJPP2955J1Z4",
+    contact_name: "Amit G. Parikh",
+    mobile: "9869905779",
+  },
+];
+
+function allOrgs() {
+  return Array.isArray(window.INJECTED_ORGS) && window.INJECTED_ORGS.length
+    ? window.INJECTED_ORGS
+    : DEFAULT_ORGS;
 }
+
+function getSelectedOrgId() {
+  const el = document.querySelector('input[name="billOrg"]:checked');
+  return el ? el.value : allOrgs()[0].id;
+}
+
+function getOrgById(orgId) {
+  const orgs = allOrgs();
+  return orgs.find((o) => o.id === orgId) || orgs[0];
+}
+
+function orgPrefix() {
+  const org = getOrgById(getSelectedOrgId());
+  return org && org.prefix ? org.prefix : "S";
+}
+
+// Estimates are filed separately from taxable bills, so they get an EST- number
+// instead of the org's S-/G- series.
+function billPrefix() {
+  const estimateToggle = document.getElementById("isEstimateToggle");
+  return estimateToggle && estimateToggle.checked ? "EST" : orgPrefix();
+}
+
+function applyOrgToProforma() {
+  const org = getOrgById(getSelectedOrgId());
+  if (!org) return;
+  const titleEl = document.getElementById("pBrandTitle");
+  if (titleEl) titleEl.textContent = org.name;
+  const gstinEl = document.getElementById("pBrandGstin");
+  if (gstinEl) {
+    gstinEl.textContent = org.gstin ? `GSTIN: ${org.gstin}` : "";
+    gstinEl.hidden = !org.gstin;
+  }
+  const contactEl = document.getElementById("pBrandContact");
+  if (contactEl) {
+    const parts = [];
+    if (org.contact_name) parts.push(`Sales contact: ${org.contact_name}`);
+    if (org.mobile) parts.push(`Mobile: ${org.mobile}`);
+    contactEl.textContent = parts.join(" · ");
+  }
+}
+
+document.getElementById("clearCustomerButton")?.addEventListener("click", () => {
+  clearCustomerDetails();
+  showToast("Customer details cleared.");
+});
+
+document.getElementById("clearCartButton")?.addEventListener("click", () => {
+  clearCartAndNewBill();
+});
+
+document.querySelectorAll('input[name="billOrg"]').forEach((radio) => {
+  radio.addEventListener("change", () => {
+    applyOrgToProforma();
+    showToast(`Bill will be filed under ${getOrgById(getSelectedOrgId()).name}.`);
+  });
+});
+
+applyOrgToProforma();
+
+// ---------------------------------------------------------------------------
+// GST export: POS bills -> per-company Tally DayBook/HSN -> gst.gov.in JSON
+// ---------------------------------------------------------------------------
+async function prepareGstFiles() {
+  const button = document.getElementById("prepareGstButton");
+  const status = document.getElementById("gstPrepareStatus");
+  const say = (message) => {
+    if (status) status.textContent = message;
+  };
+
+  if (button) button.disabled = true;
+  say("Preparing GST files for the current month…");
+
+  let payload;
+  try {
+    const response = await fetch("/api/gst/prepare", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    payload = await response.json();
+  } catch (networkError) {
+    const message =
+      "GST preparation needs the local seller server. Start it with ./update.sh and retry.";
+    say(message);
+    showToast(message);
+    throw networkError;
+  } finally {
+    if (button) button.disabled = false;
+  }
+
+  const result = payload.result || {};
+  if (!payload.success) {
+    const detail =
+      (result.errors || []).join(" ") || payload.error || "GST preparation failed.";
+    say(detail);
+    showToast(detail);
+    throw new Error(detail);
+  }
+
+  const parts = Object.values(result.orgs || {})
+    .filter((entry) => entry.bills || entry.daybook_rows)
+    .map(
+      (entry) =>
+        `${entry.name}: ${entry.bills} bill(s), ${entry.daybook_rows} DayBook row(s), ${entry.hsn_rows} HSN row(s)`,
+    );
+  const converterNote = result.converter
+    ? ` process_data.py exit ${result.converter.returncode}.`
+    : "";
+  const message = parts.length
+    ? `GST ready for ${result.period}. ${parts.join("; ")}.${converterNote}`
+    : `No taxable bills found for ${result.period}.`;
+  say(message);
+  showToast(message);
+  return result;
+}
+
+document.getElementById("prepareGstButton")?.addEventListener("click", () => {
+  prepareGstFiles().catch(() => {});
+});

@@ -32,6 +32,26 @@
         "price_list_ref": "GSC/2025 & SK/2025",
         "date": "1ST MAY 2025"
     },
+    "organizations": [
+        {
+            "id": "skumar",
+            "prefix": "S",
+            "name": "S. Kumar & Bros",
+            "gstin": "27AAGPP1621C1Z5",
+            "contact_name": "Shaumitra G. Parikh",
+            "mobile": "9821361314",
+            "phone": "35989674"
+        },
+        {
+            "id": "gsc",
+            "prefix": "G",
+            "name": "General Supply Corporation",
+            "gstin": "27ACJPP2955J1Z4",
+            "contact_name": "Amit G. Parikh",
+            "mobile": "9869905779",
+            "phone": "35989674"
+        }
+    ],
     "terms": "Prices are Ex-Godowns. S.T./C.S.T., Packing & Forwarding Extra. Special Material Prices on Request. E. & O.E.",
     "items_per_page": 60,
     "output_dir": "output",

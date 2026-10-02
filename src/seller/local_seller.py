@@ -2,6 +2,7 @@
 """Loopback-only catalog editor and safe CSV persistence service."""
 
 import csv
+import datetime as dt
 import hashlib
 import json
 import os
@@ -22,6 +23,7 @@ MAX_HISTORY = 50
 
 sys.path.insert(0, str(ROOT))
 from src import build_catalog
+from src.seller import prepare_tally_files
 
 
 
@@ -71,54 +73,85 @@ def append_client(new_client):
 BILLS_DIR = ROOT / "data" / "bills"
 ESTIMATES_DIR = ROOT / "data" / "estimates"
 
+
+def _pick(mapping, *keys, default=""):
+    """Return the first non-empty value among `keys`.
+
+    Supports both the current CommerceCore.createOrder schema
+    (order_reference / created_at / customer / amounts) and the older
+    payload shape (id / createdAt / buyer / totals) that may still be
+    present in previously saved monthly CSVs.
+    """
+    if not isinstance(mapping, dict):
+        return default
+    for key in keys:
+        value = mapping.get(key)
+        if value not in (None, ""):
+            return value
+    return default
+
+
 def append_bill(order):
     BILLS_DIR.mkdir(parents=True, exist_ok=True)
     ESTIMATES_DIR.mkdir(parents=True, exist_ok=True)
-    created_at = order.get('createdAt', '')
+    created_at = _pick(order, 'createdAt', 'created_at')
     if not created_at:
         return None
         
-    month = created_at[:7]  # YYYY-MM
+    month = str(created_at)[:7]  # YYYY-MM
     is_estimate = order.get("isEstimate", False)
     target_dir = ESTIMATES_DIR if is_estimate else BILLS_DIR
     csv_file = target_dir / f"{month}.csv"
     
-    fieldnames = ['id', 'createdAt', 'buyer_name', 'buyer_phone', 'subTotal', 'grandTotal', 'order_json']
+    fieldnames = ['id', 'createdAt', 'org', 'buyer_name', 'buyer_phone', 'subTotal', 'grandTotal', 'order_json']
     
     file_exists = csv_file.exists()
-    
-    assigned_id = order.get('id', '')
-    if not assigned_id or len(assigned_id) > 15 or 'PI-' in assigned_id:
-        count = 0
-        if file_exists:
-            with csv_file.open(encoding="utf-8-sig", newline="") as f:
-                reader = csv.DictReader(f)
-                for existing_row in reader:
-                    count += 1
-        
-        prefix = "EST" if is_estimate else "SK"
-        assigned_id = f"{prefix}-{month.replace('-', '')}-{count + 1:04d}"
+
+    org = order.get("org", "skumar")
+    org_prefix = {"skumar": "S", "gsc": "G"}.get(org, "S")
+    prefix = "EST" if is_estimate else org_prefix
+
+    existing_rows = []
+    if file_exists:
+        with csv_file.open(encoding="utf-8-sig", newline="") as f:
+            reader = csv.DictReader(f)
+            existing_header = reader.fieldnames or []
+            existing_rows = list(reader)
+        # Migrate older monthly files that predate the org column.
+        if existing_header != fieldnames:
+            with csv_file.open(mode="w", encoding="utf-8-sig", newline="") as dest:
+                writer = csv.DictWriter(dest, fieldnames=fieldnames)
+                writer.writeheader()
+                for existing_row in existing_rows:
+                    writer.writerow({k: existing_row.get(k, '') for k in fieldnames})
+
+    assigned_id = _pick(order, 'id', 'order_reference')
+    if (not assigned_id or len(assigned_id) > 15 or 'PI-' in assigned_id
+            or not assigned_id.startswith(prefix + "-")):
+        assigned_id = f"{prefix}-{month.replace('-', '')}-{len(existing_rows) + 1:04d}"
         order['id'] = assigned_id
+
+    buyer = _pick(order, 'buyer', 'customer', default={}) or {}
+    totals = _pick(order, 'totals', default={}) or {}
+    amounts = _pick(order, 'amounts', default={}) or {}
 
     row = {
         'id': assigned_id,
         'createdAt': created_at,
-        'buyer_name': order.get('buyer', {}).get('name', ''),
-        'buyer_phone': order.get('buyer', {}).get('phone', ''),
-        'subTotal': order.get('totals', {}).get('subTotal', 0),
-        'grandTotal': order.get('totals', {}).get('grandTotal', 0),
+        'org': org,
+        'buyer_name': _pick(buyer, 'name'),
+        'buyer_phone': _pick(buyer, 'phone'),
+        'subTotal': totals.get('subTotal', amounts.get('taxable_subtotal', 0)),
+        'grandTotal': totals.get('grandTotal', amounts.get('estimated_total', 0)),
         'order_json': json.dumps(order)
     }
     
     
     # Read existing to prevent duplicates
-    if file_exists:
-        with csv_file.open(encoding="utf-8-sig", newline="") as f:
-            reader = csv.DictReader(f)
-            for existing_row in reader:
-                if existing_row.get('id') == row['id']:
-                    return row  # Already exists
-                    
+    for existing_row in existing_rows:
+        if existing_row.get('id') == row['id']:
+            return row  # Already exists
+            
     with csv_file.open(mode="a", encoding="utf-8-sig", newline="") as dest:
         writer = csv.DictWriter(dest, fieldnames=fieldnames)
         if not file_exists:
@@ -282,26 +315,23 @@ def undo_catalog(expected_revision):
 
 
 def run_updater():
-    if os.name != "nt":
-        command = [
-            sys.executable,
-            str(ROOT / "src" / "build_catalog.py"),
-        ]
-        subprocess.run(command, cwd=ROOT, check=True)
-        subprocess.run(
-            [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"],
-            cwd=ROOT,
-            check=True,
-        )
-        for test_file in ("order_core.test.js", "client_directory.test.js", "bill_archive.test.js"):
-            subprocess.run(["node", f"tests/{test_file}"], cwd=ROOT, check=True)
-        return
+    """Rebuild the pages and run the full suite after a catalog save.
+
+    Cross-platform: update.sh is the documented entry point, but the seller
+    server must not depend on a shell script that Windows cannot run.
+    """
     subprocess.run(
-        [str(ROOT / "1_Click_Update.bat")],
+        [sys.executable, str(ROOT / "src" / "build_catalog.py")],
         cwd=ROOT,
         check=True,
-        shell=True,
     )
+    subprocess.run(
+        [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"],
+        cwd=ROOT,
+        check=True,
+    )
+    for test_file in ("order_core.test.js", "client_directory.test.js", "bill_archive.test.js"):
+        subprocess.run(["node", f"tests/{test_file}"], cwd=ROOT, check=True)
 
 
 class SellerHandler(SimpleHTTPRequestHandler):
@@ -422,11 +452,27 @@ class SellerHandler(SimpleHTTPRequestHandler):
                     self.send_json(400, {"success": False, "error": "month required"})
                     return
                 try:
-                    import subprocess
-                    subprocess.run(["python", str(ROOT / "tools" / "seller" / "export_tally.py"), month], check=True)
+                    subprocess.run([sys.executable, str(ROOT / "src" / "seller" / "export_tally.py"), month], check=True)
                     self.send_json(200, {"success": True, "message": f"Exported successfully for {month}"})
                 except Exception as e:
                     self.send_json(500, {"success": False, "error": str(e)})
+                return
+
+            # POS bills -> per-org Tally DayBook/HSN -> TallyToOutputsForGST JSON.
+            if self.path == "/api/gst/prepare":
+                months = payload.get("months")
+                if not months:
+                    if payload.get("all"):
+                        months = prepare_tally_files.available_months()
+                    else:
+                        months = [payload.get("month") or dt.date.today().strftime("%Y-%m")]
+                result = prepare_tally_files.prepare(
+                    months,
+                    tally_repo=payload.get("tally_repo"),
+                    run_converter=payload.get("run", True) is not False,
+                )
+                self.send_json(200 if result.get("ok") else 500,
+                               {"success": bool(result.get("ok")), "result": result})
                 return
 
             if self.path == "/api/catalog/save":
@@ -445,7 +491,7 @@ class SellerHandler(SimpleHTTPRequestHandler):
                     "fields": fields,
                     "rows": rows,
                     "revision": revision,
-                    "message": "Catalog saved; 1_Click_Update rebuilt the pages and passed its tests. Run the publisher to publish.",
+                    "message": "Catalog saved; the rebuild and full test suite passed. Run update.sh to publish.",
                 })
                 return
             if self.path == "/api/catalog/undo":

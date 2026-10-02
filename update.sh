@@ -1,19 +1,42 @@
 #!/bin/bash
 set -e
 
+# Usage:
+#   ./update.sh           pull, rebuild, test, restart the local seller server
+#   ./update.sh --local   rebuild + test only (no git pull, no server restart)
+#                         -- used by CI and when you just changed data/templates.
+LOCAL_ONLY=false
+if [ "${1:-}" = "--local" ]; then
+    LOCAL_ONLY=true
+fi
+
 echo "======================================================="
 echo "        S. KUMAR & BROS - CATALOG UPDATER"
 echo "======================================================="
 echo ""
 
-echo "Pulling latest changes..."
-git pull origin main
+if [ "$LOCAL_ONLY" = false ]; then
+    echo "Pulling latest changes..."
+    git pull origin main
+fi
 
 echo "Rebuilding the catalogs from the current CSV, templates, and images..."
 python3 src/build_catalog.py
 
 echo "Running tests..."
-pytest tests/test_end_to_end.py
+python3 -m unittest discover -s tests
+for f in tests/*.test.js; do
+    [ -e "$f" ] || continue
+    node "$f"
+done
+
+if [ "$LOCAL_ONLY" = true ]; then
+    echo ""
+    echo "======================================================="
+    echo "  UPDATE COMPLETE (local mode): rebuilt and tested locally."
+    echo "======================================================="
+    exit 0
+fi
 
 echo "Restarting local seller server..."
 # Kill old server if running

@@ -11,8 +11,9 @@ Digital Product Directory, Interactive POS/Ordering, Photo Catalog & Print Price
 > * **Browse**: Opens with **All Categories** showing the full catalog. Narrow with the category picker or search.
 > * **Search**: Type any name, size, category, or HSN (e.g. `teflon 1mm`, `soldron 25w`, `hsn 3917`).
 > * **Add Items**: Click **Add** (for priced items) or **Add to Quote** (enter custom quote rate directly in cart).
-> * **Save / Print Bill**: Open the Cart → enter customer details → click **Save Proforma Bill** (select your `data` folder once to auto-save invoices) or **Print Current Bill**.
+> * **Save / Print Bill**: Open the Cart → pick the company (**S-** for S. Kumar & Bros or **G-** for GSC) → enter customer details → click **Save Proforma Bill** (select your `data` folder once to auto-save invoices) or **Print Current Bill**.
 > * **WhatsApp**: Click **Send WhatsApp Order** to forward the formatted itemized order directly to sales.
+> * **GST Filing**: In **Saved Bills** click **🧾 Export & Prepare GST** to split the month per company into Tally `DayBook`/`HSN` files and generate the gst.gov.in JSON.
 >
 > 🖼️ **2. Visual Photo Catalog (`photo_catalog.html`)**
 > * Click category pill filters at the top or click any product photo to open a high-res lightbox preview.
@@ -21,7 +22,7 @@ Digital Product Directory, Interactive POS/Ordering, Photo Catalog & Print Price
 > * Press **`Ctrl + P`** → Choose **Save as PDF** to export an up-to-date physical or digital price catalog.
 >
 > ✏️ **4. Update Prices or Products (Admin)**
-> * Open **`data/catalog_data.csv`** in Excel → Edit prices or add items → Save → Double-click **`update.bat`**. It validates, rebuilds, and auto-pushes to GitHub Pages!
+> * Open **`data/catalog_data.csv`** in Excel → Edit prices or add items → Save → run **`./update.sh`**. It validates, rebuilds, tests, and restarts the local POS server!
 
 ---
 
@@ -36,11 +37,11 @@ Double-click any of the standalone HTML files to open them in your browser, or v
 ### 2. Update Prices, Products, or Images (Admin)
 1. Open **`data/catalog_data.csv`** in Microsoft Excel or Google Sheets.
 2. Edit prices, adjust sizes/descriptions, or append new product rows.
-3. Save the file and double-click **`update.bat`**.
-   - Validates all serial numbers and prices.
+3. Save the file and run **`./update.sh`**.
+   - Pulls the latest changes.
    - Rebuilds all 3 catalog HTML pages.
-   - Executes the automated test suite.
-   - Automatically commits and pushes the updates to GitHub Pages!
+   - Runs the full automated test suite (Python + Node).
+   - Restarts the local seller server on port 8766.
 
 ---
 
@@ -88,7 +89,7 @@ This system is built as a **pure static web application**:
 ├── index.html                   <- Interactive search & POS catalog
 ├── photo_catalog.html           <- Visual photo catalog
 ├── print_catalog.html           <- Print-ready A4 price list
-├── update.bat                   <- 1-Click build, test, and git publish script
+├── update.sh                    <- 1-Click build, test, and git publish script
 ├── Google_Review_QR.png         <- Google Review QR code asset
 │
 ├── app/                         <- Website source files
@@ -109,11 +110,13 @@ This system is built as a **pure static web application**:
 │
 ├── images/                      <- Optimized product & category images
 ├── tests/                       <- Python and Node.js automated test suites
-└── tools/                       <- Build scripts and data utilities
+└── src/                         <- Build scripts, data utilities, and seller tools
     ├── build_catalog.py         <- Main catalog compiler
     ├── audit/                   <- Catalog data verification scripts
     ├── extract/                 <- Word DOCX table & image extraction utilities
-    └── maintenance/             <- Data migration and normalization tools
+    ├── maintenance/             <- Data migration and normalization tools
+    ├── reports/                 <- Report generation scripts
+    └── seller/                  <- Local seller server, bill archive, Tally export
 ```
 
 ---
@@ -159,4 +162,4 @@ node tests/order_core.test.js
 node tests/client_directory.test.js
 node tests/bill_archive.test.js
 ```
-*(Or simply run `update.bat`, which runs all of these automatically before pushing).*
+*(Or simply run `./update.sh`, which runs all of these automatically before publishing).*
