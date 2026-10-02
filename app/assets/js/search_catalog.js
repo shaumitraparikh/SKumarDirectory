@@ -5,7 +5,7 @@ const isLocalEnv = (location.hostname === "127.0.0.1" || location.hostname === "
 const billArchive = new CatalogBillArchive.BillArchive({
   window,
   indexedDB: window.indexedDB,
-
+});
 let cart = Object.create(null);
 let lastOrder = null;
 let clientRecords = [];
@@ -51,7 +51,7 @@ const catalogSearchIndex = rawCatalog.map((item, index) => ({
 
 billArchive.restoreDirectory().catch((error) => {
   console.error("Unable to restore the generated-bills folder.", error);
-
+});
 
 let allSavedBills = [];
 
@@ -64,7 +64,7 @@ function formatMonthLabel(monthStr) {
       month: "long",
       year: "numeric",
       timeZone: "UTC",
-    
+    });
   } catch (e) {
     return monthStr;
   }
@@ -78,7 +78,7 @@ function populateMonthFilter(entries) {
   entries.forEach((e) => {
     const m = e.month || "Other";
     counts.set(m, (counts.get(m) || 0) + 1);
-  
+  });
 
   const months = Array.from(counts.keys()).sort().reverse();
   select.replaceChildren();
@@ -93,7 +93,7 @@ function populateMonthFilter(entries) {
     opt.value = m;
     opt.textContent = `${formatMonthLabel(m)} (${counts.get(m)})`;
     select.appendChild(opt);
-  
+  });
 
   if (months.includes(currentVal)) {
     select.value = currentVal;
@@ -126,7 +126,7 @@ function applySavedBillFilters() {
       if (!haystack.includes(query)) return false;
     }
     return true;
-  
+  });
 
   const countBadge = document.getElementById("billCountBadge");
   if (countBadge) {
@@ -166,7 +166,7 @@ function renderSavedBills(entries, isFiltered = false) {
     const m = entry.month || "Other";
     if (!byMonth.has(m)) byMonth.set(m, []);
     byMonth.get(m).push(entry);
-  
+  });
 
   let isFirst = true;
   byMonth.forEach((monthEntries, month) => {
@@ -264,11 +264,11 @@ function renderSavedBills(entries, isFiltered = false) {
       btns.append(openBtn, printBtn);
       row.append(info, btns);
       monthList.appendChild(row);
-    
+    });
 
     section.appendChild(monthList);
     list.appendChild(section);
-  
+  });
 }
 
 async function refreshSavedBills() {
@@ -308,7 +308,7 @@ document.getElementById("openBillsButton")?.addEventListener("click", () => {
   if (typeof dialog.showModal === "function") dialog.showModal();
   else dialog.setAttribute("open", "");
   refreshSavedBills();
-
+});
 
 document
   .getElementById("closeBillArchiveButton")
@@ -317,15 +317,15 @@ document
     if (!dialog) return;
     if (typeof dialog.close === "function") dialog.close();
     else dialog.removeAttribute("open");
-  
+  });
 
 document.getElementById("billSearchInput")?.addEventListener("input", () => {
   applySavedBillFilters();
-
+});
 
 document.getElementById("billMonthFilter")?.addEventListener("change", () => {
   applySavedBillFilters();
-
+});
 
 document
   .getElementById("chooseBillsFolderButton")
@@ -351,14 +351,14 @@ document
           console.error("Unable to select folder.", error);
           if (status)
             status.textContent = error.message || "Could not select folder.";
-        
+        });
     } catch (error) {
       console.error("Unable to select folder.", error);
       if (status)
         status.textContent =
           error.message || "Folder selection is unavailable.";
     }
-  
+  });
 
 document
   .getElementById("billArchiveList")
@@ -374,7 +374,7 @@ document
     } else if (action === "print") {
       billArchive.openBill(entry, true);
     }
-  
+  });
 
 function extractCustomersFromSavedBills(bills) {
   if (!bills || !Array.isArray(bills)) return [];
@@ -430,8 +430,8 @@ function extractCustomersFromSavedBills(bills) {
       gstin,
       address,
       state: state || "Maharashtra",
-    
-  
+    });
+  });
   return extracted;
 }
 
@@ -482,8 +482,8 @@ function mergeCustomers(lists) {
           map.set(key, Object.assign({}, c));
         }
       }
-    
-  
+    });
+  });
   return Array.from(map.values());
 }
 
@@ -597,7 +597,7 @@ function renderCustomerSearchResults(results) {
     item.addEventListener("click", handleSelect);
 
     container.appendChild(item);
-  
+  });
 
   container.style.display = "block";
 }
@@ -690,7 +690,7 @@ if (typeof fetch === "function" && location.protocol.startsWith("http")) {
         }
       }
     })
-    .catch(() => {
+    .catch(() => {});
 }
 
 document.getElementById("saveClientButton")?.addEventListener("click", () => {
@@ -735,7 +735,7 @@ document.getElementById("saveClientButton")?.addEventListener("click", () => {
   if (statusEl) {
     statusEl.innerHTML = `<span style="color:#16a34a; font-weight:600;">✓ Customer "${newClient.name || newClient.gstin}" saved & ready to auto-fill.</span>`;
   }
-
+});
 
 const lookupInput = document.getElementById("customerLookup");
 if (lookupInput) {
@@ -743,7 +743,7 @@ if (lookupInput) {
     const val = lookupInput.value.trim();
     const matches = filterCustomersCore(clientRecords, val);
     renderCustomerSearchResults(matches);
-  
+  });
 
   lookupInput.addEventListener("input", (event) => {
     const val = event.target.value.trim();
@@ -757,7 +757,7 @@ if (lookupInput) {
     if (selectedCustomer) {
       applySelectedCustomer(selectedCustomer);
     }
-  
+  });
 
   lookupInput.addEventListener("keydown", (e) => {
     const container = document.getElementById("customerSearchResults");
@@ -772,7 +772,7 @@ if (lookupInput) {
         it.classList.toggle("active", i === activeCustomerIdx),
       );
       if (items[activeCustomerIdx])
-        items[activeCustomerIdx].scrollIntoView({ block: "nearest" 
+        items[activeCustomerIdx].scrollIntoView({ block: "nearest" });
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       activeCustomerIdx = Math.max(0, activeCustomerIdx - 1);
@@ -780,7 +780,7 @@ if (lookupInput) {
         it.classList.toggle("active", i === activeCustomerIdx),
       );
       if (items[activeCustomerIdx])
-        items[activeCustomerIdx].scrollIntoView({ block: "nearest" 
+        items[activeCustomerIdx].scrollIntoView({ block: "nearest" });
     } else if (e.key === "Enter") {
       e.preventDefault();
       const target =
@@ -793,7 +793,7 @@ if (lookupInput) {
     } else if (e.key === "Escape") {
       hideCustomerDropdown();
     }
-  
+  });
 }
 
 function hideCartProductSearchDropdown() {
@@ -866,7 +866,7 @@ function initCartProductSearch() {
         input.value = "";
         dropdown.style.display = "none";
         showToast(`Added ${item.item_name} to cart`);
-      
+      });
 
       row.appendChild(addBtn);
 
@@ -875,10 +875,10 @@ function initCartProductSearch() {
         input.value = "";
         dropdown.style.display = "none";
         showToast(`Added ${item.item_name} to cart`);
-      
+      });
 
       dropdown.appendChild(row);
-    
+    });
 
     dropdown.style.display = "block";
   }
@@ -907,12 +907,12 @@ function initCartProductSearch() {
         score = fuzzyScore(text, query);
       }
       if (score >= 0.45) {
-        matches.push({ entry, score 
+        matches.push({ entry, score });
       }
     }
     matches.sort((a, b) => b.score - a.score);
     renderProductResults(matches.slice(0, 10).map((m) => m.entry));
-  
+  });
 
   input.addEventListener("keydown", (e) => {
     if (dropdown.style.display === "none") return;
@@ -926,7 +926,7 @@ function initCartProductSearch() {
         it.classList.toggle("active", i === activeProductIdx),
       );
       if (items[activeProductIdx])
-        items[activeProductIdx].scrollIntoView({ block: "nearest" 
+        items[activeProductIdx].scrollIntoView({ block: "nearest" });
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       activeProductIdx = Math.max(0, activeProductIdx - 1);
@@ -934,7 +934,7 @@ function initCartProductSearch() {
         it.classList.toggle("active", i === activeProductIdx),
       );
       if (items[activeProductIdx])
-        items[activeProductIdx].scrollIntoView({ block: "nearest" 
+        items[activeProductIdx].scrollIntoView({ block: "nearest" });
     } else if (e.key === "Enter") {
       e.preventDefault();
       const target = activeProductIdx >= 0 ? items[activeProductIdx] : items[0];
@@ -944,7 +944,7 @@ function initCartProductSearch() {
     } else if (e.key === "Escape") {
       dropdown.style.display = "none";
     }
-  
+  });
 }
 
 document.addEventListener("click", (event) => {
@@ -954,7 +954,7 @@ document.addEventListener("click", (event) => {
   if (!event.target.closest(".cart-product-search-wrap")) {
     hideCartProductSearchDropdown();
   }
-
+});
 
 function toggleCart(forceOpen) {
   const drawer = document.getElementById("cartDropdown");
@@ -981,7 +981,7 @@ document.addEventListener("keydown", (event) => {
   ) {
     toggleCart(false);
   }
-
+});
 
 function showToast(msg) {
   const t = document.getElementById("toast");
@@ -1005,7 +1005,7 @@ function createCard(item) {
       return;
     }
     openLightbox(item.sr_number);
-  
+  });
 
   const imgContainer = document.createElement("div");
   imgContainer.className = "card-img-container";
@@ -1195,24 +1195,24 @@ function initCategoryPicker() {
     } else {
       closePanel();
     }
-  
+  });
 
   panel.addEventListener("click", (e) => {
     e.stopPropagation();
-  
+  });
 
   document.addEventListener("click", (e) => {
     if (!wrap.contains(e.target)) {
       closePanel();
     }
-  
+  });
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !panel.hidden) {
       closePanel();
       btn.focus();
     }
-  
+  });
 
   function filterCategoryOptions(query) {
     const q = normalizeSearchText(query);
@@ -1224,13 +1224,13 @@ function initCategoryPicker() {
       const fullText = normalizeSearchText(cat + " " + name);
       const isMatch = !q || fullText.includes(q);
       el.style.display = isMatch ? "flex" : "none";
-    
+    });
   }
 
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
       filterCategoryOptions(e.target.value);
-    
+    });
     searchInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         const firstVisible = Array.from(
@@ -1241,7 +1241,7 @@ function initCategoryPicker() {
           e.preventDefault();
         }
       }
-    
+    });
   }
 
   list.addEventListener("click", (e) => {
@@ -1250,7 +1250,7 @@ function initCategoryPicker() {
     const catVal = itemBtn.dataset.category || "";
     selectCategory(catVal);
     closePanel();
-  
+  });
 
   window.selectCategory = function (catVal) {
     if (nativeSelect) nativeSelect.value = catVal;
@@ -1264,7 +1264,7 @@ function initCategoryPicker() {
         const nameEl = el.querySelector(".opt-name");
         if (nameEl) selectedName = nameEl.textContent;
       }
-    
+    });
     if (label) label.textContent = selectedName;
     filterCatalog();
   };
@@ -1272,7 +1272,7 @@ function initCategoryPicker() {
   if (nativeSelect) {
     nativeSelect.addEventListener("change", () => {
       selectCategory(nativeSelect.value);
-    
+    });
   }
 }
 
@@ -1294,8 +1294,8 @@ function initCatalogCacheAndPrefs() {
           ) {
             caches.delete(name);
           }
-        
-      
+        });
+      });
     }
   }
   localStorage.setItem("skumar_catalog_version", currentVersion);
@@ -1311,7 +1311,7 @@ function initCatalogCacheAndPrefs() {
     }
     sortSelect.addEventListener("change", () => {
       localStorage.setItem("skumar_sort_pref", sortSelect.value);
-    
+    });
   }
 }
 
@@ -1360,7 +1360,7 @@ function filterCatalog() {
     } else {
       if(entry.card) entry.card.style.display = "none";
     }
-  
+  });
 
   if (sortBy === "price-asc") {
     matchingEntries.sort((a, b) => {
@@ -1369,7 +1369,7 @@ function filterCatalog() {
       if (b.numericPrice === null) return -1;
       if (a.numericPrice !== b.numericPrice) return a.numericPrice - b.numericPrice;
       return a.originalIndex - b.originalIndex;
-    
+    });
   } else if (sortBy === "price-desc") {
     matchingEntries.sort((a, b) => {
       if (a.numericPrice === null && b.numericPrice === null) return a.originalIndex - b.originalIndex;
@@ -1377,7 +1377,7 @@ function filterCatalog() {
       if (b.numericPrice === null) return -1;
       if (a.numericPrice !== b.numericPrice) return b.numericPrice - a.numericPrice;
       return a.originalIndex - b.originalIndex;
-    
+    });
   } else if (sortBy === "name-asc") {
     matchingEntries.sort((a, b) => (a.item.item_name || "").localeCompare(b.item.item_name || ""));
   } else {
@@ -1468,7 +1468,7 @@ function setupGridObserver() {
     if (entries[0].isIntersecting && renderBatchIndex < currentMatchingEntries.length) {
       renderNextBatch();
     }
-  }, { rootMargin: '200px' 
+  }, { rootMargin: '200px' });
   gridObserver.observe(sentinel);
 }
 function readProduct(sr_number, qty, discountPct) {
@@ -1603,7 +1603,7 @@ function formatAmount(amount) {
   return amount.toLocaleString("en-IN", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  
+  });
 }
 
 function formatRate(rate) {
@@ -1663,7 +1663,7 @@ function saveCart() {
       qty: cart[sku].qty,
       discountPct: cart[sku].discountPct,
     };
-  
+  });
   const rates = getTaxRates();
   if (rates) snapshot.rates = rates;
   try {
@@ -1691,7 +1691,7 @@ function restoreCart() {
     const validSkus = Object.create(null);
     rawCatalog.forEach((item) => {
       validSkus[String(item.sr_number)] = true;
-    
+    });
     const restored = CommerceCore.sanitizeCartSnapshot(
       JSON.parse(raw),
       validSkus,
@@ -1702,7 +1702,7 @@ function restoreCart() {
         restored.items[sku].qty,
         restored.items[sku].discountPct,
       );
-    
+    });
     document.getElementById("cgstRate").value = restored.rates.cgstRate;
     document.getElementById("sgstRate").value = restored.rates.sgstRate;
     if (restored.discardedItems) {
@@ -1794,7 +1794,7 @@ function renderCart() {
           }
           saveCart();
           renderCart();
-        
+        });
       } else {
         rate.textContent = `Unit price \u2022 \u20B9${formatAmount(item.price)}`;
       }
@@ -1881,7 +1881,7 @@ function renderCart() {
       }
       row.append(details, itemTotal);
       cartItemsDiv.appendChild(row);
-    
+    });
   }
 
   itemsSubtotal = roundCurrency(itemsSubtotal);
@@ -2034,7 +2034,7 @@ function archiveCurrentBill(date) {
                     subTotal: getSubTotal(),
                     grandTotal: getSubTotal() + Object.values(getTaxBreakdown(getSubTotal())).reduce((a, b) => a + b, 0)
                 }
-            
+            });
             order.html = html;
             order.isEstimate = document.getElementById("isEstimateToggle")?.checked || false;
 
@@ -2046,17 +2046,17 @@ function archiveCurrentBill(date) {
                 if (res.success) {
                     return { storage: "server", entry: { fileName: res.added.id + ".html", month: res.added.createdAt.substring(0, 7) } };
                 }
-                return billArchive.saveBill({ date, reference, html 
+                return billArchive.saveBill({ date, reference, html });
             }).catch(() => billArchive.saveBill({ date, reference, html }));
         }
 
 
   return billArchive.saveBill({ date, reference, html }).then((result) => {
     if (typeof refreshSavedBills === "function") {
-      refreshSavedBills().catch(() => {
+      refreshSavedBills().catch(() => {});
     }
     return result;
-  
+  });
 }
 
 async function saveBillRequest() {
@@ -2090,10 +2090,10 @@ async function saveBillRequest() {
           0,
         ),
     },
-  
+  });
 
   // Static Pages / offline: prepare proforma and archive with File System Access / download
-  generateBill({ printAfter: false 
+  generateBill({ printAfter: false });
 }
 
 function generateBill(options = {}) {
@@ -2138,7 +2138,7 @@ function generateBill(options = {}) {
     day: "2-digit",
     month: "short",
     year: "numeric",
-  
+  });
   document.getElementById("pDate").innerText = dateStr;
   const dateCode = [
     now.getFullYear(),
@@ -2198,9 +2198,9 @@ function generateBill(options = {}) {
       cell.textContent = value;
       if ([1, 3, 4, 5].includes(column)) cell.className = "num";
       row.appendChild(cell);
-    
+    });
     tbody.appendChild(row);
-  
+  });
 
   const totals = CommerceCore.calculateTotals(
     Object.keys(cart).map((key) => cart[key]),
@@ -2269,7 +2269,7 @@ function generateBill(options = {}) {
       })
       .finally(() => {
         if (printAfter) printBill();
-      
+      });
   } catch (error) {
     console.error(
       "The proforma invoice could not be prepared for archiving.",
@@ -2312,7 +2312,7 @@ function setupLightboxListeners() {
 
   dialog.addEventListener("click", (e) => {
     if (e.target === dialog) dialog.close();
-  
+  });
 
   document.getElementById("lightboxQtyMinus")?.addEventListener("click", () => {
     const qtyInput = document.getElementById("lightboxQty");
@@ -2320,7 +2320,7 @@ function setupLightboxListeners() {
       const val = Math.max(1, (parseInt(qtyInput.value, 10) || 1) - 1);
       qtyInput.value = val;
     }
-  
+  });
 
   document.getElementById("lightboxQtyPlus")?.addEventListener("click", () => {
     const qtyInput = document.getElementById("lightboxQty");
@@ -2328,7 +2328,7 @@ function setupLightboxListeners() {
       const val = Math.min(9999, (parseInt(qtyInput.value, 10) || 1) + 1);
       qtyInput.value = val;
     }
-  
+  });
 }
 setupLightboxListeners();
 
@@ -2422,7 +2422,7 @@ function openLightbox(srNumber) {
         tr.append(th, td);
         specsBody.appendChild(tr);
       }
-    
+    });
   }
 
   // Synchronize Quantity
@@ -2483,12 +2483,13 @@ function toggleEstimateMode(checkbox) {
         title.innerHTML = checkbox.checked ? "<strong>ESTIMATE / CHALLAN MODE</strong> - Taxes disabled" : "Review items, enter customer details, or print a proforma bill";
     }
 }
+
 function clearCustomerDetails() {
   const fields = ["buyerName", "buyerPhone", "buyerEmail", "buyerAddress", "buyerGstin"];
   fields.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = "";
-  
+  });
   const state = document.getElementById("buyerState");
   if (state) state.selectedIndex = 0;
   
