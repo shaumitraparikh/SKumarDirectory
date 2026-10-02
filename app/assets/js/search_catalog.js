@@ -1,6 +1,9 @@
 const CommerceCore = window.CatalogCommerce;
 const CART_STORAGE_KEY = "skumar-catalog-cart-v1";
 const isLocalEnv = (location.hostname === "127.0.0.1" || location.hostname === "localhost") && location.protocol !== "https:";
+// View mode (public static hosting): customers may still build a dummy cart
+// and print/share it, but nothing is ever archived or sent to the shop.
+const isViewMode = window.SK_VIEW_MODE === true || !isLocalEnv;
 
 const billArchive = new CatalogBillArchive.BillArchive({
   window,
@@ -2116,6 +2119,10 @@ function generateBill(options = {}) {
     return;
   }
 
+  // View mode: a static printout only. The reference is a dummy EST- number
+  // (never a bill series) and the proforma is never archived or sent anywhere.
+  const viewModeOrder = isViewMode;
+
   const buyer = readBuyerDetails();
   const bName = buyer.name.trim() || "Cash customer";
   document.getElementById("pBuyerName").innerText = bName;
@@ -2148,8 +2155,9 @@ function generateBill(options = {}) {
     String(now.getMonth() + 1).padStart(2, "0"),
     String(now.getDate()).padStart(2, "0"),
   ].join("");
-  document.getElementById("pInvNo").innerText =
-    `${billPrefix()}-${dateCode}-${String(Math.floor(Math.random() * 1000000)).padStart(6, "0")}`;
+  document.getElementById("pInvNo").innerText = viewModeOrder
+    ? `EST-${dateCode}-${String(Math.floor(Math.random() * 1000000)).padStart(6, "0")}`
+    : `${billPrefix()}-${dateCode}-${String(Math.floor(Math.random() * 1000000)).padStart(6, "0")}`;
   applyOrgToProforma();
 
   const tbody = document.getElementById("pTableBody");
@@ -2238,8 +2246,18 @@ function generateBill(options = {}) {
   document.getElementById("pQuoteNote").hidden = !totals.includesUnpricedItems;
 
   const printBill = () => window.print();
+  const printBtn = document.getElementById("printBillBtn");
+  if (viewModeOrder) {
+    // Static printout only: never archived, never sent to any server.
+    const note = document.getElementById("viewModeCartNote");
+    if (note) note.hidden = false;
+    if (printBtn) printBtn.style.display = "block";
+    showToast("Printout ready — share it with sales to order.");
+    if (printAfter) printBill();
+    return;
+  }
   const finishWithoutPrint = () => {
-    document.getElementById("printBillBtn").style.display = "block";
+    if (printBtn) printBtn.style.display = "block";
   };
   try {
     archiveCurrentBill(now)
@@ -2291,6 +2309,24 @@ initCategoryPicker();
 initCartProductSearch();
 restoreCart();
 renderCart();
+applyViewModeCart();
+
+// In public view mode the cart is a dummy static quote sheet: relabel the
+// drawer, swap the action buttons so only "Print / Share Order" is offered,
+// and show the view-mode disclaimer. Billing stays fully local-only.
+function applyViewModeCart() {
+  if (!isViewMode) return;
+  const title = document.getElementById("cartTitle");
+  if (title) title.textContent = "🛒 Order List (Print / Share)";
+  const subtitle = document.getElementById("cartSubtitle");
+  if (subtitle)
+    subtitle.textContent =
+      "Add items, then print or save this list as a PDF to share with sales.";
+  const quoteBtn = document.getElementById("printQuoteBtn");
+  if (quoteBtn) quoteBtn.style.marginTop = "0";
+  const note = document.getElementById("viewModeCartNote");
+  if (note) note.hidden = false;
+}
 
 // Read initial URL params
 const params = new URLSearchParams(window.location.search);

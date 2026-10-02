@@ -8,8 +8,17 @@
       var isEditMode =
         isLocal && window.location.search.indexOf("edit=true") > -1;
       if (!isLocal) {
+        // Public view mode: customers get a lightweight quote cart
+        // (add items, print/share the list as a dummy EST- estimate).
+        // Seller-only tooling stays hidden off-localhost: the Save Bill
+        // button, saved-bills archive section, GST export and workspace.
+        window.SK_VIEW_MODE = true;
         document.write(
-          "<style>.cart-toggle-btn, .cart-drawer, .cart-layout, #sellerTools { display: none !important; }</style>",
+          "<style>" +
+            "#sellerTools, .seller-tools, #saveBillBtnWrap, " +
+            "#openBillsButton, #chooseBillsFolderButton, #prepareGstButton, " +
+            "#billArchiveDialog { display: none !important; }" +
+            "</style>",
         );
       }
     </script>
@@ -341,7 +350,7 @@
           <h2 class="cart-heading" id="cartTitle">
             🛒 Checkout &amp; Order Request
           </h2>
-          <div class="cart-subtitle">
+          <div class="cart-subtitle" id="cartSubtitle">
             Review items, enter customer details, or print a proforma bill
           </div>
         </div>
@@ -821,12 +830,23 @@
             </div>
 
             <div class="checkout-actions-group">
+              <span id="saveBillBtnWrap">
+                <button
+                  class="print-btn"
+                  type="button"
+                  onclick="saveBillRequest()"
+                >
+                  <span>💾 Save Proforma Bill</span>
+                </button>
+              </span>
               <button
                 class="print-btn"
+                id="printQuoteBtn"
                 type="button"
-                onclick="saveBillRequest()"
+                onclick="generateBill()"
+                style="margin-top: 8px"
               >
-                <span>💾 Save Proforma Bill</span>
+                <span>🖨️ Print / Share Order</span>
               </button>
               <button
                 class="print-btn"
@@ -837,6 +857,16 @@
               >
                 <span>🖨️ Print Current Bill</span>
               </button>
+              <p
+                class="estimate-note"
+                id="viewModeCartNote"
+                hidden
+                style="margin-top: 8px"
+              >
+                ℹ️ View mode: this creates a static printout only (dummy
+                EST- reference). It is not saved as a bill and is not sent
+                to the shop — share the printout/PDF with sales to order.
+              </p>
 
               <div class="secondary-btn-row">
                 <button class="archive-btn" id="clearCartButton" type="button">
@@ -1172,14 +1202,27 @@
       window.INJECTED_ORGS = {{ organizations | tojson }};
     </script>
     <script>
-      if (isEditMode) {
-        document.getElementById("sellerTools").style.display = "block";
-        var script = document.createElement("script");
-        script.src = "src/seller/seller_editor.js?v={{ catalog_version }}";
-        document.body.appendChild(script);
-        var cartBtn = document.querySelector(".cart-toggle-btn");
-        if (cartBtn) cartBtn.style.display = "none";
-      }
+      (function () {
+        var label = document.getElementById("cartToggleLabel");
+        if (window.isEditMode) {
+          // Edit mode: full seller workspace, cart hidden (use seller editor instead)
+          document.getElementById("sellerTools").style.display = "block";
+          var script = document.createElement("script");
+          script.src = "src/seller/seller_editor.js?v={{ catalog_version }}";
+          document.body.appendChild(script);
+          var cartBtn = document.querySelector(".cart-toggle-btn");
+          if (cartBtn) cartBtn.style.display = "none";
+        } else if (window.isLocal) {
+          // Local non-edit mode: full billing cart
+          if (label) label.textContent = "🛒 Cart";
+        } else {
+          // Public / GitHub Pages: minimal quote cart for customers
+          if (label) label.textContent = "📋 Quote";
+          // Show a friendly note inside the cart drawer
+          var noteEl = document.getElementById("viewModeCartNote");
+          if (noteEl) noteEl.hidden = false;
+        }
+      })();
     </script>
 
     <script src="app/assets/js/search_catalog.js?v={{ catalog_version }}"></script>
