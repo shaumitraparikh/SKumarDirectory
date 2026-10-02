@@ -17,8 +17,8 @@ def load_tool(name, relative_path):
     return module
 
 
-seller = load_tool("local_seller_tool", "src/seller/local_seller.py")
-actions_budget = load_tool("actions_budget_tool", "src/seller/actions_budget.py")
+seller = load_tool("local_seller_tool", "tools/seller/local_seller.py")
+actions_budget = load_tool("actions_budget_tool", "tools/seller/actions_budget.py")
 
 
 class SellerEditorTests(unittest.TestCase):

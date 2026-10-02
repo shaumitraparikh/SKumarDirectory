@@ -451,6 +451,6 @@
     }).catch(function (error) {
         document.getElementById('sellerAddButton').disabled = true;
         document.getElementById('sellerSaveButton').disabled = true;
-        status.textContent = error.message + ' Start src/seller/start_seller.bat.';
+        status.textContent = error.message + ' Start tools/seller/start_seller.bat.';
     });
 }());

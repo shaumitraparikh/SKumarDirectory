@@ -2,14 +2,7 @@
 <html lang="en">
 <head>
     <script>
-        var isLocal = (
-            window.location.hostname === "127.0.0.1" || 
-            window.location.hostname === "localhost" || 
-            window.location.hostname === "0.0.0.0" || 
-            window.location.protocol === "file:" ||
-            window.location.hostname.startsWith("192.168.") ||
-            window.location.hostname.startsWith("10.")
-        );
+        var isLocal = (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost");
         var isEditMode = isLocal && window.location.search.indexOf("edit=true") > -1;
         if (!isLocal) {
             document.write("<style>.cart-toggle-btn, .cart-drawer, .cart-layout, #sellerTools { display: none !important; }</style>");
@@ -98,7 +91,7 @@
     <a href="?edit=false" class="mode-toggle-btn mode-toggle-customer" id="customerViewBtn" style="display: none;">&#x1F441; Customer View</a>
     <a href="?edit=true" class="mode-toggle-btn mode-toggle-edit" id="editModeBtn" style="display: none;">&#x270F;&#xFE0F; Edit Mode</a>
     <script>
-        if (isLocal) {
+        if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
             if (typeof isEditMode !== "undefined" && isEditMode) {
                 document.getElementById("customerViewBtn").style.display = "inline-flex";
             } else {
