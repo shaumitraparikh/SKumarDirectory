@@ -14,6 +14,32 @@
 <link rel="stylesheet" href="tools/seller/seller_editor.css" id="sellerCss" disabled>
 </head>
 <body data-catalog-version="288ed3343e">
+<section class="seller-tools" id="sellerTools" style="display: none;" aria-label="Seller catalog controls">
+    <div class="seller-tools-title">
+        <strong>Seller workspace</strong>
+        <span>This editor runs only from the local seller server.</span>
+    </div>
+    <div class="seller-tools-actions">
+        <button id="sellerAddButton" type="button" disabled>➕ Add product</button>
+        <button id="sellerUndoButton" type="button" disabled title="Undo last change">↩️ Undo</button>
+        <button id="sellerSaveButton" type="button" disabled>💾 Save changes (0)</button>
+        <button id="sellerExportButton" type="button" title="Export monthly daybook to Excel" onclick="exportDayBook()">📊 Export DayBook</button>
+        <span id="sellerStatus" role="status" aria-live="polite">Connecting to local editor…</span>
+    </div>
+</section>
+<dialog class="seller-editor-dialog" id="sellerEditorDialog" style="display:none;" aria-labelledby="sellerEditorTitle">
+    <form id="sellerEditorForm">
+        <div class="seller-editor-heading">
+            <h2 id="sellerEditorTitle">Edit catalog item</h2>
+        </div>
+        <div class="seller-editor-fields" id="sellerEditorFields"></div>
+        <div class="seller-editor-actions">
+            <button id="sellerEditorCancel" type="button" class="btn-cancel">Cancel</button>
+            <button id="sellerEditorClose" type="button" class="btn-save">Apply changes</button>
+        </div>
+    </form>
+</dialog>
+
 
 <nav class="global-nav" style="background: #102a43; padding: 6px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 9999; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-family: 'Segoe UI', system-ui, sans-serif;">
     <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 0 auto;">
