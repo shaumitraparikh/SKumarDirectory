@@ -110,7 +110,6 @@ class CatalogEndToEndTests(unittest.TestCase):
         self.assertIn('<details class="buyer-info"', search_html)
         self.assertIn('id="orderSummaryDetails"', search_html)
         self.assertIn('id="customerLookup"', search_html)
-        self.assertIn('id="clientCsvFile"', search_html)
         self.assertIn('app/assets/js/client_directory_core.js', search_html)
         self.assertIn('app/assets/js/bill_archive.js', search_html)
         self.assertIn('id="billArchiveDialog"', search_html)

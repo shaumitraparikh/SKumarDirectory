@@ -18,6 +18,7 @@
         <a href="index.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🛒 POS & Search</a>
         <a href="print_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">📄 Price List</a>
         <a href="photo_catalog.html" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">🖼️ Photo Gallery</a>
+        <a href="Google_Review_QR.pdf" target="_blank" style="text-decoration: none; padding: 6px 12px; color: #fff; font-weight: 600; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 13px; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.05);">⭐ Google Review</a>
     </div>
 </nav>
 
@@ -108,8 +109,6 @@
                             <label for="customerLookup" class="lookup-label">🔍 Find existing customer (optional)</label>
                             <div class="lookup-input-row">
                                 <input type="search" id="customerLookup" autocomplete="off" placeholder="Search by name, business, phone, or GSTIN to auto-fill...">
-                                <input type="file" id="clientCsvFile" accept=".csv,text/csv" hidden>
-                                <button type="button" class="load-clients-btn" id="loadClientsButton" title="Load client_data.csv or any customer CSV file" onclick="document.getElementById('clientCsvFile').click()">📁 Load CSV</button>
                                 <button type="button" class="load-clients-btn" id="saveClientButton" title="Save customer details for future auto-fill">💾 Save / Update</button>
                                 <button type="button" class="load-clients-btn clear-client-btn" id="clearCustomerButton" title="Clear customer details">✕ Clear</button>
                             </div>

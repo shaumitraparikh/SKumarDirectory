@@ -634,32 +634,6 @@ function applySelectedCustomer(customer) {
   }
 }
 
-function loadCustomerCsv(file) {
-  const status = document.getElementById("clientDirectoryStatus");
-  if (!file) return;
-  if (file.size > 5 * 1024 * 1024) {
-    status.textContent =
-      "Customer CSV is larger than 5 MB. Please choose a smaller file.";
-    return;
-  }
-  file
-    .text()
-    .then((contents) => {
-      const records = ClientDirectory.parseCsv(contents);
-      setupClientData(mergeCustomers([records, clientRecords]));
-      document.getElementById("customerLookup").value = "";
-      status.textContent = records.length
-        ? `${records.length} customer record${records.length === 1 ? "" : "s"} loaded.`
-        : "No customer records found. You can still enter customer details manually.";
-    })
-    .catch((error) => {
-      console.error("Unable to load the customer CSV.", error);
-      status.textContent =
-        error.message ||
-        "Could not read this CSV. Check its format and try again.";
-    });
-}
-
 function setupClientData(records) {
   if (!records || !Array.isArray(records)) records = [];
   clientRecords = records;
@@ -816,14 +790,6 @@ if (lookupInput) {
     }
   });
 }
-
-document
-  .getElementById("clientCsvFile")
-  ?.addEventListener("change", (event) => {
-    const file = event.target.files && event.target.files[0];
-    if (file) loadCustomerCsv(file);
-    event.target.value = "";
-  });
 
 function hideCartProductSearchDropdown() {
   const dd = document.getElementById("cartProductSearchResults");
