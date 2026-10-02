@@ -270,6 +270,16 @@
                 status.textContent = 'That product is no longer in the local draft.';
                 return;
             }
+            var oldRow = rows[index];
+            Object.keys(oldRow).forEach(function(k) {
+                if (fields.indexOf(k) === -1) {
+                    updated[k] = oldRow[k];
+                }
+            });
+            // Clear cached image if the explicit image ID changed, or if it was a category default and they changed categories
+            if (updated.image !== oldRow.image || (oldRow.image_is_representative && updated.category !== oldRow.category)) {
+                updated.display_image_path = '';
+            }
             rows[index] = updated;
         }
         editorDialog.close();
