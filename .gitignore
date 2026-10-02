@@ -13,3 +13,5 @@ images/sr_*
 *.code-workspace
 data/bills/
 data/monthly_reports/
+
+data/estimates/
