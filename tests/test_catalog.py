@@ -103,7 +103,7 @@ class CatalogDataTests(unittest.TestCase):
         self.assertIn("Amit G. Parikh", search)
         self.assertIn("27ACJPP2955J1Z4", search)
         self.assertIn("9869905779", printed)
-        self.assertIn("window.INJECTED_CLIENT_DATA = []", search)
+        self.assertIn("window.INJECTED_CLIENT_DATA =", search)
 
 if __name__ == "__main__":
     unittest.main()

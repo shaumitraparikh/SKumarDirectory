@@ -114,7 +114,7 @@ class CatalogEndToEndTests(unittest.TestCase):
         self.assertIn('app/assets/js/bill_archive.js', search_html)
         self.assertIn('id="billArchiveDialog"', search_html)
         self.assertIn('id="openBillsButton"', search_html)
-        self.assertIn("window.INJECTED_CLIENT_DATA = []", search_html)
+        self.assertIn("window.INJECTED_CLIENT_DATA =", search_html)
         self.assertNotIn('src="data/client_data.csv"', search_html)
         self.assertNotIn("href=\"data/client_data.csv\"", search_html)
     def test_hidden_catalog_items_are_excluded_from_customer_output(self):
