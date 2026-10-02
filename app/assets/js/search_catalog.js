@@ -1,6 +1,13 @@
 const CommerceCore = window.CatalogCommerce;
 const CART_STORAGE_KEY = "skumar-catalog-cart-v1";
-const isLocalEnv = (location.hostname === "127.0.0.1" || location.hostname === "localhost") && location.protocol !== "https:";
+const isLocalEnv = (
+    location.hostname === "127.0.0.1" || 
+    location.hostname === "localhost" || 
+    location.hostname === "0.0.0.0" || 
+    location.protocol === "file:" ||
+    location.hostname.startsWith("192.168.") ||
+    location.hostname.startsWith("10.")
+);
 
 const billArchive = new CatalogBillArchive.BillArchive({
   window,
