@@ -2,25 +2,58 @@
 <html lang="en">
   <head>
     <script>
-      var isLocal =
-        window.location.hostname === "127.0.0.1" ||
-        window.location.hostname === "localhost";
-      var isEditMode =
-        isLocal && window.location.search.indexOf("edit=true") > -1;
-      if (!isLocal) {
-        // Public view mode: customers get a lightweight quote cart
-        // (add items, print/share the list as a dummy EST- estimate).
-        // Seller-only tooling stays hidden off-localhost: the Save Bill
-        // button, saved-bills archive section, GST export and workspace.
-        window.SK_VIEW_MODE = true;
-        document.write(
-          "<style>" +
-            "#sellerTools, .seller-tools, #saveBillBtnWrap, " +
-            "#openBillsButton, #chooseBillsFolderButton, #prepareGstButton, " +
-            "#billArchiveDialog { display: none !important; }" +
-            "</style>",
-        );
-      }
+      // Local = running from the seller's machine (any of these patterns):
+      //   - file:// protocol (opened directly from disk)
+      //   - localhost / 127.0.0.1 (dev server)
+      //   - LAN IPs: 192.168.x.x, 10.x.x.x, 172.16-31.x.x
+      (function () {
+        var h = window.location.hostname;
+        var isLan =
+          /^192\.168\./.test(h) ||
+          /^10\./.test(h) ||
+          /^172\.(1[6-9]|2\d|3[01])\./.test(h);
+        var isLocal =
+          window.location.protocol === "file:" ||
+          h === "127.0.0.1" ||
+          h === "localhost" ||
+          isLan;
+        var isEditMode =
+          isLocal && window.location.search.indexOf("edit=true") > -1;
+
+        window.isLocal    = isLocal;
+        window.isEditMode = isEditMode;
+
+        // Also expose as legacy var for inline scripts
+        var s = window;
+        s.isLocal    = isLocal;
+        s.isEditMode = isEditMode;
+
+        if (!isLocal) {
+          // ── Public / GitHub Pages: customer-only minimal cart ──────────────
+          // Customers can add items and print a quote list.
+          // ALL seller tooling, customer details form, billing and GST
+          // sections stay hidden unless running locally.
+          window.SK_VIEW_MODE = true;
+          document.write(
+            "<style>" +
+              /* Seller-only panels */
+              "#sellerTools, .seller-tools," +
+              "#saveBillBtnWrap, #openBillsButton," +
+              "#chooseBillsFolderButton, #prepareGstButton," +
+              "#billArchiveDialog," +
+              /* Customer details card (full checkout form) */
+              "#buyerDetailsCard," +
+              /* Tax rate inputs row */
+              ".tax-settings-card," +
+              /* Saved bills archive */
+              "#savedBillsSection" +
+              " { display: none !important; }" +
+              /* Simplify cart header for public */
+              ".cart-subtitle { display: none !important; }" +
+              "</style>"
+          );
+        }
+      })();
     </script>
 
     <meta charset="UTF-8" />
