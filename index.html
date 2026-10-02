@@ -50,6 +50,8 @@
               " { display: none !important; }" +
               /* Simplify cart header for public */
               ".cart-subtitle { display: none !important; }" +
+              /* Show simple public name field */
+              "#publicNameBox { display: block !important; }" +
               "</style>"
           );
         }
@@ -80,7 +82,7 @@
       disabled
     />
   </head>
-  <body data-catalog-version="52423e3af8">
+  <body data-catalog-version="5ea0bb0233">
     <section
       class="seller-tools"
       id="sellerTools"
@@ -140,7 +142,6 @@
       </form>
     </dialog>
 
-    <div class="super-sticky-wrapper" style="position: sticky; top: 0; z-index: 9999; display: flex; flex-direction: column; background: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
     <nav
       class="global-nav"
       style="
@@ -149,8 +150,10 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        position: relative;
-        z-index: 1;
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         font-family: &quot;Segoe UI&quot;, system-ui, sans-serif;
       "
     >
@@ -1365,7 +1368,6 @@
         Cart <span class="cart-badge" id="cartCountBadge">0</span>
       </button>
     </div>
-    </div>
     <div
       style="
         text-align: center;
@@ -1411,7 +1413,14 @@
       <div class="cart-layout">
         <!-- Left Column: Customer details & Cart Items -->
         <div class="cart-main-col">
-          <!-- Customer Details Card -->
+          <!-- Public Simple Name Field -->
+          <div class="checkout-card" id="publicNameBox" style="display: none; padding: 15px; margin-bottom: 15px;">
+            <label style="display:block; font-weight: 600; color: #1e3a8a; margin-bottom: 8px;">Your Name / Company (Optional)</label>
+            <input type="text" id="viewBuyerName" placeholder="Enter name to appear on your order inquiry printout..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 14px;">
+            <p style="margin: 8px 0 0 0; font-size: 12px; color: #64748b;">This will just be added to your printout for your own reference.</p>
+          </div>
+
+          <!-- Customer Details Card (Seller only) -->
           <div class="checkout-card" id="buyerDetailsCard">
             <details class="buyer-info" id="buyerDetails" open>
               <summary class="buyer-summary">
@@ -2254,7 +2263,7 @@
           // Edit mode: full seller workspace, cart hidden (use seller editor instead)
           document.getElementById("sellerTools").style.display = "block";
           var script = document.createElement("script");
-          script.src = "src/seller/seller_editor.js?v=52423e3af8";
+          script.src = "src/seller/seller_editor.js?v=5ea0bb0233";
           document.body.appendChild(script);
           var cartBtn = document.querySelector(".cart-toggle-btn");
           if (cartBtn) cartBtn.style.display = "none";
@@ -2271,7 +2280,7 @@
       })();
     </script>
 
-    <script src="app/assets/js/search_catalog.js?v=52423e3af8"></script>
+    <script src="app/assets/js/search_catalog.js?v=5ea0bb0233"></script>
     <script>
       if (
         "serviceWorker" in navigator &&
@@ -2279,7 +2288,7 @@
       ) {
         window.addEventListener("load", function () {
           navigator.serviceWorker
-            .register("app/sw.js?v=52423e3af8")
+            .register("app/sw.js?v=5ea0bb0233")
             .then(function (reg) {
               reg.onupdatefound = function () {
                 var installing = reg.installing;
