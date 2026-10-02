@@ -2720,3 +2720,27 @@ document.getElementById("prepareGstButton")?.addEventListener("click", () => {
   prepareGstFiles().catch(() => {});
 });
 window.exportDayBook = prepareGstFiles;
+
+function shareOrderMobile() {
+  if (Object.keys(cart).length === 0) return alert('Your cart is empty.');
+  let text = "Hello! I would like to inquire about the following items:\n\n";
+  const viewName = document.getElementById("viewBuyerName")?.value.trim();
+  if (viewName) {
+    text += `Name: ${viewName}\n\n`;
+  }
+  for (let id in cart) {
+    let item = cart[id];
+    text += `- ${item.name} (Qty: ${item.qty})\n`;
+  }
+  text += "\nPlease let me know the availability and pricing.";
+  
+  if (navigator.share) {
+    navigator.share({
+      title: 'Order Inquiry',
+      text: text
+    }).catch(console.error);
+  } else {
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  }
+}
+window.shareOrderMobile = shareOrderMobile;

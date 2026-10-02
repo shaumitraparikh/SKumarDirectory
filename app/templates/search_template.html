@@ -133,7 +133,7 @@
           <button id="sellerEditorCancel" type="button" class="btn-cancel">
             Cancel
           </button>
-          <button id="sellerEditorApply" type="submit" class="btn-save">
+          <button id="sellerEditorClose" type="button" class="btn-save">
             Apply changes
           </button>
         </div>
@@ -872,12 +872,21 @@
               </span>
               <button
                 class="print-btn"
+                id="shareWhatsAppBtn"
+                type="button"
+                onclick="shareOrderMobile()"
+                style="margin-top: 8px; background: #25d366; border-color: #128c7e; color: #fff;"
+              >
+                <span>💬 Send via WhatsApp</span>
+              </button>
+              <button
+                class="print-btn"
                 id="printQuoteBtn"
                 type="button"
                 onclick="generateBill()"
                 style="margin-top: 8px"
               >
-                <span>🖨️ Print / Share Order</span>
+                <span>🖨️ Print to PDF</span>
               </button>
               <button
                 class="print-btn"
@@ -894,9 +903,7 @@
                 hidden
                 style="margin-top: 8px"
               >
-                ℹ️ View mode: this creates a static printout only (dummy
-                EST- reference). It is not saved as a bill and is not sent
-                to the shop — share the printout/PDF with sales to order.
+                ℹ️ <strong>View mode:</strong> This creates a temporary inquiry list. It is not an official bill and is not sent to the shop automatically. Click "Send via WhatsApp" to share your list with sales instantly!
               </p>
 
               <div class="secondary-btn-row">
