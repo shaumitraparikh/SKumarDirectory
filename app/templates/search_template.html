@@ -394,6 +394,11 @@
       <div class="cart-layout">
         <!-- Left Column: Customer details & Cart Items -->
         <div class="cart-main-col">
+          <!-- Simplified public name field for order inquiry mode -->
+          <div class="checkout-card" id="publicNameBox" style="display: none; padding: 15px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc;">
+            <label for="viewBuyerName" style="display: block; font-weight: 600; color: #1e293b; font-size: 13px; margin-bottom: 6px;">Your Name / Company (Optional)</label>
+            <input type="text" id="viewBuyerName" placeholder="Enter name to appear on order list..." style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px;" />
+          </div>
           <!-- Customer Details Card -->
           <div class="checkout-card" id="buyerDetailsCard">
             <details class="buyer-info" id="buyerDetails" open>
@@ -1262,6 +1267,8 @@
           // Show a friendly note inside the cart drawer
           var noteEl = document.getElementById("viewModeCartNote");
           if (noteEl) noteEl.hidden = false;
+          var pubBox = document.getElementById("publicNameBox");
+          if (pubBox) pubBox.style.display = "block";
         }
       })();
     </script>

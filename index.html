@@ -80,7 +80,7 @@
       disabled
     />
   </head>
-  <body data-catalog-version="b91a647068">
+  <body data-catalog-version="d4e8338d6e">
     <div class="super-sticky-wrapper" style="position: sticky; top: 0; z-index: 9999; display: flex; flex-direction: column; background: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
     <section
       class="seller-tools"
@@ -1407,6 +1407,11 @@
       <div class="cart-layout">
         <!-- Left Column: Customer details & Cart Items -->
         <div class="cart-main-col">
+          <!-- Simplified public name field for order inquiry mode -->
+          <div class="checkout-card" id="publicNameBox" style="display: none; padding: 15px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc;">
+            <label for="viewBuyerName" style="display: block; font-weight: 600; color: #1e293b; font-size: 13px; margin-bottom: 6px;">Your Name / Company (Optional)</label>
+            <input type="text" id="viewBuyerName" placeholder="Enter name to appear on order list..." style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px;" />
+          </div>
           <!-- Customer Details Card -->
           <div class="checkout-card" id="buyerDetailsCard">
             <details class="buyer-info" id="buyerDetails" open>
@@ -2258,10 +2263,10 @@
           document.getElementById("sellerTools").style.display = "block";
           var link = document.createElement("link");
           link.rel = "stylesheet";
-          link.href = "src/seller/seller_editor.css?v=b91a647068";
+          link.href = "src/seller/seller_editor.css?v=d4e8338d6e";
           document.head.appendChild(link);
           var script = document.createElement("script");
-          script.src = "src/seller/seller_editor.js?v=b91a647068";
+          script.src = "src/seller/seller_editor.js?v=d4e8338d6e";
           document.body.appendChild(script);
           var cartBtn = document.querySelector(".cart-toggle-btn");
           if (cartBtn) cartBtn.style.display = "none";
@@ -2274,11 +2279,13 @@
           // Show a friendly note inside the cart drawer
           var noteEl = document.getElementById("viewModeCartNote");
           if (noteEl) noteEl.hidden = false;
+          var pubBox = document.getElementById("publicNameBox");
+          if (pubBox) pubBox.style.display = "block";
         }
       })();
     </script>
 
-    <script src="app/assets/js/search_catalog.js?v=b91a647068"></script>
+    <script src="app/assets/js/search_catalog.js?v=d4e8338d6e"></script>
     <script>
       if (
         "serviceWorker" in navigator &&
@@ -2286,7 +2293,7 @@
       ) {
         window.addEventListener("load", function () {
           navigator.serviceWorker
-            .register("app/sw.js?v=b91a647068")
+            .register("app/sw.js?v=d4e8338d6e")
             .then(function (reg) {
               reg.onupdatefound = function () {
                 var installing = reg.installing;
