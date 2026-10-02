@@ -2356,3 +2356,27 @@ details[open] > .order-summary-toggle::after {
     color: #475569;
     font-weight: 600;
 }
+
+/* Compact Buyer Form */
+.buyer-form-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+}
+.form-group label {
+    font-size: 11px;
+    margin-bottom: 2px;
+}
+.form-group input, .form-group textarea {
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 4px;
+}
+.customer-lookup-box {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e2e8f0;
+}
+.lookup-label {
+    font-size: 13px;
+    font-weight: 600;
+}

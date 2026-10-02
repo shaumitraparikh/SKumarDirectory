@@ -69,15 +69,19 @@ def append_client(new_client):
 
 
 BILLS_DIR = ROOT / "data" / "bills"
+ESTIMATES_DIR = ROOT / "data" / "estimates"
 
 def append_bill(order):
     BILLS_DIR.mkdir(parents=True, exist_ok=True)
+    ESTIMATES_DIR.mkdir(parents=True, exist_ok=True)
     created_at = order.get('createdAt', '')
     if not created_at:
         return None
         
     month = created_at[:7]  # YYYY-MM
-    csv_file = BILLS_DIR / f"{month}.csv"
+    is_estimate = order.get("isEstimate", False)
+    target_dir = ESTIMATES_DIR if is_estimate else BILLS_DIR
+    csv_file = target_dir / f"{month}.csv"
     
     fieldnames = ['id', 'createdAt', 'buyer_name', 'buyer_phone', 'subTotal', 'grandTotal', 'order_json']
     
@@ -92,7 +96,8 @@ def append_bill(order):
                 for existing_row in reader:
                     count += 1
         
-        assigned_id = f"SK-{month.replace('-', '')}-{count + 1:04d}"
+        prefix = "EST" if is_estimate else "SK"
+        assigned_id = f"{prefix}-{month.replace('-', '')}-{count + 1:04d}"
         order['id'] = assigned_id
 
     row = {
@@ -131,6 +136,7 @@ def append_bill(order):
 
 def read_bills():
     BILLS_DIR.mkdir(parents=True, exist_ok=True)
+    ESTIMATES_DIR.mkdir(parents=True, exist_ok=True)
     bills = []
     import re as regex
     for csv_file in BILLS_DIR.glob("*.csv"):

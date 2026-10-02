@@ -609,6 +609,10 @@ function hideCustomerDropdown() {
 }
 
 function applySelectedCustomer(customer) {
+  document.getElementById("manualBuyerForm").style.display = "grid";
+  const manualBtn = document.getElementById("enterManualBtn"); if(manualBtn) manualBtn.style.display = "none";
+
+
   if (!customer) return;
   document.getElementById("buyerName").value =
     customer.business_name || customer.name || "";
@@ -1607,6 +1611,9 @@ function formatRate(rate) {
 }
 
 function getTaxRates() {
+  const isEstimate = document.getElementById("isEstimateToggle")?.checked;
+  if (isEstimate) return { cgstRate: 0, sgstRate: 0 };
+
   const cgstInput = document.getElementById("cgstRate");
   const sgstInput = document.getElementById("sgstRate");
   if (!cgstInput.checkValidity() || !sgstInput.checkValidity()) return null;
@@ -2022,6 +2029,8 @@ function archiveCurrentBill(date) {
                 }
             });
             order.html = html;
+            order.isEstimate = document.getElementById("isEstimateToggle")?.checked || false;
+
             return fetch("/api/bills/add", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -2457,4 +2466,13 @@ function clearCartAndNewBill() {
   }
   
   showToast("Cart cleared. Ready for a new bill.");
+}
+function toggleEstimateMode(checkbox) {
+    renderCart();
+    
+    // Also update UI to indicate it's an estimate
+    const title = document.querySelector(".cart-subtitle");
+    if(title) {
+        title.innerHTML = checkbox.checked ? "<strong>ESTIMATE / CHALLAN MODE</strong> - Taxes disabled" : "Review items, enter customer details, or print a proforma bill";
+    }
 }
