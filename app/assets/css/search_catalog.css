@@ -628,6 +628,10 @@ details[open] > .order-summary-toggle::after {
 }
 .cart-items {
   padding: 8px 20px 20px;
+  max-height: min(58vh, 540px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Quick "search catalog to add items" bar inside the cart */
@@ -1981,8 +1985,7 @@ details[open] > .order-summary-toggle::after {
   }
   #printBill {
     display: block !important;
-    position: absolute;
-    inset: 0;
+    position: relative;
     width: 100%;
     font-family: Arial, Helvetica, sans-serif;
     color: #172b4d;
@@ -2113,6 +2116,7 @@ details[open] > .order-summary-toggle::after {
     border-bottom: 1px solid #d9e2ec;
     padding: 7px 5px;
     font-size: 8pt;
+    word-break: break-word;
   }
   .inv-table th {
     background: #173b57 !important;

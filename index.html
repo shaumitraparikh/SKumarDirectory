@@ -86,7 +86,7 @@
       disabled
     />
   </head>
-  <body data-catalog-version="50dd3ebb7d">
+  <body data-catalog-version="93a62ab847">
     <section
       class="seller-tools"
       id="sellerTools"
@@ -2258,12 +2258,13 @@
       (function () {
         var label = document.getElementById("cartToggleLabel");
         if (window.isEditMode) {
-          // Edit mode: full seller workspace and billing cart active
+          // Edit mode: full seller workspace, cart hidden (use seller editor instead)
           document.getElementById("sellerTools").style.display = "block";
           var script = document.createElement("script");
-          script.src = "src/seller/seller_editor.js?v=50dd3ebb7d";
+          script.src = "src/seller/seller_editor.js?v=93a62ab847";
           document.body.appendChild(script);
-          if (label) label.textContent = "🛒 Cart";
+          var cartBtn = document.querySelector(".cart-toggle-btn");
+          if (cartBtn) cartBtn.style.display = "none";
         } else if (window.isLocal) {
           // Local non-edit mode: full billing cart
           if (label) label.textContent = "🛒 Cart";
@@ -2277,7 +2278,7 @@
       })();
     </script>
 
-    <script src="app/assets/js/search_catalog.js?v=50dd3ebb7d"></script>
+    <script src="app/assets/js/search_catalog.js?v=93a62ab847"></script>
     <script>
       if (
         "serviceWorker" in navigator &&
@@ -2285,7 +2286,7 @@
       ) {
         window.addEventListener("load", function () {
           navigator.serviceWorker
-            .register("app/sw.js?v=50dd3ebb7d")
+            .register("app/sw.js?v=93a62ab847")
             .then(function (reg) {
               reg.onupdatefound = function () {
                 var installing = reg.installing;
