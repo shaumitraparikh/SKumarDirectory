@@ -8,7 +8,8 @@
 <title>S. Kumar &amp; Bros - POS / Search Catalog</title>
 <link rel="icon" type="image/svg+xml" href="app/assets/icons/favicon.svg">
 <link rel="alternate icon" type="image/png" href="app/assets/icons/favicon.png">
-<link rel="apple-touch-icon" href="app/assets/icons/favicon.png">
+<link rel="apple-touch-icon" href="app/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="app/site.webmanifest">
 <link rel="stylesheet" href="app/assets/css/search_catalog.css">
 </head>
 <body data-catalog-version="2a30ea9fd7">
@@ -888,8 +889,8 @@
                         <button class="archive-btn" id="openBillsButton" type="button">
                             <span>📁 Saved Bills</span>
                         </button>
-                        <button class="archive-btn clear-cart-btn" id="clearCartBtn" type="button" onclick="clearCartAndNewBill()" style="background: #e11d48; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                            <span>🗑️ Clear Cart & New Bill</span>
+                        <button class="order-copy-btn" id="orderCopyButton" type="button" onclick="downloadOrderCopy()" hidden>
+                            <span>📥 Order Copy</span>
                         </button>
                     </div>
 
