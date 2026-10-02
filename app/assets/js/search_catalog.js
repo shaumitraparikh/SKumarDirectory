@@ -2151,13 +2151,9 @@ function generateBill(options = {}) {
     if (titleSpan) titleSpan.innerText = 'Items requested';
     if (factStrong) factStrong.innerText = 'Order Inquiry';
     
-    // Hide seller business details
-    const hideIds = [
-      'pBrandLegalName', 'pBrandTagline', 'pBrandAddress', 
-      'pBrandPhone', 'pBrandContact', 'pBrandGstin',
-      'pBuyerContact', 'pBuyerAddress', 'pBuyerGstin'
-    ];
-    hideIds.forEach(id => {
+    // Only hide the buyer's missing info if it's empty, keep the seller header visible!
+    const hideBuyerIds = ['pBuyerContact', 'pBuyerAddress', 'pBuyerGstin'];
+    hideBuyerIds.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
     });
@@ -2175,11 +2171,7 @@ function generateBill(options = {}) {
     if (titleSpan) titleSpan.innerText = 'Quotation / order summary';
     if (factStrong) factStrong.innerText = 'Proforma invoice';
     
-    const showIds = [
-      'pBrandLegalName', 'pBrandTagline', 'pBrandAddress', 
-      'pBrandPhone', 'pBrandContact', 'pBrandGstin',
-      'pBuyerContact', 'pBuyerAddress', 'pBuyerGstin'
-    ];
+    const showIds = ['pBuyerContact', 'pBuyerAddress', 'pBuyerGstin'];
     showIds.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.display = '';
