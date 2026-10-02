@@ -1820,19 +1820,21 @@ function renderCart() {
       if (meta.textContent) details.append(meta);
       details.append(rate, controls);
       if (item.price !== null) {
-        const discountDetails = document.createElement("details");
-        discountDetails.className = "cart-item-discount";
-        discountDetails.open = item.discountOpen;
-        discountDetails.addEventListener("toggle", () => {
-          item.discountOpen = discountDetails.open;
-        });
-        const discountSummary = document.createElement("summary");
-        discountSummary.textContent =
-          item.discountPct > 0
-            ? `Item discount · ${item.discountPct}%`
-            : "Add item discount";
         const discountControls = document.createElement("div");
         discountControls.className = "discount-controls";
+        discountControls.style.display = "flex";
+        discountControls.style.alignItems = "center";
+        discountControls.style.gap = "8px";
+        discountControls.style.marginTop = "12px";
+        discountControls.style.paddingTop = "12px";
+        discountControls.style.borderTop = "1px solid #e2e8f0";
+        
+        const discountLabel = document.createElement("label");
+        discountLabel.textContent = "Discount %:";
+        discountLabel.style.fontWeight = "bold";
+        discountLabel.style.fontSize = "16px";
+        discountLabel.style.color = "#b45309";
+        
         const discountInput = document.createElement("input");
         discountInput.className = "discount-input";
         discountInput.type = "number";
@@ -1840,18 +1842,23 @@ function renderCart() {
         discountInput.max = "100";
         discountInput.step = "0.01";
         discountInput.value = item.discountPct;
-        discountInput.setAttribute(
-          "aria-label",
-          `Discount percentage for ${item.name}`,
-        );
-        discountInput.addEventListener("change", () =>
-          updateItemDiscount(k, discountInput.value),
-        );
+        discountInput.style.fontSize = "18px";
+        discountInput.style.padding = "6px 8px";
+        discountInput.style.width = "80px";
+        discountInput.style.fontWeight = "bold";
+        discountInput.style.border = "2px solid #cbd5e1";
+        discountInput.style.borderRadius = "6px";
+        
+        discountInput.setAttribute("aria-label", `Discount percentage for ${item.name}`);
+        discountInput.addEventListener("change", () => updateItemDiscount(k, discountInput.value));
+        
         const percentLabel = document.createElement("span");
         percentLabel.textContent = "% off";
-        discountControls.append(discountInput, percentLabel);
-        discountDetails.append(discountSummary, discountControls);
-        details.append(discountDetails);
+        percentLabel.style.fontSize = "16px";
+        percentLabel.style.fontWeight = "600";
+        
+        discountControls.append(discountLabel, discountInput, percentLabel);
+        details.append(discountControls);
       } else {
         const quoteNote = document.createElement("div");
         quoteNote.className = "cart-item-rate";

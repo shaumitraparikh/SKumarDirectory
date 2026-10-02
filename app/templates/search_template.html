@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        var isLocal = (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost");
+        var isEditMode = isLocal && window.location.search.indexOf("edit=true") > -1;
+        if (!isLocal) {
+            document.write("<style>.cart-toggle-btn, .cart-drawer, .cart-layout, #sellerTools { display: none !important; }</style>");
+        }
+    </script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Search the S. Kumar & Bros insulating materials and electrical accessories catalog and request an order.">
@@ -132,10 +140,6 @@
                 <details class="buyer-info" id="buyerDetails" open>
                     <summary class="buyer-summary">
                         <div class="summary-title-wrap">
-                    <div style="margin-top: 10px; margin-bottom: 5px; font-weight: 600; display:flex; align-items:center; gap: 8px;">
-                        <input type="checkbox" id="isEstimateToggle" style="width: 18px; height: 18px; accent-color: #d97706; cursor:pointer;" onchange="toggleEstimateMode(this)">
-                        <label for="isEstimateToggle" style="cursor:pointer; color: #102a43; font-size:14px;">Non-Billed (Estimate / Challan)</label>
-                    </div>
 
                             <span class="summary-icon">👤</span>
                             <div>
@@ -145,6 +149,11 @@
                         </div>
                     </summary>
                     <div class="buyer-fields-wrap">
+                    <div style="margin-bottom: 12px; padding: 10px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; font-weight: 600; display:flex; align-items:center; gap: 8px;">
+                        <input type="checkbox" id="isEstimateToggle" style="width: 18px; height: 18px; accent-color: #d97706; cursor:pointer;" onchange="toggleEstimateMode(this)">
+                        <label for="isEstimateToggle" style="cursor:pointer; color: #92400e; font-size:14px; margin:0;">Non-Billed (Estimate / Challan Mode)</label>
+                    </div>
+
                         <!-- Quick Customer Lookup Bar -->
                         <div class="customer-lookup-box">
                             <label for="customerLookup" class="lookup-label">🔍 Find existing customer (optional)</label>
@@ -217,10 +226,6 @@
                 <details class="cart-items-section" id="orderSummaryDetails" open>
                     <summary class="order-summary-toggle">
                         <div class="summary-title-wrap">
-                    <div style="margin-top: 10px; margin-bottom: 5px; font-weight: 600; display:flex; align-items:center; gap: 8px;">
-                        <input type="checkbox" id="isEstimateToggle" style="width: 18px; height: 18px; accent-color: #d97706; cursor:pointer;" onchange="toggleEstimateMode(this)">
-                        <label for="isEstimateToggle" style="cursor:pointer; color: #102a43; font-size:14px;">Non-Billed (Estimate / Challan)</label>
-                    </div>
 
                             <span class="summary-icon">📦</span>
                             <div>
@@ -495,7 +500,7 @@
 <script>window.INJECTED_CLIENT_DATA = {{ client_data | tojson }};</script>
 <script>window.INJECTED_SAVED_BILLS = {{ saved_bills | tojson }};</script>
 <script>
-    var isEditMode = (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") && window.location.search.indexOf("edit=true") > -1;
+    
     if (isEditMode) {
         document.getElementById("sellerTools").style.display = "block";
         var script = document.createElement("script");
