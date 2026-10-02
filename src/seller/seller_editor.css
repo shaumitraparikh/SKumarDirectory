@@ -1,7 +1,6 @@
 .seller-tools {
-    position: sticky;
-    top: 0;
-    z-index: 200;
+    position: relative;
+    z-index: 1;
     display: grid;
     gap: 10px;
     padding: 12px max(14px, calc((100vw - 1400px) / 2));
