@@ -41,13 +41,19 @@
               "#saveBillBtnWrap, #openBillsButton," +
               "#chooseBillsFolderButton, #prepareGstButton," +
               "#billArchiveDialog," +
-              /* Customer details card (full checkout form) */
-              "#buyerDetailsCard," +
+              /* Specific Offline seller tools within the customer details card */
+              "#estimateToggleWrapper," +
+              "#billOrgWrapper," +
+              ".customer-lookup-box," +
+              "#enterManualBtn," +
+              ".disclosure-hint," +
               /* Tax rate inputs row */
               ".tax-settings-card," +
               /* Saved bills archive */
               "#savedBillsSection" +
               " { display: none !important; }" +
+              /* Force the manual name/address form open so public customers can use it */
+              "#manualBuyerForm { display: block !important; }" +
               /* Simplify cart header for public */
               ".cart-subtitle { display: none !important; }" +
               "</style>"
@@ -89,6 +95,7 @@
     >
       <div class="seller-tools-title">
         <strong>Seller workspace</strong>
+        <span>This editor runs only from the local seller server.</span>
       </div>
       <div class="seller-tools-actions">
         <button id="sellerAddButton" type="button" disabled>
@@ -1239,13 +1246,12 @@
       (function () {
         var label = document.getElementById("cartToggleLabel");
         if (window.isEditMode) {
-          // Edit mode: full seller workspace, cart hidden (use seller editor instead)
+          // Edit mode: full seller workspace and billing cart active
           document.getElementById("sellerTools").style.display = "block";
           var script = document.createElement("script");
           script.src = "src/seller/seller_editor.js?v={{ catalog_version }}";
           document.body.appendChild(script);
-          var cartBtn = document.querySelector(".cart-toggle-btn");
-          if (cartBtn) cartBtn.style.display = "none";
+          if (label) label.textContent = "🛒 Cart";
         } else if (window.isLocal) {
           // Local non-edit mode: full billing cart
           if (label) label.textContent = "🛒 Cart";
