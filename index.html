@@ -41,13 +41,19 @@
               "#saveBillBtnWrap, #openBillsButton," +
               "#chooseBillsFolderButton, #prepareGstButton," +
               "#billArchiveDialog," +
-              /* Customer details card (full checkout form) */
-              "#buyerDetailsCard," +
+              /* Specific Offline seller tools within the customer details card */
+              "#estimateToggleWrapper," +
+              "#billOrgWrapper," +
+              ".customer-lookup-box," +
+              "#enterManualBtn," +
+              ".disclosure-hint," +
               /* Tax rate inputs row */
               ".tax-settings-card," +
               /* Saved bills archive */
               "#savedBillsSection" +
               " { display: none !important; }" +
+              /* Force the manual name/address form open so public customers can use it */
+              "#manualBuyerForm { display: block !important; }" +
               /* Simplify cart header for public */
               ".cart-subtitle { display: none !important; }" +
               "</style>"
@@ -80,7 +86,7 @@
       disabled
     />
   </head>
-  <body data-catalog-version="f4a314ff97">
+  <body data-catalog-version="50dd3ebb7d">
     <section
       class="seller-tools"
       id="sellerTools"
@@ -1431,6 +1437,7 @@
               </summary>
               <div class="buyer-fields-wrap">
                 <div
+                  id="estimateToggleWrapper"
                   style="
                     margin-bottom: 12px;
                     padding: 10px;
@@ -1468,6 +1475,7 @@
 
                 <!-- Billing company selector: files the bill under S. Kumar (S-) or GSC (G-) -->
                 <div
+                  id="billOrgWrapper"
                   style="
                     margin-bottom: 12px;
                     padding: 10px;
@@ -2253,7 +2261,7 @@
           // Edit mode: full seller workspace, cart hidden (use seller editor instead)
           document.getElementById("sellerTools").style.display = "block";
           var script = document.createElement("script");
-          script.src = "src/seller/seller_editor.js?v=f4a314ff97";
+          script.src = "src/seller/seller_editor.js?v=50dd3ebb7d";
           document.body.appendChild(script);
           var cartBtn = document.querySelector(".cart-toggle-btn");
           if (cartBtn) cartBtn.style.display = "none";
@@ -2270,7 +2278,7 @@
       })();
     </script>
 
-    <script src="app/assets/js/search_catalog.js?v=f4a314ff97"></script>
+    <script src="app/assets/js/search_catalog.js?v=50dd3ebb7d"></script>
     <script>
       if (
         "serviceWorker" in navigator &&
@@ -2278,7 +2286,7 @@
       ) {
         window.addEventListener("load", function () {
           navigator.serviceWorker
-            .register("app/sw.js?v=f4a314ff97")
+            .register("app/sw.js?v=50dd3ebb7d")
             .then(function (reg) {
               reg.onupdatefound = function () {
                 var installing = reg.installing;

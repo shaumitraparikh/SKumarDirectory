@@ -41,13 +41,19 @@
               "#saveBillBtnWrap, #openBillsButton," +
               "#chooseBillsFolderButton, #prepareGstButton," +
               "#billArchiveDialog," +
-              /* Customer details card (full checkout form) */
-              "#buyerDetailsCard," +
+              /* Specific Offline seller tools within the customer details card */
+              "#estimateToggleWrapper," +
+              "#billOrgWrapper," +
+              ".customer-lookup-box," +
+              "#enterManualBtn," +
+              ".disclosure-hint," +
               /* Tax rate inputs row */
               ".tax-settings-card," +
               /* Saved bills archive */
               "#savedBillsSection" +
               " { display: none !important; }" +
+              /* Force the manual name/address form open so public customers can use it */
+              "#manualBuyerForm { display: block !important; }" +
               /* Simplify cart header for public */
               ".cart-subtitle { display: none !important; }" +
               "</style>"
@@ -418,6 +424,7 @@
               </summary>
               <div class="buyer-fields-wrap">
                 <div
+                  id="estimateToggleWrapper"
                   style="
                     margin-bottom: 12px;
                     padding: 10px;
@@ -455,6 +462,7 @@
 
                 <!-- Billing company selector: files the bill under S. Kumar (S-) or GSC (G-) -->
                 <div
+                  id="billOrgWrapper"
                   style="
                     margin-bottom: 12px;
                     padding: 10px;
