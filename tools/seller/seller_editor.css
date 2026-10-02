@@ -1,0 +1,119 @@
+.seller-tools {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    display: grid;
+    gap: 10px;
+    padding: 12px max(14px, calc((100vw - 1400px) / 2));
+    background: #102a43;
+    color: #fff;
+    box-shadow: 0 3px 14px rgba(15, 23, 42, .2);
+}
+
+.seller-tools-title,
+.seller-tool-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+}
+
+.seller-tools-title { font-size: 13px; }
+.seller-tools-title span { color: #cbd5e1; font-size: 11px; }
+.seller-tool-actions button,
+.seller-editor-actions button {
+    min-height: 38px;
+    padding: 8px 12px;
+    border: 1px solid #9fb3c8;
+    border-radius: 6px;
+    background: #fff;
+    color: #173b57;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.seller-tool-actions button:disabled { opacity: .55; cursor: not-allowed; }
+#sellerSaveButton { border-color: #28a745; background: #28a745; color: #fff; }
+#sellerStatus { flex: 1 1 260px; color: #e2e8f0; font-size: 12px; }
+.seller-hidden-item { opacity: .66; border: 2px dashed #d97706; }
+.seller-hidden-label { max-width: 90px; color: #9a3412; font-size: 10px; font-weight: 700; text-align: center; }
+.seller-item-edit, .seller-item-hide, .seller-item-delete {
+    min-height: 34px;
+    padding: 6px 9px;
+    border: 1px solid #9fb3c8;
+    border-radius: 5px;
+    background: #fff;
+    color: #24527a;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 650;
+    cursor: pointer;
+}
+.seller-item-delete { color: #a61b1b; border-color: #e0a6a6; }
+
+.seller-editor-dialog {
+    width: min(800px, calc(100vw - 20px));
+    max-width: 800px;
+    max-height: 90dvh;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    color: #243b53;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, .3);
+}
+.seller-editor-dialog::backdrop { background: rgba(15, 23, 42, .58); }
+.seller-editor-dialog form { display: grid; max-height: 90dvh; }
+.seller-editor-heading {
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: #102a43;
+    color: #fff;
+}
+.seller-editor-heading h2 { margin: 0; font-size: 18px; }
+.seller-editor-heading button { border: 0; background: transparent; color: #fff; font-size: 24px; cursor: pointer; }
+.seller-editor-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 18px;
+    overflow: auto;
+}
+.seller-field { display: grid; gap: 5px; min-width: 0; }
+.seller-field-wide { grid-column: 1 / -1; }
+.seller-field label { color: #486581; font-size: 11px; font-weight: 700; }
+.seller-field input, .seller-field textarea {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    color: #243b53;
+    font: inherit;
+    font-size: 13px;
+}
+.seller-field textarea { min-height: 72px; resize: vertical; }
+.seller-editor-actions {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 18px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+#sellerEditorApply { background: #1f5c45; color: #fff; border-color: #1f5c45; }
+
+@media (max-width: 650px) {
+    .seller-tools { padding: 10px 12px; }
+    .seller-tool-actions button { flex: 1 1 auto; }
+    .seller-editor-fields { grid-template-columns: 1fr; gap: 9px; padding: 12px; }
+    .seller-field-wide { grid-column: auto; }
+}

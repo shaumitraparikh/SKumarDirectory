@@ -11,6 +11,7 @@
 <link rel="apple-touch-icon" href="app/assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="app/site.webmanifest">
 <link rel="stylesheet" href="app/assets/css/search_catalog.css">
+<link rel="stylesheet" href="tools/seller/seller_editor.css" id="sellerCss" disabled>
 </head>
 <body data-catalog-version="{{ catalog_version }}">
 
@@ -53,6 +54,18 @@
             </div>
         </div>
         <!-- Standard select maintained for full compatibility with scripts -->
+    <a href="?edit=false" class="mode-toggle-btn mode-toggle-customer" id="customerViewBtn" style="display: none;">&#x1F441; Customer View</a>
+    <a href="?edit=true" class="mode-toggle-btn mode-toggle-edit" id="editModeBtn" style="display: none;">&#x270F;&#xFE0F; Edit Mode</a>
+    <script>
+        if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+            if (typeof isEditMode !== "undefined" && isEditMode) {
+                document.getElementById("customerViewBtn").style.display = "inline-flex";
+            } else {
+                document.getElementById("editModeBtn").style.display = "inline-flex";
+            }
+        }
+    </script>
+
         <select id="categoryFilter" aria-label="Filter by category" onchange="filterCatalog()" class="search-dropdown" style="display: none;">
             <option value="">All Categories</option>
             {% for cat in sorted_categories %}
@@ -443,6 +456,17 @@
 <script src="app/assets/js/bill_archive.js"></script>
 <script>window.INJECTED_CLIENT_DATA = {{ client_data | tojson }};</script>
 <script>window.INJECTED_SAVED_BILLS = {{ saved_bills | tojson }};</script>
+<script>
+    if (isEditMode) {
+        document.getElementById("sellerTools").style.display = "block";
+        var script = document.createElement("script");
+        script.src = "tools/seller/seller_editor.js?v={{ catalog_version }}";
+        document.body.appendChild(script);
+        var cartBtn = document.querySelector(".cart-toggle-btn");
+        if (cartBtn) cartBtn.style.display = "none";
+    }
+</script>
+
 <script src="app/assets/js/search_catalog.js?v={{ catalog_version }}"></script>
 <script>
     if ('serviceWorker' in navigator  && location.protocol.startsWith('http')) {
