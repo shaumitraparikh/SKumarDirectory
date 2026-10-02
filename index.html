@@ -80,7 +80,7 @@
       disabled
     />
   </head>
-  <body data-catalog-version="d4e8338d6e">
+  <body data-catalog-version="3d59659b02">
     <div class="super-sticky-wrapper" style="position: sticky; top: 0; z-index: 9999; display: flex; flex-direction: column; background: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
     <section
       class="seller-tools"
@@ -2263,10 +2263,10 @@
           document.getElementById("sellerTools").style.display = "block";
           var link = document.createElement("link");
           link.rel = "stylesheet";
-          link.href = "src/seller/seller_editor.css?v=d4e8338d6e";
+          link.href = "src/seller/seller_editor.css?v=3d59659b02";
           document.head.appendChild(link);
           var script = document.createElement("script");
-          script.src = "src/seller/seller_editor.js?v=d4e8338d6e";
+          script.src = "src/seller/seller_editor.js?v=3d59659b02";
           document.body.appendChild(script);
           var cartBtn = document.querySelector(".cart-toggle-btn");
           if (cartBtn) cartBtn.style.display = "none";
@@ -2285,7 +2285,7 @@
       })();
     </script>
 
-    <script src="app/assets/js/search_catalog.js?v=d4e8338d6e"></script>
+    <script src="app/assets/js/search_catalog.js?v=3d59659b02"></script>
     <script>
       if (
         "serviceWorker" in navigator &&
@@ -2293,7 +2293,7 @@
       ) {
         window.addEventListener("load", function () {
           navigator.serviceWorker
-            .register("app/sw.js?v=d4e8338d6e")
+            .register("app/sw.js?v=3d59659b02")
             .then(function (reg) {
               reg.onupdatefound = function () {
                 var installing = reg.installing;

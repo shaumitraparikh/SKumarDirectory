@@ -2122,7 +2122,7 @@ function generateBill(options = {}) {
   const viewModeOrder = isViewMode;
 
   const buyer = readBuyerDetails();
-  const bName = buyer.name.trim() || "Cash customer";
+  const bName = buyer.name.trim() || (viewModeOrder ? "" : "Cash customer");
   document.getElementById("pBuyerName").innerText = bName;
   document.getElementById("pBuyerContact").innerText = [
     buyer.phone.trim(),
@@ -2140,6 +2140,58 @@ function generateBill(options = {}) {
   document.getElementById("pBuyerGstin").innerText = buyer.gstin.trim()
     ? `Customer GSTIN: ${buyer.gstin.trim().toUpperCase()}`
     : "";
+
+  // Simplify printout for public users
+  const titleH2 = document.querySelector('.inv-title h2');
+  const titleSpan = document.querySelector('.inv-title span');
+  const factStrong = document.querySelector('.inv-fact strong');
+  
+  if (viewModeOrder) {
+    if (titleH2) titleH2.innerHTML = 'ORDER<br/>INQUIRY';
+    if (titleSpan) titleSpan.innerText = 'Items requested';
+    if (factStrong) factStrong.innerText = 'Order Inquiry';
+    
+    // Hide seller business details
+    const hideIds = [
+      'pBrandLegalName', 'pBrandTagline', 'pBrandAddress', 
+      'pBrandPhone', 'pBrandContact', 'pBrandGstin',
+      'pBuyerContact', 'pBuyerAddress', 'pBuyerGstin'
+    ];
+    hideIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    
+    const signoff = document.querySelector('.inv-signoff');
+    if (signoff) signoff.style.display = 'none';
+    const notes = document.querySelector('.inv-notes');
+    if (notes) notes.style.display = 'none';
+    
+    const invCardLabel = document.querySelector('.inv-card-label');
+    if (invCardLabel) invCardLabel.style.display = bName ? '' : 'none';
+  } else {
+    // Restore default if switching back to local seller mode
+    if (titleH2) titleH2.innerHTML = 'PROFORMA<br/>INVOICE';
+    if (titleSpan) titleSpan.innerText = 'Quotation / order summary';
+    if (factStrong) factStrong.innerText = 'Proforma invoice';
+    
+    const showIds = [
+      'pBrandLegalName', 'pBrandTagline', 'pBrandAddress', 
+      'pBrandPhone', 'pBrandContact', 'pBrandGstin',
+      'pBuyerContact', 'pBuyerAddress', 'pBuyerGstin'
+    ];
+    showIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = '';
+    });
+    
+    const signoff = document.querySelector('.inv-signoff');
+    if (signoff) signoff.style.display = '';
+    const notes = document.querySelector('.inv-notes');
+    if (notes) notes.style.display = '';
+    const invCardLabel = document.querySelector('.inv-card-label');
+    if (invCardLabel) invCardLabel.style.display = '';
+  }
 
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-IN", {
