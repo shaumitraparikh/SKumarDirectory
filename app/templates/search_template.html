@@ -41,19 +41,13 @@
               "#saveBillBtnWrap, #openBillsButton," +
               "#chooseBillsFolderButton, #prepareGstButton," +
               "#billArchiveDialog," +
-              /* Specific Offline seller tools within the customer details card */
-              "#estimateToggleWrapper," +
-              "#billOrgWrapper," +
-              ".customer-lookup-box," +
-              "#enterManualBtn," +
-              ".disclosure-hint," +
+              /* Customer details card (full checkout form) */
+              "#buyerDetailsCard," +
               /* Tax rate inputs row */
               ".tax-settings-card," +
               /* Saved bills archive */
               "#savedBillsSection" +
               " { display: none !important; }" +
-              /* Force the manual name/address form open so public customers can use it */
-              "#manualBuyerForm { display: block !important; }" +
               /* Simplify cart header for public */
               ".cart-subtitle { display: none !important; }" +
               "</style>"
@@ -95,7 +89,6 @@
     >
       <div class="seller-tools-title">
         <strong>Seller workspace</strong>
-        <span>This editor runs only from the local seller server.</span>
       </div>
       <div class="seller-tools-actions">
         <button id="sellerAddButton" type="button" disabled>

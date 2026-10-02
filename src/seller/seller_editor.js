@@ -441,7 +441,7 @@
         setCatalog(data);
         var restoredDraft = restoreDraft(data);
         renderDraft();
-        status.textContent = 'Connected to the loopback-only seller editor. ' + rows.length + ' products loaded.'
+        status.textContent = rows.length + ' products loaded.'
             + (restoredDraft ? ' Unsaved draft restored.' : '');
         request('undo/status').then(function (undo) {
             savedUndoAvailable = undo.can_undo;
