@@ -34,19 +34,24 @@
           // ALL seller tooling, customer details form, billing and GST
           // sections stay hidden unless running locally.
           window.SK_VIEW_MODE = true;
-          var style = document.createElement('style');
-          style.innerHTML =
-            "#sellerTools, .seller-tools," +
-            "#saveBillBtnWrap, #openBillsButton," +
-            "#chooseBillsFolderButton, #prepareGstButton," +
-            "#billArchiveDialog," +
-            "#buyerDetailsCard," +
-            ".tax-settings-card," +
-            "#savedBillsSection" +
-            " { display: none !important; }" +
-            ".cart-subtitle { display: none !important; }" +
-            "#publicNameBox { display: block !important; }";
-          document.head.appendChild(style);
+          document.write(
+            "<style>" +
+              /* Seller-only panels */
+              "#sellerTools, .seller-tools," +
+              "#saveBillBtnWrap, #openBillsButton," +
+              "#chooseBillsFolderButton, #prepareGstButton," +
+              "#billArchiveDialog," +
+              /* Customer details card (full checkout form) */
+              "#buyerDetailsCard," +
+              /* Tax rate inputs row */
+              ".tax-settings-card," +
+              /* Saved bills archive */
+              "#savedBillsSection" +
+              " { display: none !important; }" +
+              /* Simplify cart header for public */
+              ".cart-subtitle { display: none !important; }" +
+              "</style>"
+          );
         }
       })();
     </script>
@@ -75,7 +80,8 @@
       disabled
     />
   </head>
-  <body data-catalog-version="52423e3af8">
+  <body data-catalog-version="b91a647068">
+    <div class="super-sticky-wrapper" style="position: sticky; top: 0; z-index: 9999; display: flex; flex-direction: column; background: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
     <section
       class="seller-tools"
       id="sellerTools"
@@ -116,7 +122,6 @@
     <dialog
       class="seller-editor-dialog"
       id="sellerEditorDialog"
-      style="display: none"
       aria-labelledby="sellerEditorTitle"
     >
       <form id="sellerEditorForm">
@@ -128,7 +133,7 @@
           <button id="sellerEditorCancel" type="button" class="btn-cancel">
             Cancel
           </button>
-          <button id="sellerEditorClose" type="button" class="btn-save">
+          <button id="sellerEditorApply" type="submit" class="btn-save">
             Apply changes
           </button>
         </div>
@@ -143,10 +148,8 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 9999;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 1;
         font-family: &quot;Segoe UI&quot;, system-ui, sans-serif;
       "
     >
@@ -1358,6 +1361,7 @@
         Cart <span class="cart-badge" id="cartCountBadge">0</span>
       </button>
     </div>
+    </div>
     <div
       style="
         text-align: center;
@@ -1403,14 +1407,7 @@
       <div class="cart-layout">
         <!-- Left Column: Customer details & Cart Items -->
         <div class="cart-main-col">
-          <!-- Public Simple Name Field -->
-          <div class="checkout-card" id="publicNameBox" style="display: none; padding: 15px; margin-bottom: 15px;">
-            <label style="display:block; font-weight: 600; color: #1e3a8a; margin-bottom: 8px;">Your Name / Company (Optional)</label>
-            <input type="text" id="viewBuyerName" placeholder="Enter name to appear on your order inquiry printout..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 14px;">
-            <p style="margin: 8px 0 0 0; font-size: 12px; color: #64748b;">This will just be added to your printout for your own reference.</p>
-          </div>
-
-          <!-- Customer Details Card (Seller only) -->
+          <!-- Customer Details Card -->
           <div class="checkout-card" id="buyerDetailsCard">
             <details class="buyer-info" id="buyerDetails" open>
               <summary class="buyer-summary">
@@ -1887,12 +1884,21 @@
               </span>
               <button
                 class="print-btn"
+                id="shareWhatsAppBtn"
+                type="button"
+                onclick="shareOrderMobile()"
+                style="margin-top: 8px; background: #25d366; border-color: #128c7e; color: #fff;"
+              >
+                <span>💬 Send via WhatsApp</span>
+              </button>
+              <button
+                class="print-btn"
                 id="printQuoteBtn"
                 type="button"
                 onclick="generateBill()"
                 style="margin-top: 8px"
               >
-                <span>🖨️ Print / Share Order</span>
+                <span>🖨️ Print to PDF</span>
               </button>
               <button
                 class="print-btn"
@@ -1909,9 +1915,7 @@
                 hidden
                 style="margin-top: 8px"
               >
-                ℹ️ View mode: this creates a static printout only (dummy
-                EST- reference). It is not saved as a bill and is not sent
-                to the shop — share the printout/PDF with sales to order.
+                ℹ️ <strong>View mode:</strong> This creates a temporary inquiry list. It is not an official bill and is not sent to the shop automatically. Click "Send via WhatsApp" to share your list with sales instantly!
               </p>
 
               <div class="secondary-btn-row">
@@ -2130,11 +2134,11 @@
       <div class="inv-topline"></div>
       <div class="inv-header">
         <div class="inv-brand">
-          <p class="legal-name">S. Kumar &amp; Bros</p>
+          <p class="legal-name" id="pBrandLegalName">S. Kumar &amp; Bros</p>
           <h1 id="pBrandTitle">S. Kumar &amp; Bros</h1>
-          <p class="tagline">Manufacturers, Importers &amp; Stockist of Insulating Materials &amp; Electrical Accessories</p>
-          <p>3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.</p>
-          <p>
+          <p class="tagline" id="pBrandTagline">Manufacturers, Importers &amp; Stockist of Insulating Materials &amp; Electrical Accessories</p>
+          <p id="pBrandAddress">3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.</p>
+          <p id="pBrandPhone">
             Office phone: 022-49233982
           </p>
           <p class="inv-contact" id="pBrandContact"></p>
@@ -2252,8 +2256,12 @@
         if (window.isEditMode) {
           // Edit mode: full seller workspace, cart hidden (use seller editor instead)
           document.getElementById("sellerTools").style.display = "block";
+          var link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = "src/seller/seller_editor.css?v=b91a647068";
+          document.head.appendChild(link);
           var script = document.createElement("script");
-          script.src = "src/seller/seller_editor.js?v=52423e3af8";
+          script.src = "src/seller/seller_editor.js?v=b91a647068";
           document.body.appendChild(script);
           var cartBtn = document.querySelector(".cart-toggle-btn");
           if (cartBtn) cartBtn.style.display = "none";
@@ -2270,7 +2278,7 @@
       })();
     </script>
 
-    <script src="app/assets/js/search_catalog.js?v=52423e3af8"></script>
+    <script src="app/assets/js/search_catalog.js?v=b91a647068"></script>
     <script>
       if (
         "serviceWorker" in navigator &&
@@ -2278,7 +2286,7 @@
       ) {
         window.addEventListener("load", function () {
           navigator.serviceWorker
-            .register("app/sw.js?v=52423e3af8")
+            .register("app/sw.js?v=b91a647068")
             .then(function (reg) {
               reg.onupdatefound = function () {
                 var installing = reg.installing;
