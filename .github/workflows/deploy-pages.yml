@@ -64,7 +64,7 @@ jobs:
           cp print_catalog.html _site/print_catalog.html
           cp index.html _site/search_catalog.html
           cp index.html _site/customer_catalog.html
-          [ -f Google_Review_QR.pdf ] && cp Google_Review_QR.pdf _site/Google_Review_QR.pdf || true
+          [ -f Google_Review_QR.png ] && cp Google_Review_QR.png _site/Google_Review_QR.png || true
           cp -R app _site/app
           cp -R images _site/images
           mkdir -p _site/data

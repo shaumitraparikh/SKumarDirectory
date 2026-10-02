@@ -1,6 +1,5 @@
 const CommerceCore = window.CatalogCommerce;
 const CART_STORAGE_KEY = "skumar-catalog-cart-v1";
-const checkoutConfig = document.getElementById("checkoutConfig");
 const billArchive = new CatalogBillArchive.BillArchive({
   window,
   indexedDB: window.indexedDB,
@@ -1865,156 +1864,6 @@ function readBuyerDetails() {
   };
 }
 
-function sendWhatsAppOrder(order) {
-  const sellerPhone = CommerceCore.normalizeIndianMobile(
-    checkoutConfig.dataset.whatsappNumber,
-  );
-  if (!sellerPhone) {
-    throw new Error(
-      "The business WhatsApp number is not configured. Please contact sales by phone.",
-    );
-  }
-  const message = CommerceCore.formatOrderMessage(order);
-  if (message.length > 4000) {
-    throw new Error(
-      "This order is too long for a WhatsApp message. Reduce the cart or download the structured order copy.",
-    );
-  }
-  const link = document.getElementById("whatsAppFallback");
-  link.href = `https://wa.me/${sellerPhone}?text=${encodeURIComponent(message)}`;
-  link.textContent =
-    "If WhatsApp did not open, continue to send this order request";
-  link.hidden = false;
-  link.click();
-  showToast(
-    `Order ${order.order_reference} prepared. Sales must confirm it; no payment was taken.`,
-  );
-}
-
-async function startPaymentCheckout(order) {
-  const apiBaseUrl = checkoutConfig.dataset.apiBaseUrl.trim();
-  if (!apiBaseUrl) {
-    throw new Error(
-      "Online payment is not enabled yet. Your order request has not been charged; contact sales to confirm it.",
-    );
-  }
-
-  let endpoint;
-  try {
-    endpoint = new URL("/api/checkout/orders", apiBaseUrl);
-  } catch (error) {
-    throw new Error("The configured secure checkout API URL is invalid.");
-  }
-  if (endpoint.protocol !== "https:") {
-    throw new Error("The online checkout API must use HTTPS.");
-  }
-
-  const response = await fetch(endpoint.toString(), {
-    method: "POST",
-    credentials: "omit",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify(order),
-  });
-  if (!response.ok) {
-    throw new Error(
-      `Secure checkout could not create the order (HTTP ${response.status}). No payment was taken.`,
-    );
-  }
-  const result = await response.json();
-  let checkoutUrl;
-  try {
-    checkoutUrl = new URL(result.checkout_url);
-  } catch (error) {
-    throw new Error(
-      "Secure checkout returned an invalid payment URL. No payment was taken.",
-    );
-  }
-  if (checkoutUrl.protocol !== "https:") {
-    throw new Error(
-      "Secure checkout returned a non-HTTPS payment URL. No payment was taken.",
-    );
-  }
-  window.location.assign(checkoutUrl.toString());
-}
-
-async function placeOrderRequest() {
-  if (Object.keys(cart).length === 0) {
-    showToast("Add at least one product before requesting an order.");
-    return;
-  }
-  const requiredFields = ["buyerName", "buyerPhone"];
-  const invalidField = requiredFields
-    .map((id) => document.getElementById(id))
-    .find((field) => !field.checkValidity());
-  if (invalidField) {
-    invalidField.reportValidity();
-    return;
-  }
-
-  const buyer = CommerceCore.validateBuyer(readBuyerDetails());
-  if (!buyer.valid) {
-    showToast(buyer.errors[0]);
-    const target = buyer.errors[0].includes("GSTIN")
-      ? "buyerGstin"
-      : buyer.errors[0].includes("email")
-        ? "buyerEmail"
-        : "buyerPhone";
-    document.getElementById(target).focus();
-    return;
-  }
-  const rates = getTaxRates();
-  if (!rates) {
-    showToast("Enter valid CGST and SGST rates before requesting an order.");
-    return;
-  }
-
-  try {
-    lastOrder = CommerceCore.createOrder({
-      id: createOrderReference(),
-      createdAt: new Date().toISOString(),
-      buyer: readBuyerDetails(),
-      items: Object.keys(cart).map((key) => cart[key]),
-      rates,
-    });
-    document.getElementById("orderCopyButton").hidden = false;
-    const provider = checkoutConfig.dataset.provider || "whatsapp";
-    if (provider === "whatsapp") {
-      sendWhatsAppOrder(lastOrder);
-    } else if (provider === "razorpay") {
-      await startPaymentCheckout(lastOrder);
-    } else {
-      throw new Error(
-        `Unsupported checkout provider "${provider}". No order or payment was submitted.`,
-      );
-    }
-  } catch (error) {
-    console.error("Order request could not be submitted.", error);
-    showToast(
-      error.message ||
-        "Order request could not be submitted. Please contact sales.",
-    );
-  }
-}
-
-function downloadOrderCopy() {
-  if (!lastOrder) {
-    showToast(
-      "Create an order request before downloading its structured copy.",
-    );
-    return;
-  }
-  const blob = new Blob([JSON.stringify(lastOrder, null, 2)], {
-    type: "application/json",
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `${lastOrder.order_reference}.json`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
 
 function standaloneBillHtml() {
   const stylesheet = Array.from(document.styleSheets).find(
@@ -2505,4 +2354,26 @@ function openLightbox(srNumber) {
   } else {
     dialog.setAttribute("open", "");
   }
+}
+
+function clearCartAndNewBill() {
+  if (Object.keys(cart).length > 0 && !confirm("Are you sure you want to clear the cart and start a new bill?")) {
+    return;
+  }
+  
+  cart = {};
+  
+  const discountInputs = document.querySelectorAll('.cart-item-discount-input');
+  discountInputs.forEach(input => input.value = 0);
+  
+  clearCustomerDetails();
+  
+  renderCart();
+  
+  const printBtn = document.getElementById("printBillBtn");
+  if (printBtn) {
+    printBtn.style.display = "none";
+  }
+  
+  showToast("Cart cleared. Ready for a new bill.");
 }

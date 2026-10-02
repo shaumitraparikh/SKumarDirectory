@@ -24,10 +24,6 @@
 
 {% include "partials/_header.html" %}
 
-<div id="checkoutConfig" hidden
-     data-provider="{{ billing.get('checkout', {}).get('provider', 'whatsapp') }}"
-     data-whatsapp-number="{{ billing.get('checkout', {}).get('whatsapp_number', '') }}"
-     data-api-base-url="{{ billing.get('checkout', {}).get('api_base_url', '') }}"></div>
 
 <div class="sticky-bar" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
         
@@ -275,8 +271,8 @@
                         <button class="archive-btn" id="openBillsButton" type="button">
                             <span>📁 Saved Bills</span>
                         </button>
-                        <button class="order-copy-btn" id="orderCopyButton" type="button" onclick="downloadOrderCopy()" hidden>
-                            <span>📥 Order Copy</span>
+                        <button class="archive-btn clear-cart-btn" id="clearCartBtn" type="button" onclick="clearCartAndNewBill()" style="background: #e11d48; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                            <span>🗑️ Clear Cart & New Bill</span>
                         </button>
                     </div>
 

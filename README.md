@@ -89,7 +89,7 @@ This system is built as a **pure static web application**:
 ├── photo_catalog.html           <- Visual photo catalog
 ├── print_catalog.html           <- Print-ready A4 price list
 ├── update.bat                   <- 1-Click build, test, and git publish script
-├── Google_Review_QR.pdf         <- Google Review QR code asset
+├── Google_Review_QR.png         <- Google Review QR code asset
 │
 ├── app/                         <- Website source files
 │   ├── assets/
