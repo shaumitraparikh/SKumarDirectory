@@ -1,6 +1,18 @@
 const CommerceCore = window.CatalogCommerce;
 const CART_STORAGE_KEY = "skumar-catalog-cart-v1";
-const isLocalEnv = (location.hostname === "127.0.0.1" || location.hostname === "localhost") && location.protocol !== "https:";
+const isLocalEnv = (() => {
+  const h = location.hostname || "";
+  const isLan =
+    /^192\.168\./.test(h) ||
+    /^10\./.test(h) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(h);
+  return (
+    location.protocol === "file:" ||
+    h === "127.0.0.1" ||
+    h === "localhost" ||
+    isLan
+  );
+})();
 // View mode (public static hosting): customers may still build a dummy cart
 // and print/share it, but nothing is ever archived or sent to the shop.
 const isViewMode = window.SK_VIEW_MODE === true || !isLocalEnv;
@@ -1922,14 +1934,19 @@ function createOrderReference() {
 }
 
 function readBuyerDetails() {
+  const pick = (id) => document.getElementById(id)?.value || "";
+  const viewName =
+    document.getElementById("viewBuyerName")?.value ||
+    document.getElementById("buyerName")?.value ||
+    "";
   return {
-    name: document.getElementById("buyerName").value,
-    phone: document.getElementById("buyerPhone").value,
-    email: document.getElementById("buyerEmail").value,
-    address: document.getElementById("buyerAddress").value,
-    state: document.getElementById("buyerState").value,
-    pincode: document.getElementById("buyerPincode").value,
-    gstin: document.getElementById("buyerGstin").value,
+    name: viewName,
+    phone: pick("buyerPhone"),
+    email: pick("buyerEmail"),
+    address: pick("buyerAddress"),
+    state: pick("buyerState"),
+    pincode: pick("buyerPincode"),
+    gstin: pick("buyerGstin"),
     deliveryInstructions:
       (document.getElementById("deliveryInstructions") || {}).value || "",
     transportPreference:
@@ -2032,7 +2049,7 @@ function archiveCurrentBill(date) {
                 id: reference,
                 createdAt: date.toISOString(),
                 buyer: readBuyerDetails(),
-                items: cart,
+                items: Object.values(cart),
                 rates: getTaxRates() || { cgstRate: 9, sgstRate: 9 },
                 totals: {
                     subTotal: getSubTotal(),
@@ -2078,27 +2095,8 @@ async function saveBillRequest() {
     if (invalidInput) invalidInput.reportValidity();
     return;
   }
-  const now = new Date();
-  const reference = document.getElementById("pInvNo").innerText.trim() || "";
 
-  const order = CommerceCore.createOrder({
-    id: reference,
-    createdAt: now.toISOString(),
-    buyer: readBuyerDetails(),
-    items: cart,
-    rates: taxRates,
-    totals: {
-      subTotal: getSubTotal(),
-      grandTotal:
-        getSubTotal() +
-        Object.values(getTaxBreakdown(getSubTotal())).reduce(
-          (a, b) => a + b,
-          0,
-        ),
-    },
-  });
-
-  // Static Pages / offline: prepare proforma and archive with File System Access / download
+  // Generate proforma (assigns ID) and archive with File System Access / local server
   generateBill({ printAfter: false });
 }
 

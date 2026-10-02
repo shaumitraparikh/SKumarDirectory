@@ -172,23 +172,25 @@ def read_bills():
     ESTIMATES_DIR.mkdir(parents=True, exist_ok=True)
     bills = []
     import re as regex
-    for csv_file in BILLS_DIR.glob("*.csv"):
-        if not regex.match(r"^\d{4}-\d{2}\.csv$", csv_file.name):
-            continue
-        month = csv_file.stem
-        with csv_file.open(encoding="utf-8-sig", newline="") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                bills.append({
-                    "id": row.get('id'),
-                    "month": month,
-                    "createdAt": row.get('createdAt'),
-                    "reference": f"{row.get('id')} - {row.get('buyer_name')}",
-                    "buyer_name": row.get('buyer_name'),
-                    "grandTotal": row.get('grandTotal'),
-                    "storage": "server",
-                    "order_json": row.get('order_json')
-                })
+    for target_dir in [BILLS_DIR, ESTIMATES_DIR]:
+        for csv_file in target_dir.glob("*.csv"):
+            if not regex.match(r"^\d{4}-\d{2}\.csv$", csv_file.name):
+                continue
+            month = csv_file.stem
+            with csv_file.open(encoding="utf-8-sig", newline="") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    bills.append({
+                        "id": row.get('id'),
+                        "month": month,
+                        "createdAt": row.get('createdAt'),
+                        "reference": f"{row.get('id')} - {row.get('buyer_name')}",
+                        "buyer_name": row.get('buyer_name'),
+                        "grandTotal": row.get('grandTotal'),
+                        "storage": "server",
+                        "order_json": row.get('order_json'),
+                        "isEstimate": target_dir == ESTIMATES_DIR
+                    })
     return sorted(bills, key=lambda x: x.get('createdAt', ''), reverse=True)
 
 
