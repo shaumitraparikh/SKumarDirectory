@@ -80,7 +80,7 @@
       disabled
     />
   </head>
-  <body data-catalog-version="edf07e83dc">
+  <body data-catalog-version="f4a314ff97">
     <section
       class="seller-tools"
       id="sellerTools"
@@ -2253,7 +2253,7 @@
           // Edit mode: full seller workspace, cart hidden (use seller editor instead)
           document.getElementById("sellerTools").style.display = "block";
           var script = document.createElement("script");
-          script.src = "src/seller/seller_editor.js?v=edf07e83dc";
+          script.src = "src/seller/seller_editor.js?v=f4a314ff97";
           document.body.appendChild(script);
           var cartBtn = document.querySelector(".cart-toggle-btn");
           if (cartBtn) cartBtn.style.display = "none";
@@ -2270,7 +2270,7 @@
       })();
     </script>
 
-    <script src="app/assets/js/search_catalog.js?v=edf07e83dc"></script>
+    <script src="app/assets/js/search_catalog.js?v=f4a314ff97"></script>
     <script>
       if (
         "serviceWorker" in navigator &&
@@ -2278,7 +2278,7 @@
       ) {
         window.addEventListener("load", function () {
           navigator.serviceWorker
-            .register("app/sw.js?v=edf07e83dc")
+            .register("app/sw.js?v=f4a314ff97")
             .then(function (reg) {
               reg.onupdatefound = function () {
                 var installing = reg.installing;

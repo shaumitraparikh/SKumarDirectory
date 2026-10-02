@@ -628,10 +628,6 @@ details[open] > .order-summary-toggle::after {
 }
 .cart-items {
   padding: 8px 20px 20px;
-  max-height: min(58vh, 540px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* Quick "search catalog to add items" bar inside the cart */
