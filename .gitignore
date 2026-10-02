@@ -18,3 +18,9 @@ data/estimates/
 
 # Local handoff / ops notes (not for public Pages repo)
 HANDOFF.md
+
+# Server and Logs
+*.log
+server.pid
+nohup.out
+.DS_Store
