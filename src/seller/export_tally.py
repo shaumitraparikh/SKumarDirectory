@@ -11,9 +11,28 @@ def main():
         
     month = sys.argv[1]
     repo_dir = Path(__file__).parent.parent.parent
-    bills_file = repo_dir / "data" / "bills" / f"{month}.csv"
+    xlsx_file = repo_dir / "data" / "bills" / f"{month}.xlsx"
+    csv_file = repo_dir / "data" / "bills" / f"{month}.csv"
     
-    if not bills_file.exists():
+    rows = []
+    if xlsx_file.exists():
+        import openpyxl
+        wb = openpyxl.load_workbook(xlsx_file, data_only=True)
+        ws = wb.active
+        all_rows = list(ws.iter_rows(values_only=True))
+        if all_rows:
+            headers = [str(c).strip() if c is not None else "" for c in all_rows[0]]
+            for r in all_rows[1:]:
+                if not any(v is not None and str(v).strip() for v in r):
+                    continue
+                rows.append({
+                    headers[i]: str(r[i]).strip() if i < len(r) and r[i] is not None else ""
+                    for i in range(len(headers))
+                })
+    elif csv_file.exists():
+        with csv_file.open("r", encoding="utf-8-sig") as f:
+            rows = list(csv.DictReader(f))
+    else:
         print(f"No bills found for month: {month}")
         sys.exit(1)
         
@@ -24,9 +43,7 @@ def main():
     daybook_data = []
     hsn_data = []
     
-    with bills_file.open("r", encoding="utf-8-sig") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
+    for row in rows:
             order = json.loads(row['order_json'])
             
             # Format Date

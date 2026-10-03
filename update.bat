@@ -65,6 +65,8 @@ exit /b 0
 set "LOCAL_ONLY=0"
 if /i "%~1"=="--local" set "LOCAL_ONLY=1"
 if /i "%~1"=="/local" set "LOCAL_ONLY=1"
+if /i "%~1"=="--local-only" set "LOCAL_ONLY=1"
+if /i "%~1"=="/local-only" set "LOCAL_ONLY=1"
 
 echo =======================================================
 echo         S. KUMAR ^& BROS - CATALOG UPDATER

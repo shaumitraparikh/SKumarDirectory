@@ -34,7 +34,7 @@ if [ "${1:-}" = "--export-gst" ]; then
 fi
 
 LOCAL_ONLY=false
-if [ "${1:-}" = "--local" ]; then
+if [ "${1:-}" = "--local" ] || [ "${1:-}" = "--local-only" ]; then
     LOCAL_ONLY=true
 fi
 
