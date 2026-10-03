@@ -290,7 +290,8 @@
         editorDialog.close();
         saveDraft();
         renderDraft();
-        status.textContent = 'Unsaved changes are in this page draft. Save & run updater to write them to the CSV.';
+        var saveBtn = document.getElementById('sellerSaveButton');
+        if(saveBtn && !saveBtn.disabled) saveBtn.click();
     });
 
     // The submit handler handles saving and closing
@@ -349,7 +350,9 @@
                 editRow.list_price = newPrice;
                 saveDraft();
                 restorePriceDisplay(newPrice);
-                status.textContent = 'Price updated in draft. Save to persist.';
+                status.textContent = 'Price updated. Saving...';
+                var saveBtn = document.getElementById('sellerSaveButton');
+                if(saveBtn && !saveBtn.disabled) saveBtn.click();
                 var toast = document.getElementById('toast');
                 if (toast) {
                     toast.textContent = 'Price updated to ' + (newPrice ? '₹' + newPrice : 'Price on request');
@@ -397,6 +400,8 @@
             status.textContent = 'Visibility change is unsaved. Hidden items remain in seller data and will be excluded from customer pages.';
             saveDraft();
             renderDraft();
+            var saveBtn = document.getElementById('sellerSaveButton');
+            if(saveBtn && !saveBtn.disabled) saveBtn.click();
             return;
         }
         if (target.dataset.deleteSerial) {
@@ -407,6 +412,8 @@
             status.textContent = 'Product removed from the unsaved draft. Save to persist, or Undo to restore it.';
             saveDraft();
             renderDraft();
+            var saveBtn = document.getElementById('sellerSaveButton');
+            if(saveBtn && !saveBtn.disabled) saveBtn.click();
         }
     });
 
