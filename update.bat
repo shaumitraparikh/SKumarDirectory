@@ -120,7 +120,7 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8766 ^| findstr LISTENING') 
 )
 
 REM Start new server in background and record PID
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$proc = Start-Process -FilePath '%PYTHON_EXE%' -ArgumentList 'src\seller\local_seller.py' -WindowStyle Hidden -PassThru; $proc.Id | Out-File -FilePath 'server.pid' -Encoding ascii"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$proc = Start-Process -FilePath '%PYTHON_EXE%' -ArgumentList 'src\seller\local_seller.py' -WorkingDirectory '%REPO_DIR%' -RedirectStandardOutput 'server.log' -RedirectStandardError 'server.err.log' -WindowStyle Hidden -PassThru; $proc.Id | Out-File -FilePath 'server.pid' -Encoding ascii"
 
 REM Allow brief startup time to initialize socket (portable delay)
 ping 127.0.0.1 -n 2 >nul
