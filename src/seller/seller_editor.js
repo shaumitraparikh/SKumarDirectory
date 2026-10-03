@@ -460,7 +460,10 @@
             savedUndoAvailable = undo.can_undo;
             updateUndoButton();
             status.textContent += undo.can_undo ? ' Saved changes can be undone.' : '';
-        }).catch(function () {});
+            document.getElementById('sellerAddButton').disabled = false;
+        }).catch(function () {
+            document.getElementById('sellerAddButton').disabled = false;
+        });
     }).catch(function (error) {
         document.getElementById('sellerAddButton').disabled = true;
         document.getElementById('sellerSaveButton').disabled = true;
