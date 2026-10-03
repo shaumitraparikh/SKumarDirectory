@@ -2068,6 +2068,16 @@ function archiveCurrentBill(date) {
                 body: JSON.stringify(order)
             }).then(r => r.json()).then(res => {
                 if (res.success) {
+                    if (res.added && res.added.id && res.added.id !== reference) {
+                        document.getElementById("pInvNo").innerText = res.added.id;
+                        order.id = res.added.id;
+                        order.html = standaloneBillHtml();
+                        fetch("/api/bills/add", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(order)
+                        }).catch(e => console.warn(e));
+                    }
                     // Automatically trigger Tally/GST preparation in the background
                     fetch("/api/gst/prepare", {
                         method: "POST",
