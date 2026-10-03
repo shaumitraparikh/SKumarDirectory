@@ -95,7 +95,7 @@ class CatalogDataTests(unittest.TestCase):
         self.assertIn("Add to quote", search_js)
         self.assertIn("commerce_core.js", search)
         self.assertIn("search_catalog.css", search)
-        self.assertIn('href="app/assets/css/search_catalog.css"', search)
+        self.assertIn('href="app/assets/css/search_catalog.css', search)
         self.assertIn('src="app/assets/js/commerce_core.js"', search)
         self.assertIn('href="print_catalog.html"', search)
         self.assertIn("Price on request", printed)

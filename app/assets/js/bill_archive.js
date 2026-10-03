@@ -38,7 +38,7 @@
             buyerName = buyerMatch[1].trim();
         }
         var totalMatch = html.match(/id=["']pGrandTotal["'][^>]*>([^<]+)</i) ||
-                         html.match(/class=["'][^"']*grand-total[^"']*["'][^>]*>.*?(?:₹|INR|\b)([\d,]+(?:\.\d{2})?)/is);
+                         html.match(/class=["'][^"']*grand-total[^"']*["'][^>]*>[\s\S]*?(?:₹|INR|\b)([\d,]+(?:\.\d{2})?)/i);
         if (totalMatch && totalMatch[1].trim()) {
             grandTotal = totalMatch[1].trim();
         }
