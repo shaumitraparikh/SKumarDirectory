@@ -105,9 +105,11 @@ if "%LOCAL_ONLY%"=="1" (
 echo Restarting local seller server...
 REM Kill old server via PID if server.pid exists
 if exist "server.pid" (
-    set /p OLD_PID=<"server.pid"
-    if defined OLD_PID (
-        taskkill /F /PID !OLD_PID! >nul 2>&1
+    for /f "usebackq delims=" %%p in ("server.pid") do (
+        set "OLD_PID=%%p"
+        if defined OLD_PID (
+            taskkill /F /PID !OLD_PID! >nul 2>&1
+        )
     )
     del /f /q "server.pid" >nul 2>&1
 )
@@ -120,12 +122,12 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8766 ^| findstr LISTENING') 
 REM Start new server in background and record PID
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$proc = Start-Process -FilePath '%PYTHON_EXE%' -ArgumentList 'src\seller\local_seller.py' -WindowStyle Hidden -PassThru; $proc.Id | Out-File -FilePath 'server.pid' -Encoding ascii"
 
-REM Allow brief startup time to initialize socket
-timeout /t 1 /nobreak >nul
+REM Allow brief startup time to initialize socket (portable delay)
+ping 127.0.0.1 -n 2 >nul
 
 set "SERVER_PID="
 if exist "server.pid" (
-    set /p SERVER_PID=<"server.pid"
+    for /f "usebackq delims=" %%p in ("server.pid") do set "SERVER_PID=%%p"
 )
 
 if defined SERVER_PID (
