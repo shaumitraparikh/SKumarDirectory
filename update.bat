@@ -63,34 +63,25 @@ echo.
 
 if "%LOCAL_ONLY%"=="0" (
     echo Pulling latest changes...
+    git restore index.html photo_catalog.html print_catalog.html >nul 2>&1
     git pull origin main
     if errorlevel 1 (
-        echo ERROR: Git pull failed.
-        exit /b 1
+        echo WARNING: Git pull encountered an issue. Proceeding with local rebuild...
     )
 )
 
 echo Rebuilding the catalogs from the current CSV, templates, and images...
 "%PYTHON_EXE%" src\build_catalog.py
-if errorlevel 1 (
-    echo ERROR: Catalog build failed.
-    exit /b 1
-)
+if errorlevel 1 goto :error
 
 echo Running tests...
 "%PYTHON_EXE%" -m unittest discover -s tests
-if errorlevel 1 (
-    echo ERROR: Python unit tests failed.
-    exit /b 1
-)
+if errorlevel 1 goto :error
 
 for %%f in (tests\*.test.js) do (
     if exist "%%f" (
         node "%%f"
-        if errorlevel 1 (
-            echo ERROR: JavaScript test %%f failed.
-            exit /b 1
-        )
+        if errorlevel 1 goto :error
     )
 )
 
@@ -119,8 +110,8 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8766 ^| findstr LISTENING') 
     taskkill /F /PID %%a >nul 2>&1
 )
 
-REM Start new server minimized in background and record output
-start "SKumar Local Seller" /min cmd /c ""%PYTHON_EXE%" src\seller\local_seller.py > server.log 2>&1"
+REM Start new server minimized in background
+start "SKumar Local Server" /d "%REPO_DIR%" /min "%PYTHON_EXE%" src\seller\local_seller.py
 
 REM Allow brief startup time to initialize socket (portable delay)
 ping 127.0.0.1 -n 3 >nul
@@ -141,6 +132,19 @@ if defined SERVER_PID (
 echo.
 echo =======================================================
 echo   UPDATE COMPLETE!
-echo   The app is running at: http://127.0.0.1:8766/?edit=true
+echo   Opening http://127.0.0.1:8766/?edit=true in browser...
 echo =======================================================
+start "" "http://127.0.0.1:8766/?edit=true"
+echo.
+echo Press any key to close this window...
+pause >nul
 exit /b 0
+
+:error
+echo.
+echo =======================================================
+echo   ERROR: Update encountered an issue. See details above.
+echo =======================================================
+echo.
+pause
+exit /b 1
