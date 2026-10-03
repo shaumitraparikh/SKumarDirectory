@@ -22,7 +22,7 @@ Digital Product Directory, Interactive POS/Ordering, Photo Catalog & Print Price
 > * Press **`Ctrl + P`** → Choose **Save as PDF** to export an up-to-date physical or digital price catalog.
 >
 > ✏️ **4. Update Prices or Products (Admin)**
-> * Open **`data/catalog_data.csv`** in Excel → Edit prices or add items → Save → run **`./update.sh`**. It validates, rebuilds, tests, and restarts the local POS server!
+> * Open **`data/catalog_data.xlsx`** in Excel → Edit prices or add items → Save → run **`./update.sh`**. It validates, rebuilds, tests, and restarts the local POS server!
 
 ---
 
@@ -35,7 +35,7 @@ Double-click any of the standalone HTML files to open them in your browser, or v
 - **`print_catalog.html`** — 📄 **Print-Ready Price List**: Clean layout formatted for printing (`Ctrl + P` → Save as PDF).
 
 ### 2. Update Prices, Products, or Images (Admin)
-1. Open **`data/catalog_data.csv`** in Microsoft Excel or Google Sheets.
+1. Open **`data/catalog_data.xlsx`** in Microsoft Excel or Google Sheets.
 2. Edit prices, adjust sizes/descriptions, or append new product rows.
 3. Save the file and run **`./update.sh`**.
    - Pulls the latest changes.
@@ -54,8 +54,8 @@ Double-click any of the standalone HTML files to open them in your browser, or v
   * For items with listed prices, click **Add** to add to cart.
   * For *Price on Request* items, click **Add to Quote**; you can enter custom quote rates directly inside the cart drawer.
 * **Customer Directory**:
-  * Copy `data/client_data.example.csv` to `data/client_data.csv` (git-ignored), then use **Load Customer List (CSV)** in checkout. Customer GSTINs are never published to GitHub Pages.
-  * Type customer name/GSTIN in the checkout panel to auto-fill details once the CSV is loaded.
+  * Copy `data/client_data.example.xlsx` to `data/client_data.xlsx` (git-ignored), then use **Load Customer List (Excel)** in checkout. Customer GSTINs are never published to GitHub Pages.
+  * Type customer name/GSTIN in the checkout panel to auto-fill details once the list is loaded.
 * **Proforma Invoice & Billing**:
   * Generates a branded proforma invoice with CGST/SGST tax breakdown, customer GSTIN, and company contact details.
   * Click **Save Proforma Bill**: On GitHub Pages / static hosting, the browser archives bills into `data/bills/` and `data/generated_bills/` via the File System Access API (or downloads a copy).
@@ -100,11 +100,11 @@ This system is built as a **pure static web application**:
 │   └── sw.js                    <- Offline Service Worker cache engine
 │
 ├── data/                        <- Databases and source documents
-│   ├── catalog_data.csv         <- Canonical product database (edit this!)
-│   ├── client_data.csv          <- Customer directory (git-ignored for privacy)
-│   ├── client_data.example.csv  <- Template for customer directory CSV
+│   ├── catalog_data.xlsx        <- Canonical product database (edit this!)
+│   ├── client_data.xlsx         <- Customer directory (git-ignored for privacy)
+│   ├── client_data.example.xlsx <- Template for customer directory Excel
 │   ├── config.json              <- Company header, GSTIN, contacts, and tax rates
-│   ├── bills/                   <- Generated monthly CSV bill registers (YYYY-MM.csv)
+│   ├── bills/                   <- Generated monthly Excel bill registers (YYYY-MM.xlsx)
 │   ├── generated_bills/         <- Archived HTML/PDF invoices organized by month
 │   └── docs 2025/               <- Original source Word documents (.docx backups)
 │
@@ -123,7 +123,7 @@ This system is built as a **pure static web application**:
 
 ## 🛠️ Data Management Reference
 
-### Adding or Editing Products (`data/catalog_data.csv`)
+### Adding or Editing Products (`data/catalog_data.xlsx`)
 | Column | Description | Example |
 |---|---|---|
 | `sr_number` | Unique product identifier (Group.Item format) | `1.1`, `2.5`, `18.12` |

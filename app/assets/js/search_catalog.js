@@ -686,23 +686,21 @@ const initialClients = mergeCustomers([
 ]);
 setupClientData(initialClients);
 
-// Auto-fetch local client_data.csv if served over HTTP/localhost
+// Auto-fetch local client data if served over HTTP/localhost
 if (typeof fetch === "function" && location.protocol.startsWith("http")) {
-  fetch("data/client_data.csv")
-    .then((res) => (res.ok ? res.text() : Promise.reject()))
-    .then((csvText) => {
-      if (window.ClientDirectory && csvText) {
-        const fetchedClients = ClientDirectory.parseCsv(csvText);
-        if (fetchedClients && fetchedClients.length) {
-          const combined = mergeCustomers([fetchedClients, clientRecords]);
-          setupClientData(combined);
-          try {
-            localStorage.setItem(
-              "saved_client_records",
-              JSON.stringify(combined),
-            );
-          } catch (e) {}
-        }
+  fetch("/api/clients")
+    .then((res) => (res.ok ? res.json() : Promise.reject()))
+    .then((data) => {
+      const fetchedClients = data && data.clients ? data.clients : [];
+      if (fetchedClients && fetchedClients.length) {
+        const combined = mergeCustomers([fetchedClients, clientRecords]);
+        setupClientData(combined);
+        try {
+          localStorage.setItem(
+            "saved_client_records",
+            JSON.stringify(combined),
+          );
+        } catch (e) {}
       }
     })
     .catch(() => {});

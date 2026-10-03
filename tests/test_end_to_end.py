@@ -52,12 +52,18 @@ class EmbeddedCatalogParser(HTMLParser):
 class CatalogEndToEndTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        with (CATALOG_ROOT / "data" / "catalog_data.csv").open(
-            encoding="utf-8-sig", newline=""
-        ) as csv_file:
-            reader = csv.DictReader(csv_file)
-            cls.csv_fields = reader.fieldnames
-            cls.csv_rows = list(reader)
+        import openpyxl
+        wb = openpyxl.load_workbook(CATALOG_ROOT / "data" / "catalog_data.xlsx", data_only=True)
+        ws = wb.active
+        all_rows = list(ws.iter_rows(values_only=True))
+        cls.csv_fields = [str(c).strip() for c in all_rows[0] if c is not None]
+        cls.csv_rows = []
+        for r in all_rows[1:]:
+            if any(v is not None and str(v).strip() for v in r):
+                cls.csv_rows.append({
+                    cls.csv_fields[i]: str(r[i]).strip() if i < len(r) and r[i] is not None else ""
+                    for i in range(len(cls.csv_fields))
+                })
         cls.products_by_serial = {row["sr_number"]: row for row in cls.csv_rows}
 
     def test_full_catalog_build_runs_from_outside_repository(self):
@@ -87,12 +93,12 @@ class CatalogEndToEndTests(unittest.TestCase):
         self.assertEqual(config["checkout"]["provider"], "whatsapp")
 
     def test_customer_directory_stays_local_and_order_forms_are_accessible_disclosures(self):
-        example_file = CATALOG_ROOT / "data" / "client_data.example.csv"
-        self.assertTrue(example_file.is_file(), "Missing data/client_data.example.csv template")
+        example_file = CATALOG_ROOT / "data" / "client_data.example.xlsx"
+        self.assertTrue(example_file.is_file(), "Missing data/client_data.example.xlsx template")
 
-        self.assertIn("data/client_data.csv", (CATALOG_ROOT / ".gitignore").read_text(encoding="utf-8"))
+        self.assertIn("data/client_data.xlsx", (CATALOG_ROOT / ".gitignore").read_text(encoding="utf-8"))
         tracked_customer_data = subprocess.run(
-            ["git", "ls-files", "--error-unmatch", "data/client_data.csv"],
+            ["git", "ls-files", "--error-unmatch", "data/client_data.xlsx"],
             cwd=CATALOG_ROOT,
             capture_output=True,
             text=True,
@@ -100,7 +106,7 @@ class CatalogEndToEndTests(unittest.TestCase):
         )
         self.assertNotEqual(tracked_customer_data.returncode, 0)
         ignored_customer_data = subprocess.run(
-            ["git", "check-ignore", "--quiet", "data/client_data.csv"],
+            ["git", "check-ignore", "--quiet", "data/client_data.xlsx"],
             cwd=CATALOG_ROOT,
             check=False,
         )
@@ -115,8 +121,8 @@ class CatalogEndToEndTests(unittest.TestCase):
         self.assertIn('id="billArchiveDialog"', search_html)
         self.assertIn('id="openBillsButton"', search_html)
         self.assertIn("window.INJECTED_CLIENT_DATA =", search_html)
-        self.assertNotIn('src="data/client_data.csv"', search_html)
-        self.assertNotIn("href=\"data/client_data.csv\"", search_html)
+        self.assertNotIn('src="data/client_data.xlsx"', search_html)
+        self.assertNotIn("href=\"data/client_data.xlsx\"", search_html)
     def test_hidden_catalog_items_are_excluded_from_customer_output(self):
         self.assertIn("hidden", self.csv_fields)
         rows = [

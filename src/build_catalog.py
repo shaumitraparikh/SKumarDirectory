@@ -46,9 +46,7 @@ except ImportError:
 # ============================================================
 SCRIPT_DIR = Path(__file__).parent.parent
 CONFIG_FILE = SCRIPT_DIR / "data" / "config.json"
-DATA_XLSX_FILE = SCRIPT_DIR / "data" / "catalog_data.xlsx"
-DATA_CSV_FILE = SCRIPT_DIR / "data" / "catalog_data.csv"
-DATA_FILE = DATA_XLSX_FILE if DATA_XLSX_FILE.exists() else DATA_CSV_FILE
+DATA_FILE = SCRIPT_DIR / "data" / "catalog_data.xlsx"
 DATA_NOTES_FILE = SCRIPT_DIR / "data" / "catalog_data_notes.json"
 IMAGES_DIR = SCRIPT_DIR / "images"
 TEMPLATES_DIR = SCRIPT_DIR / "app" / "templates"
@@ -61,9 +59,9 @@ def load_config():
         return json.load(f)
 
 
-def load_csv_data(csv_path):
-    """Load product data from XLSX or CSV."""
-    path = Path(csv_path)
+def load_catalog_data(data_path):
+    """Load product data from XLSX workbook."""
+    path = Path(data_path)
     if not path.exists():
         if path.suffix == ".csv" and path.with_suffix(".xlsx").exists():
             path = path.with_suffix(".xlsx")
@@ -71,7 +69,7 @@ def load_csv_data(csv_path):
             path = path.with_suffix(".csv")
 
     items = []
-    if path.suffix == ".xlsx":
+    if path.suffix == ".xlsx" or not path.suffix:
         import openpyxl
         wb = openpyxl.load_workbook(path, data_only=True)
         ws = wb.active
@@ -134,10 +132,9 @@ def load_csv_data(csv_path):
             }
             missing_fields = required_fields - set(reader.fieldnames or [])
             if missing_fields:
-                raise ValueError(f"Catalog CSV is missing columns: {', '.join(sorted(missing_fields))}")
+                raise ValueError(f"Catalog data is missing columns: {', '.join(sorted(missing_fields))}")
 
             for row in reader:
-                # Clean up data
                 item = {}
                 for key, val in row.items():
                     item[key] = val.strip() if val else ''
@@ -149,7 +146,6 @@ def load_csv_data(csv_path):
                     '1', 'true', 'yes', 'hidden'
                 }
 
-                # Clean up unit field
                 unit = item.get('unit', '')
                 if unit in (',,', ',') or '\ufffd' in unit:
                     item['unit'] = ''
@@ -170,6 +166,9 @@ def load_csv_data(csv_path):
     for item in items:
         item['notes'] = notes.get(item['sr_number'], {})
     return items
+
+
+load_csv_data = load_catalog_data
 
 
 def load_catalog_data_notes(items):
@@ -522,7 +521,6 @@ def build_search_catalog(config, categories, items, env):
 
     client_data = []
     client_xlsx = Path('data/client_data.xlsx')
-    client_csv = Path('data/client_data.csv')
     if client_xlsx.is_file():
         import openpyxl
         cwb = openpyxl.load_workbook(client_xlsx, data_only=True)
@@ -536,10 +534,6 @@ def build_search_catalog(config, categories, items, env):
                         cfields[idx]: str(cr[idx]).strip() if idx < len(cr) and cr[idx] is not None else ''
                         for idx in range(len(cfields))
                     })
-    elif client_csv.is_file():
-        with open(client_csv, 'r', encoding='utf-8') as cf:
-            reader = csv.DictReader(cf)
-            client_data = list(reader)
 
     saved_bills = load_saved_bills()
 

@@ -142,7 +142,7 @@ def available_months() -> list:
     pattern = re.compile(r"\d{4}-\d{2}")
     found = set()
     for p in BILLS_DIR.iterdir():
-        if p.suffix in (".csv", ".xlsx") and pattern.fullmatch(p.stem):
+        if p.suffix in (".xlsx", ".csv") and pattern.fullmatch(p.stem):
             found.add(p.stem)
     return sorted(found)
 
@@ -196,7 +196,6 @@ def read_bills(months: list) -> list:
                 order = json.loads(raw)
             except json.JSONDecodeError:
                 continue
-            # Older registers carried the org only as a CSV column.
             order.setdefault("org", row.get("org") or "skumar")
             order.setdefault("order_reference", row.get("id") or "")
             order.setdefault("created_at", row.get("createdAt") or "")

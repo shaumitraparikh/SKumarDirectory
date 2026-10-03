@@ -54,7 +54,7 @@
     "items_per_page": 60,
     "output_dir": "output",
     "images_dir": "images",
-    "data_file": "data/catalog_data.csv",
+    "data_file": "data/catalog_data.xlsx",
     "phone": "022-49233982",
     "address": "3rd Central Building, Grd. Floor, 11, Bomanji Master Road, Next to Kalbadevi Head Post Office, Mumbai - 400 002.",
     "gst": "",

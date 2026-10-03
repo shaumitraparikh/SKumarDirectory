@@ -341,27 +341,31 @@ class PrepareRunTests(unittest.TestCase):
         self.temporary_directory.cleanup()
 
     def _write_register(self, month, orders):
-        import csv as csv_module
-
-        path = self.bills_dir / f"{month}.csv"
-        with path.open("w", encoding="utf-8-sig", newline="") as handle:
-            writer = csv_module.DictWriter(
-                handle,
-                fieldnames=["id", "createdAt", "org", "buyer_name", "buyer_phone",
-                            "subTotal", "grandTotal", "order_json"],
-            )
-            writer.writeheader()
-            for order in orders:
-                writer.writerow({
-                    "id": order["order_reference"],
-                    "createdAt": order["created_at"],
-                    "org": order["org"],
-                    "buyer_name": order["customer"]["name"],
-                    "buyer_phone": order["customer"].get("phone", ""),
-                    "subTotal": order["amounts"]["taxable_subtotal"],
-                    "grandTotal": order["amounts"]["estimated_total"],
-                    "order_json": json.dumps(order),
-                })
+        import openpyxl
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = month[:31]
+        fields = ["id", "createdAt", "org", "buyer_name", "buyer_phone",
+                  "subTotal", "grandTotal", "order_json"]
+        for c_idx, field in enumerate(fields, 1):
+            cell = ws.cell(row=1, column=c_idx, value=field)
+            cell.number_format = '@'
+        for r_idx, order in enumerate(orders, 2):
+            row_dict = {
+                "id": order["order_reference"],
+                "createdAt": order["created_at"],
+                "org": order["org"],
+                "buyer_name": order["customer"]["name"],
+                "buyer_phone": order["customer"].get("phone", ""),
+                "subTotal": order["amounts"]["taxable_subtotal"],
+                "grandTotal": order["amounts"]["estimated_total"],
+                "order_json": json.dumps(order),
+            }
+            for c_idx, field in enumerate(fields, 1):
+                cell = ws.cell(row=r_idx, column=c_idx, value=str(row_dict.get(field, "")))
+                cell.number_format = '@'
+        path = self.bills_dir / f"{month}.xlsx"
+        wb.save(path)
 
     def test_bills_are_split_into_per_org_daybook_and_hsn_files(self):
         result = prepare.prepare(
@@ -442,13 +446,15 @@ class AppendBillSchemaTests(unittest.TestCase):
         self.assertEqual(row["subTotal"], 1672.0)
         self.assertEqual(row["grandTotal"], 1972.96)
 
-        registers = sorted(p.name for p in seller.BILLS_DIR.glob("*.csv"))
-        self.assertEqual(registers, ["2026-10.csv"])
+        registers = sorted(p.name for p in seller.BILLS_DIR.glob("*.xlsx"))
+        self.assertEqual(registers, ["2026-10.xlsx"])
 
-        with (seller.BILLS_DIR / "2026-10.csv").open(
-            encoding="utf-8-sig", newline=""
-        ) as handle:
-            stored = next(csv_module.DictReader(handle))
+        import openpyxl
+        wb = openpyxl.load_workbook(seller.BILLS_DIR / "2026-10.xlsx", data_only=True)
+        ws = wb.active
+        all_rows = list(ws.iter_rows(values_only=True))
+        header = [str(c).strip() for c in all_rows[0] if c is not None]
+        stored = dict(zip(header, [str(c).strip() if c is not None else "" for c in all_rows[1]]))
         payload = json.loads(stored["order_json"])
         self.assertEqual(payload["order_reference"], "S-202610-000001")
         self.assertEqual(payload["org"], "skumar")
@@ -458,8 +464,8 @@ class AppendBillSchemaTests(unittest.TestCase):
 
         self.assertIsNotNone(row)
         self.assertTrue(row["id"].startswith("EST-"))
-        self.assertTrue(list(seller.ESTIMATES_DIR.glob("*.csv")))
-        self.assertFalse(list(seller.BILLS_DIR.glob("*.csv")))
+        self.assertTrue(list(seller.ESTIMATES_DIR.glob("*.xlsx")))
+        self.assertFalse(list(seller.BILLS_DIR.glob("*.xlsx")))
 
     def test_payload_without_any_timestamp_is_rejected(self):
         self.assertIsNone(seller.append_bill({"org": "skumar"}))

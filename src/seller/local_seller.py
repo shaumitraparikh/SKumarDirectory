@@ -15,9 +15,7 @@ from urllib.parse import urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DATA_XLSX_FILE = ROOT / "data" / "catalog_data.xlsx"
-DATA_CSV_FILE = ROOT / "data" / "catalog_data.csv"
-DATA_FILE = DATA_XLSX_FILE if DATA_XLSX_FILE.exists() else DATA_CSV_FILE
+DATA_FILE = ROOT / "data" / "catalog_data.xlsx"
 HISTORY_FILE = ROOT / "data" / ".seller_history.json"
 HOST = "127.0.0.1"
 PORT = 8766
@@ -29,40 +27,27 @@ from src.seller import prepare_tally_files
 
 
 
-CLIENT_XLSX_FILE = ROOT / "data" / "client_data.xlsx"
-CLIENT_CSV_FILE = ROOT / "data" / "client_data.csv"
-CLIENT_FILE = CLIENT_XLSX_FILE if CLIENT_XLSX_FILE.exists() else CLIENT_CSV_FILE
+CLIENT_FILE = ROOT / "data" / "client_data.xlsx"
 
 def read_clients():
-    target = CLIENT_FILE
-    if not target.exists():
-        if target.suffix == ".xlsx" and CLIENT_CSV_FILE.exists():
-            target = CLIENT_CSV_FILE
-        elif target.suffix == ".csv" and CLIENT_XLSX_FILE.exists():
-            target = CLIENT_XLSX_FILE
-        else:
-            return []
-
-    if target.suffix == ".xlsx":
-        import openpyxl
-        wb = openpyxl.load_workbook(target, data_only=True)
-        ws = wb.active
-        all_rows = list(ws.iter_rows(values_only=True))
-        if not all_rows:
-            return []
-        fields = [str(c).strip() for c in all_rows[0] if c is not None]
-        clients = []
-        for r in all_rows[1:]:
-            if not any(v is not None and str(v).strip() for v in r):
-                continue
-            clients.append({
-                fields[i]: str(r[i]).strip() if i < len(r) and r[i] is not None else ""
-                for i in range(len(fields))
-            })
-        return clients
-    else:
-        with target.open(encoding="utf-8-sig", newline="") as source:
-            return list(csv.DictReader(source))
+    if not CLIENT_FILE.exists():
+        return []
+    import openpyxl
+    wb = openpyxl.load_workbook(CLIENT_FILE, data_only=True)
+    ws = wb.active
+    all_rows = list(ws.iter_rows(values_only=True))
+    if not all_rows:
+        return []
+    fields = [str(c).strip() for c in all_rows[0] if c is not None]
+    clients = []
+    for r in all_rows[1:]:
+        if not any(v is not None and str(v).strip() for v in r):
+            continue
+        clients.append({
+            fields[i]: str(r[i]).strip() if i < len(r) and r[i] is not None else ""
+            for i in range(len(fields))
+        })
+    return clients
 
 def append_client(new_client):
     clients = read_clients()
@@ -89,7 +74,6 @@ def append_client(new_client):
         clean_new = {k: new_client.get(k, '') for k in fieldnames}
         clients.append(clean_new)
 
-    # 1. Write XLSX (primary)
     import openpyxl
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -102,15 +86,7 @@ def append_client(new_client):
             val = str(c.get(field, '') or '').strip()
             cell = ws.cell(row=r_idx, column=c_idx, value=val)
             cell.number_format = '@'
-    wb.save(CLIENT_XLSX_FILE)
-
-    # 2. Rewrite CSV mirror
-    with CLIENT_CSV_FILE.open(mode='w', encoding="utf-8-sig", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        for c in clients:
-            writer.writerow({k: c.get(k, '') for k in fieldnames})
-            
+    wb.save(CLIENT_FILE)
     return True
 
 
@@ -124,7 +100,7 @@ def _pick(mapping, *keys, default=""):
     Supports both the current CommerceCore.createOrder schema
     (order_reference / created_at / customer / amounts) and the older
     payload shape (id / createdAt / buyer / totals) that may still be
-    present in previously saved monthly CSVs.
+    present in previously saved monthly files.
     """
     if not isinstance(mapping, dict):
         return default
@@ -146,7 +122,6 @@ def append_bill(order):
     is_estimate = order.get("isEstimate", False)
     target_dir = ESTIMATES_DIR if is_estimate else BILLS_DIR
     xlsx_file = target_dir / f"{month}.xlsx"
-    csv_file = target_dir / f"{month}.csv"
     
     fieldnames = ['id', 'createdAt', 'org', 'buyer_name', 'buyer_phone', 'subTotal', 'grandTotal', 'order_json']
 
@@ -168,10 +143,6 @@ def append_bill(order):
                         f_names[i]: str(r[i]).strip() if i < len(r) and r[i] is not None else ""
                         for i in range(len(f_names))
                     })
-    elif csv_file.exists():
-        with csv_file.open(encoding="utf-8-sig", newline="") as f:
-            reader = csv.DictReader(f)
-            existing_rows = list(reader)
 
     assigned_id = _pick(order, 'id', 'order_reference')
     if (not assigned_id or len(assigned_id) > 15 or 'PI-' in assigned_id
@@ -205,7 +176,6 @@ def append_bill(order):
     if not found:
         existing_rows.append(row)
 
-    # 1. Write XLSX (primary)
     import openpyxl
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -219,13 +189,6 @@ def append_bill(order):
             cell = ws.cell(row=r_idx, column=c_idx, value=val)
             cell.number_format = '@'
     wb.save(xlsx_file)
-
-    # 2. Write CSV (mirror / compatibility)
-    with csv_file.open(mode="w", encoding="utf-8-sig", newline="") as dest:
-        writer = csv.DictWriter(dest, fieldnames=fieldnames)
-        writer.writeheader()
-        for r in existing_rows:
-            writer.writerow({k: r.get(k, '') for k in fieldnames})
         
     html_payload = order.get('html')
     if html_payload:
@@ -242,35 +205,24 @@ def read_bills():
     bills = []
     import re as regex
     for target_dir in [BILLS_DIR, ESTIMATES_DIR]:
-        months_seen = set()
-        files = sorted(target_dir.glob("*.xlsx")) + sorted(target_dir.glob("*.csv"))
-        for file_path in files:
-            if not regex.match(r"^\d{4}-\d{2}\.(xlsx|csv)$", file_path.name):
+        for xlsx_file in sorted(target_dir.glob("*.xlsx")):
+            if not regex.match(r"^\d{4}-\d{2}\.xlsx$", xlsx_file.name):
                 continue
-            month = file_path.stem
-            if month in months_seen:
+            month = xlsx_file.stem
+            import openpyxl
+            wb = openpyxl.load_workbook(xlsx_file, data_only=True)
+            ws = wb.active
+            all_rows = list(ws.iter_rows(values_only=True))
+            if not all_rows:
                 continue
-            months_seen.add(month)
-
-            rows = []
-            if file_path.suffix == ".xlsx":
-                import openpyxl
-                wb = openpyxl.load_workbook(file_path, data_only=True)
-                ws = wb.active
-                all_rows = list(ws.iter_rows(values_only=True))
-                if all_rows:
-                    f_names = [str(c).strip() for c in all_rows[0] if c is not None]
-                    for r in all_rows[1:]:
-                        if any(v is not None and str(v).strip() for v in r):
-                            rows.append({
-                                f_names[i]: str(r[i]).strip() if i < len(r) and r[i] is not None else ""
-                                for i in range(len(f_names))
-                            })
-            else:
-                with file_path.open(encoding="utf-8-sig", newline="") as f:
-                    rows = list(csv.DictReader(f))
-
-            for row in rows:
+            f_names = [str(c).strip() for c in all_rows[0] if c is not None]
+            for r in all_rows[1:]:
+                if not any(v is not None and str(v).strip() for v in r):
+                    continue
+                row = {
+                    f_names[i]: str(r[i]).strip() if i < len(r) and r[i] is not None else ""
+                    for i in range(len(f_names))
+                }
                 bills.append({
                     "id": row.get('id'),
                     "month": month,
@@ -286,45 +238,33 @@ def read_bills():
 
 
 def read_catalog():
-    target = DATA_FILE
-    if not target.exists():
-        if target.suffix == ".xlsx" and DATA_CSV_FILE.exists():
-            target = DATA_CSV_FILE
-        elif target.suffix == ".csv" and DATA_XLSX_FILE.exists():
-            target = DATA_XLSX_FILE
-        else:
-            raise FileNotFoundError(f"Catalog file not found: {DATA_FILE}")
+    if not DATA_FILE.exists():
+        raise FileNotFoundError(f"Catalog file not found: {DATA_FILE}")
 
-    raw = target.read_bytes()
-    if target.suffix == ".xlsx":
-        import openpyxl
-        wb = openpyxl.load_workbook(target, data_only=True)
-        ws = wb.active
-        all_rows = list(ws.iter_rows(values_only=True))
-        if not all_rows:
-            return [], [], hashlib.sha256(raw).hexdigest()
-        fields = [str(col).strip() for col in all_rows[0] if col is not None]
-        rows = []
-        for r in all_rows[1:]:
-            if not any(v is not None and str(v).strip() for v in r):
-                continue
-            item = {}
-            for col_idx, key in enumerate(fields):
-                val = r[col_idx] if col_idx < len(r) else ''
-                if val is None:
-                    item[key] = ''
-                elif key == 'sr_number':
-                    item[key] = str(val).strip()
-                elif isinstance(val, float) and val.is_integer() and key in ('hsn_code', 'page'):
-                    item[key] = str(int(val))
-                else:
-                    item[key] = str(val).strip()
-            rows.append(item)
-    else:
-        with target.open(encoding="utf-8-sig", newline="") as source:
-            reader = csv.DictReader(source)
-            fields = list(reader.fieldnames or [])
-            rows = list(reader)
+    raw = DATA_FILE.read_bytes()
+    import openpyxl
+    wb = openpyxl.load_workbook(DATA_FILE, data_only=True)
+    ws = wb.active
+    all_rows = list(ws.iter_rows(values_only=True))
+    if not all_rows:
+        return [], [], hashlib.sha256(raw).hexdigest()
+    fields = [str(col).strip() for col in all_rows[0] if col is not None]
+    rows = []
+    for r in all_rows[1:]:
+        if not any(v is not None and str(v).strip() for v in r):
+            continue
+        item = {}
+        for col_idx, key in enumerate(fields):
+            val = r[col_idx] if col_idx < len(r) else ''
+            if val is None:
+                item[key] = ''
+            elif key == 'sr_number':
+                item[key] = str(val).strip()
+            elif isinstance(val, float) and val.is_integer() and key in ('hsn_code', 'page'):
+                item[key] = str(int(val))
+            else:
+                item[key] = str(val).strip()
+        rows.append(item)
 
     if "hidden" not in fields:
         fields.append("hidden")
@@ -338,8 +278,6 @@ def write_catalog(fields, rows):
     if "hidden" not in fields:
         fields.append("hidden")
 
-    # 1. Write XLSX
-    xlsx_target = DATA_XLSX_FILE if DATA_FILE.suffix == ".xlsx" else (DATA_FILE if DATA_FILE.suffix == ".xlsx" else DATA_FILE.with_suffix(".xlsx"))
     import openpyxl
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -353,37 +291,13 @@ def write_catalog(fields, rows):
             cell = ws.cell(row=r_idx, column=c_idx, value=val)
             cell.number_format = '@'
 
-    temp_xlsx = xlsx_target.parent / f".catalog_data-{os.getpid()}.tmp.xlsx"
+    temp_xlsx = DATA_FILE.parent / f".catalog_data-{os.getpid()}.tmp.xlsx"
     try:
         wb.save(temp_xlsx)
-        os.replace(temp_xlsx, xlsx_target)
+        os.replace(temp_xlsx, DATA_FILE)
     finally:
         if temp_xlsx.exists():
             temp_xlsx.unlink()
-
-    # 2. Write CSV (mirror / compatibility)
-    csv_target = DATA_CSV_FILE if DATA_FILE.suffix == ".xlsx" else DATA_FILE
-    temporary_path = None
-    try:
-        with tempfile.NamedTemporaryFile(
-            mode="w",
-            encoding="utf-8-sig",
-            newline="",
-            dir=csv_target.parent,
-            prefix=".catalog_data-",
-            suffix=".tmp",
-            delete=False,
-        ) as temporary:
-            temporary_path = Path(temporary.name)
-            writer = csv.DictWriter(temporary, fieldnames=fields, extrasaction="ignore")
-            writer.writeheader()
-            for r in rows:
-                writer.writerow({k: r.get(k, "") for k in fields})
-        os.replace(temporary_path, csv_target)
-        temporary_path = None
-    finally:
-        if temporary_path and temporary_path.exists():
-            temporary_path.unlink()
 
 
 def read_history():

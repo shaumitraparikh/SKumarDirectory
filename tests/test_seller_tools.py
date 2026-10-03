@@ -27,22 +27,24 @@ class SellerEditorTests(unittest.TestCase):
         root = Path(self.temporary_directory.name)
         self.original_data = seller.DATA_FILE
         self.original_history = seller.HISTORY_FILE
-        seller.DATA_FILE = root / "catalog_data.csv"
+        seller.DATA_FILE = root / "catalog_data.xlsx"
         seller.HISTORY_FILE = root / ".seller_history.json"
-        with seller.DATA_FILE.open("w", encoding="utf-8-sig", newline="") as output:
-            writer = csv.DictWriter(
-                output,
-                fieldnames=[
-                    "sr_number", "group_number", "item_number", "category",
-                    "item_name", "hsn_code", "list_price", "hidden",
-                ],
-            )
-            writer.writeheader()
-            writer.writerow({
-                "sr_number": "1.1",
-                "category": "Test", "item_name": "Item", "hsn_code": "",
-                "list_price": "10", "hidden": "",
-            })
+        import openpyxl
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Catalog"
+        fieldnames = [
+            "sr_number", "group_number", "item_number", "category",
+            "item_name", "hsn_code", "list_price", "hidden",
+        ]
+        for c_idx, field in enumerate(fieldnames, 1):
+            cell = ws.cell(row=1, column=c_idx, value=field)
+            cell.number_format = '@'
+        row_vals = ["1.1", "", "", "Test", "Item", "", "10", ""]
+        for c_idx, val in enumerate(row_vals, 1):
+            cell = ws.cell(row=2, column=c_idx, value=val)
+            cell.number_format = '@'
+        wb.save(seller.DATA_FILE)
 
     def tearDown(self):
         seller.DATA_FILE = self.original_data

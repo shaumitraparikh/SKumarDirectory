@@ -69,7 +69,7 @@ jobs:
           cp -R images _site/images
           mkdir -p _site/data
           cp data/config.json _site/data/
-          cp data/catalog_data.csv _site/data/
+          cp data/catalog_data.xlsx _site/data/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

@@ -121,16 +121,34 @@ def one_saved_bill(isolated_bills_dir):
     return {**isolated_bills_dir, "order": order}
 
 
-# ── Component 1: bill is persisted to CSV ──────────────────────────────────────
+def _read_xlsx_rows(path):
+    import openpyxl
+    wb = openpyxl.load_workbook(path, data_only=True)
+    ws = wb.active
+    all_rows = list(ws.iter_rows(values_only=True))
+    if not all_rows:
+        return []
+    fields = [str(c).strip() for c in all_rows[0] if c is not None]
+    rows = []
+    for r in all_rows[1:]:
+        if any(v is not None and str(v).strip() for v in r):
+            rows.append({
+                fields[i]: str(r[i]).strip() if i < len(r) and r[i] is not None else ""
+                for i in range(len(fields))
+            })
+    return rows
+
+
+# ── Component 1: bill is persisted to XLSX ──────────────────────────────────────
 class TestBillSavedToCSV:
     def test_append_bill_creates_monthly_csv(self, one_saved_bill):
         month = "2026-10"
-        csv_file = one_saved_bill["bills"] / f"{month}.csv"
-        assert csv_file.exists(), f"Expected {csv_file} to exist after append_bill()"
+        xlsx_file = one_saved_bill["bills"] / f"{month}.xlsx"
+        assert xlsx_file.exists(), f"Expected {xlsx_file} to exist after append_bill()"
 
     def test_csv_has_correct_fields(self, one_saved_bill):
-        csv_file = one_saved_bill["bills"] / "2026-10.csv"
-        rows = list(csv.DictReader(csv_file.open(encoding="utf-8-sig")))
+        xlsx_file = one_saved_bill["bills"] / "2026-10.xlsx"
+        rows = _read_xlsx_rows(xlsx_file)
         assert len(rows) == 1
         row = rows[0]
         # Server auto-assigns ID with org prefix "S-" for skumar
@@ -139,8 +157,8 @@ class TestBillSavedToCSV:
         assert float(row["subTotal"]) == pytest.approx(1000.0)
 
     def test_csv_embeds_full_order_json(self, one_saved_bill):
-        csv_file = one_saved_bill["bills"] / "2026-10.csv"
-        rows = list(csv.DictReader(csv_file.open(encoding="utf-8-sig")))
+        xlsx_file = one_saved_bill["bills"] / "2026-10.xlsx"
+        rows = _read_xlsx_rows(xlsx_file)
         order_json = json.loads(rows[0]["order_json"])
         assert order_json["buyer"]["gstin"] == CUSTOMER_GSTIN
         items = order_json.get("items", [])
@@ -150,8 +168,8 @@ class TestBillSavedToCSV:
         import src.seller.local_seller as ls
         est_order = _make_order(bill_id="EST-202610-0001", is_estimate=True)
         ls.append_bill(est_order)
-        est_file = isolated_bills_dir["estimates"] / "2026-10.csv"
-        bill_file = isolated_bills_dir["bills"] / "2026-10.csv"
+        est_file = isolated_bills_dir["estimates"] / "2026-10.xlsx"
+        bill_file = isolated_bills_dir["bills"] / "2026-10.xlsx"
         assert est_file.exists(), "Estimate must land in estimates/"
         assert not bill_file.exists(), "Estimate must NOT appear in bills/"
 
@@ -161,8 +179,8 @@ class TestBillSavedToCSV:
         order = _make_order()
         ls.append_bill(order)
         ls.append_bill(order)  # second save of same order
-        csv_file = isolated_bills_dir["bills"] / "2026-10.csv"
-        rows = list(csv.DictReader(csv_file.open(encoding="utf-8-sig")))
+        xlsx_file = isolated_bills_dir["bills"] / "2026-10.xlsx"
+        rows = _read_xlsx_rows(xlsx_file)
         # Server assigns sequential IDs; same order saved twice gets same auto-ID
         # and the second write updates the existing row (dedup by ID)
         assert len(rows) in (1, 2), (
