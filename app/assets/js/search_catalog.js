@@ -975,9 +975,11 @@ function toggleCart(forceOpen) {
   const drawer = document.getElementById("cartDropdown");
   const isOpen = drawer.classList.contains("open");
   const shouldOpen = typeof forceOpen === "boolean" ? forceOpen : !isOpen;
+  const backdrop = document.getElementById("cartBackdrop");
   drawer.classList.toggle("open", shouldOpen);
-  document.getElementById("cartBackdrop").classList.toggle("open", shouldOpen);
+  backdrop.classList.toggle("open", shouldOpen);
   drawer.setAttribute("aria-hidden", String(!shouldOpen));
+  backdrop.setAttribute("aria-hidden", String(!shouldOpen));
   document
     .querySelector(".cart-toggle-btn")
     .setAttribute("aria-expanded", String(shouldOpen));
@@ -2107,19 +2109,21 @@ function generateBill(options = {}) {
     return;
   }
 
-  const taxRates = getTaxRates();
+  // View mode: a static printout only.
+  const viewModeOrder = isViewMode;
+
+  const taxRates = viewModeOrder ? { cgstRate: 0, sgstRate: 0 } : getTaxRates();
   if (!taxRates) {
     const invalidInput = [
       document.getElementById("cgstRate"),
       document.getElementById("sgstRate"),
     ].find((input) => !input.checkValidity());
-    invalidInput.reportValidity();
+    if (invalidInput) invalidInput.reportValidity();
     return;
   }
 
   // View mode: a static printout only. The reference is a dummy EST- number
   // (never a bill series) and the proforma is never archived or sent anywhere.
-  const viewModeOrder = isViewMode;
 
   const buyer = readBuyerDetails();
   const bName = buyer.name.trim() || (viewModeOrder ? "" : "Cash customer");
