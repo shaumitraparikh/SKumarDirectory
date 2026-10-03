@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 setlocal enabledelayedexpansion
 
 REM Usage:
@@ -11,10 +12,27 @@ set "REPO_DIR=%~dp0"
 cd /d "%REPO_DIR%" || exit /b 1
 
 REM ── Find python executable ──────────────────────────────────────────────────
+set "PYTHON_CMD="
 if exist "%REPO_DIR%.venv\Scripts\python.exe" (
-    set "PYTHON_EXE=%REPO_DIR%.venv\Scripts\python.exe"
+    set "PYTHON_CMD="%REPO_DIR%.venv\Scripts\python.exe""
 ) else (
-    set "PYTHON_EXE=python"
+    py -3 -c "import sys; sys.exit(0)" >nul 2>&1
+    if not errorlevel 1 (
+        set "PYTHON_CMD=py -3"
+    ) else (
+        python -c "import sys; sys.exit(0)" >nul 2>&1
+        if not errorlevel 1 (
+            set "PYTHON_CMD=python"
+        ) else (
+            python3 -c "import sys; sys.exit(0)" >nul 2>&1
+            if not errorlevel 1 (
+                set "PYTHON_CMD=python3"
+            ) else (
+                echo ERROR: Python 3 was not found. Please install Python from https://www.python.org/
+                exit /b 1
+            )
+        )
+    )
 )
 
 REM ── GST export shortcut ─────────────────────────────────────────────────────
@@ -33,10 +51,10 @@ echo   S. KUMAR ^& BROS - GST EXPORT
 echo =======================================================
 if /i "%MONTH%"=="all" (
     echo Exporting ALL saved months -^> Tally DayBook -^> GST JSON...
-    "%PYTHON_EXE%" src\seller\prepare_tally_files.py --all
+    %PYTHON_CMD% src\seller\prepare_tally_files.py --all
 ) else (
     echo Exporting %MONTH% -^> Tally DayBook -^> GST JSON...
-    "%PYTHON_EXE%" src\seller\prepare_tally_files.py --month "%MONTH%"
+    %PYTHON_CMD% src\seller\prepare_tally_files.py --month "%MONTH%"
 )
 if errorlevel 1 (
     echo.
@@ -63,26 +81,36 @@ echo.
 
 if "%LOCAL_ONLY%"=="0" (
     echo Pulling latest changes...
-    git restore index.html photo_catalog.html print_catalog.html >nul 2>&1
-    git pull origin main
-    if errorlevel 1 (
-        echo WARNING: Git pull encountered an issue. Proceeding with local rebuild...
+    where git >nul 2>&1
+    if not errorlevel 1 (
+        git restore index.html photo_catalog.html print_catalog.html >nul 2>&1
+        git pull origin main
+        if errorlevel 1 (
+            echo WARNING: Git pull encountered an issue. Proceeding with local rebuild...
+        )
+    ) else (
+        echo WARNING: Git is not installed or not in PATH. Skipping pull...
     )
 )
 
-echo Rebuilding the catalogs from the current CSV, templates, and images...
-"%PYTHON_EXE%" src\build_catalog.py
+echo Rebuilding the catalogs from the current data (XLSX/CSV), templates, and images...
+%PYTHON_CMD% src\build_catalog.py
 if errorlevel 1 goto :error
 
 echo Running tests...
-"%PYTHON_EXE%" -m unittest discover -s tests
+%PYTHON_CMD% -m unittest discover -s tests
 if errorlevel 1 goto :error
 
-for %%f in (tests\*.test.js) do (
-    if exist "%%f" (
-        node "%%f"
-        if errorlevel 1 goto :error
+where node >nul 2>&1
+if not errorlevel 1 (
+    for %%f in (tests\*.test.js) do (
+        if exist "%%f" (
+            node "%%f"
+            if errorlevel 1 goto :error
+        )
     )
+) else (
+    echo Note: Node.js not detected; skipping front-end test assertions.
 )
 
 if "%LOCAL_ONLY%"=="1" (
@@ -107,11 +135,11 @@ if exist "server.pid" (
 
 REM Kill any remaining process listening on port 8766
 for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8766 ^| findstr LISTENING') do (
-    taskkill /F /PID %%a >nul 2>&1
+    if not "%%a"=="0" taskkill /F /PID %%a >nul 2>&1
 )
 
 REM Start new server minimized in background
-start "SKumar Local Server" /d "%REPO_DIR%" /min "%PYTHON_EXE%" src\seller\local_seller.py
+start "SKumar Local Server" /d "%REPO_DIR%" /min %PYTHON_CMD% src\seller\local_seller.py
 
 REM Allow brief startup time to initialize socket (portable delay)
 ping 127.0.0.1 -n 3 >nul

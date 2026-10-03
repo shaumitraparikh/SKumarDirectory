@@ -4,6 +4,7 @@ __pycache__/
 venv/
 .pytest_cache/
 data/client_data.csv
+data/client_data.xlsx
 data/generated_bills/*
 !data/generated_bills/.gitkeep
 images_source_backup/

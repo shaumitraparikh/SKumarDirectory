@@ -46,7 +46,9 @@ except ImportError:
 # ============================================================
 SCRIPT_DIR = Path(__file__).parent.parent
 CONFIG_FILE = SCRIPT_DIR / "data" / "config.json"
-DATA_FILE = SCRIPT_DIR / "data" / "catalog_data.csv"
+DATA_XLSX_FILE = SCRIPT_DIR / "data" / "catalog_data.xlsx"
+DATA_CSV_FILE = SCRIPT_DIR / "data" / "catalog_data.csv"
+DATA_FILE = DATA_XLSX_FILE if DATA_XLSX_FILE.exists() else DATA_CSV_FILE
 DATA_NOTES_FILE = SCRIPT_DIR / "data" / "catalog_data_notes.json"
 IMAGES_DIR = SCRIPT_DIR / "images"
 TEMPLATES_DIR = SCRIPT_DIR / "app" / "templates"
@@ -60,46 +62,108 @@ def load_config():
 
 
 def load_csv_data(csv_path):
-    """Load product data from CSV."""
+    """Load product data from XLSX or CSV."""
+    path = Path(csv_path)
+    if not path.exists():
+        if path.suffix == ".csv" and path.with_suffix(".xlsx").exists():
+            path = path.with_suffix(".xlsx")
+        elif path.suffix == ".xlsx" and path.with_suffix(".csv").exists():
+            path = path.with_suffix(".csv")
+
     items = []
-    with open(csv_path, 'r', encoding='utf-8-sig') as f:
-        reader = csv.DictReader(f)
+    if path.suffix == ".xlsx":
+        import openpyxl
+        wb = openpyxl.load_workbook(path, data_only=True)
+        ws = wb.active
+        all_rows = list(ws.iter_rows(values_only=True))
+        if not all_rows:
+            return []
+        raw_header = all_rows[0]
+        fieldnames = [str(col).strip() for col in raw_header if col is not None]
         required_fields = {
             'sr_number', 'category', 'item_name', 'hsn_code', 'list_price',
             'unit', 'packing', 'image_ref', 'page'
         }
-        missing_fields = required_fields - set(reader.fieldnames or [])
+        missing_fields = required_fields - set(fieldnames)
         if missing_fields:
-            raise ValueError(f"Catalog CSV is missing columns: {', '.join(sorted(missing_fields))}")
+            raise ValueError(f"Catalog XLSX is missing columns: {', '.join(sorted(missing_fields))}")
 
-        for row in reader:
-            # Clean up data
+        for r in all_rows[1:]:
+            if not any(v is not None and str(v).strip() for v in r):
+                continue
             item = {}
-            for key, val in row.items():
-                item[key] = val.strip() if val else ''
-            
+            for col_idx, key in enumerate(fieldnames):
+                val = r[col_idx] if col_idx < len(r) else ''
+                if val is None:
+                    item[key] = ''
+                elif key == 'sr_number':
+                    item[key] = str(val).strip()
+                elif isinstance(val, float) and val.is_integer() and key in ('hsn_code', 'page'):
+                    item[key] = str(int(val))
+                else:
+                    item[key] = str(val).strip()
+
             if not item.get('sr_number') or not item.get('sr_number', '').strip():
                 continue
 
             item['hidden'] = item.get('hidden', '').strip().lower() in {
                 '1', 'true', 'yes', 'hidden'
             }
-            
+
             # Clean up unit field
             unit = item.get('unit', '')
             if unit in (',,', ',') or '\ufffd' in unit:
                 item['unit'] = ''
             if '\ufffd' in item.get('packing', ''):
                 item['packing'] = ''
-                
+
             ref = item.get('image_ref', '').strip()
             if ref and '.' in ref and '.' in item.get('sr_number', ''):
                 if ref.split('.')[0] != item['sr_number'].split('.')[0]:
                     ref = ''
                     item['image_ref'] = ''
             item['image_path'] = find_image(ref, IMAGES_DIR)
-            
+
             items.append(item)
+    else:
+        with open(path, 'r', encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            required_fields = {
+                'sr_number', 'category', 'item_name', 'hsn_code', 'list_price',
+                'unit', 'packing', 'image_ref', 'page'
+            }
+            missing_fields = required_fields - set(reader.fieldnames or [])
+            if missing_fields:
+                raise ValueError(f"Catalog CSV is missing columns: {', '.join(sorted(missing_fields))}")
+
+            for row in reader:
+                # Clean up data
+                item = {}
+                for key, val in row.items():
+                    item[key] = val.strip() if val else ''
+
+                if not item.get('sr_number') or not item.get('sr_number', '').strip():
+                    continue
+
+                item['hidden'] = item.get('hidden', '').strip().lower() in {
+                    '1', 'true', 'yes', 'hidden'
+                }
+
+                # Clean up unit field
+                unit = item.get('unit', '')
+                if unit in (',,', ',') or '\ufffd' in unit:
+                    item['unit'] = ''
+                if '\ufffd' in item.get('packing', ''):
+                    item['packing'] = ''
+
+                ref = item.get('image_ref', '').strip()
+                if ref and '.' in ref and '.' in item.get('sr_number', ''):
+                    if ref.split('.')[0] != item['sr_number'].split('.')[0]:
+                        ref = ''
+                        item['image_ref'] = ''
+                item['image_path'] = find_image(ref, IMAGES_DIR)
+
+                items.append(item)
 
     validate_catalog_data(items)
     notes = load_catalog_data_notes(items)
@@ -457,8 +521,22 @@ def build_search_catalog(config, categories, items, env):
     catalog_version = compute_catalog_version()
 
     client_data = []
+    client_xlsx = Path('data/client_data.xlsx')
     client_csv = Path('data/client_data.csv')
-    if client_csv.is_file():
+    if client_xlsx.is_file():
+        import openpyxl
+        cwb = openpyxl.load_workbook(client_xlsx, data_only=True)
+        cws = cwb.active
+        crows = list(cws.iter_rows(values_only=True))
+        if crows:
+            cfields = [str(c).strip() for c in crows[0] if c is not None]
+            for cr in crows[1:]:
+                if any(v is not None and str(v).strip() for v in cr):
+                    client_data.append({
+                        cfields[idx]: str(cr[idx]).strip() if idx < len(cr) and cr[idx] is not None else ''
+                        for idx in range(len(cfields))
+                    })
+    elif client_csv.is_file():
         with open(client_csv, 'r', encoding='utf-8') as cf:
             reader = csv.DictReader(cf)
             client_data = list(reader)

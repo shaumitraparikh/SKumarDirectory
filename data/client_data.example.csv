@@ -1,0 +1,3 @@
+client_id,name,business_name,phone,email,address,state,pincode,gstin
+EXAMPLE01,Example Customer,Example Trading Co.,9869900000,example@example.com,"12 Sample Street, Mumbai",Maharashtra,400001,27AAAAA0000A1Z5
+EXAMPLE02,Second Sample,Sample Electricals,9821300000,,,"5 Demo Road",Maharashtra,400002,27BBBBB0000B1Z5
