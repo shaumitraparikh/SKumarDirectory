@@ -119,15 +119,17 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8766 ^| findstr LISTENING') 
     taskkill /F /PID %%a >nul 2>&1
 )
 
-REM Start new server in background and record PID
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$proc = Start-Process -FilePath '%PYTHON_EXE%' -ArgumentList 'src\seller\local_seller.py' -WorkingDirectory '%REPO_DIR%' -RedirectStandardOutput 'server.log' -RedirectStandardError 'server.err.log' -WindowStyle Hidden -PassThru; $proc.Id | Out-File -FilePath 'server.pid' -Encoding ascii"
+REM Start new server in background and record output to server.log
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$psi = New-Object System.Diagnostics.ProcessStartInfo; $psi.FileName = 'cmd.exe'; $psi.Arguments = '/c """%PYTHON_EXE%"" -u src\seller\local_seller.py > server.log 2>&1'; $psi.WindowStyle = 'Hidden'; $psi.CreateNoWindow = $true; [System.Diagnostics.Process]::Start($psi) | Out-Null"
 
 REM Allow brief startup time to initialize socket (portable delay)
-ping 127.0.0.1 -n 2 >nul
+ping 127.0.0.1 -n 3 >nul
 
+REM Record listening PID to server.pid
 set "SERVER_PID="
-if exist "server.pid" (
-    for /f "usebackq delims=" %%p in ("server.pid") do set "SERVER_PID=%%p"
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8766 ^| findstr LISTENING') do (
+    set "SERVER_PID=%%a"
+    echo %%a> "server.pid"
 )
 
 if defined SERVER_PID (
