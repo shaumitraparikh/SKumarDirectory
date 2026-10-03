@@ -16,7 +16,7 @@ const CORE_ASSETS = [
     'app/assets/js/client_directory_core.js',
     'app/assets/js/bill_archive.js',
     'data/config.json',
-    'data/catalog_data.xlsx'
+    'data/catalog_data.csv'
 ];
 
 self.addEventListener('install', event => {

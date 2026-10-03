@@ -13,7 +13,7 @@ from src import build_catalog
 class CatalogDataTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.items = build_catalog.load_csv_data(CATALOG_ROOT / "data" / "catalog_data.xlsx")
+        cls.items = build_catalog.load_csv_data(CATALOG_ROOT / "data" / "catalog_data.csv")
         cls.by_serial = {item["sr_number"]: item for item in cls.items}
 
     def test_serial_and_hierarchical_numbers_are_unique_and_positive(self):

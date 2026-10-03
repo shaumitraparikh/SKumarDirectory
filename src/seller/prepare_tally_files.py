@@ -140,11 +140,14 @@ def available_months() -> list:
     if not BILLS_DIR.is_dir():
         return []
     pattern = re.compile(r"\d{4}-\d{2}")
-    found = set()
-    for p in BILLS_DIR.iterdir():
-        if p.suffix in (".xlsx", ".csv") and pattern.fullmatch(p.stem):
-            found.add(p.stem)
-    return sorted(found)
+    months = set()
+    for p in BILLS_DIR.glob("*.xlsx"):
+        if pattern.fullmatch(p.stem):
+            months.add(p.stem)
+    for p in BILLS_DIR.glob("*.csv"):
+        if pattern.fullmatch(p.stem):
+            months.add(p.stem)
+    return sorted(months)
 
 
 # ---------------------------------------------------------------------------
@@ -177,13 +180,14 @@ def read_bills(months: list) -> list:
             ws = wb.active
             all_rows = list(ws.iter_rows(values_only=True))
             if all_rows:
-                fields = [str(c).strip() for c in all_rows[0] if c is not None]
+                headers = [str(c).strip() if c is not None else "" for c in all_rows[0]]
                 for r in all_rows[1:]:
-                    if any(v is not None and str(v).strip() for v in r):
-                        rows.append({
-                            fields[i]: str(r[i]).strip() if i < len(r) and r[i] is not None else ""
-                            for i in range(len(fields))
-                        })
+                    if not any(v is not None and str(v).strip() for v in r):
+                        continue
+                    rows.append({
+                        headers[i]: str(r[i]).strip() if i < len(r) and r[i] is not None else ""
+                        for i in range(len(headers))
+                    })
         elif csv_path.exists():
             with csv_path.open(encoding="utf-8-sig", newline="") as handle:
                 rows = list(csv.DictReader(handle))
@@ -196,6 +200,7 @@ def read_bills(months: list) -> list:
                 order = json.loads(raw)
             except json.JSONDecodeError:
                 continue
+            # Older registers carried the org only as a column.
             order.setdefault("org", row.get("org") or "skumar")
             order.setdefault("order_reference", row.get("id") or "")
             order.setdefault("created_at", row.get("createdAt") or "")

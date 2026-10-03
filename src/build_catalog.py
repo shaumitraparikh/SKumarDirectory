@@ -60,7 +60,7 @@ def load_config():
 
 
 def load_catalog_data(data_path):
-    """Load product data from XLSX workbook."""
+    """Load product data from XLSX or CSV."""
     path = Path(data_path)
     if not path.exists():
         if path.suffix == ".csv" and path.with_suffix(".xlsx").exists():
@@ -101,14 +101,13 @@ def load_catalog_data(data_path):
                 else:
                     item[key] = str(val).strip()
 
-            if not item.get('sr_number') or not item.get('sr_number', '').strip():
+            if not item.get('sr_number'):
                 continue
 
             item['hidden'] = item.get('hidden', '').strip().lower() in {
                 '1', 'true', 'yes', 'hidden'
             }
 
-            # Clean up unit field
             unit = item.get('unit', '')
             if unit in (',,', ',') or '\ufffd' in unit:
                 item['unit'] = ''
@@ -116,10 +115,6 @@ def load_catalog_data(data_path):
                 item['packing'] = ''
 
             ref = item.get('image_ref', '').strip()
-            if ref and '.' in ref and '.' in item.get('sr_number', ''):
-                if ref.split('.')[0] != item['sr_number'].split('.')[0]:
-                    ref = ''
-                    item['image_ref'] = ''
             item['image_path'] = find_image(ref, IMAGES_DIR)
 
             items.append(item)
@@ -153,10 +148,6 @@ def load_catalog_data(data_path):
                     item['packing'] = ''
 
                 ref = item.get('image_ref', '').strip()
-                if ref and '.' in ref and '.' in item.get('sr_number', ''):
-                    if ref.split('.')[0] != item['sr_number'].split('.')[0]:
-                        ref = ''
-                        item['image_ref'] = ''
                 item['image_path'] = find_image(ref, IMAGES_DIR)
 
                 items.append(item)
@@ -221,6 +212,27 @@ def validate_catalog_data(items):
 
     if len(serials) != len(set(serials)):
         raise ValueError("Catalog serial numbers must be unique.")
+
+
+def sync_image_serial_map(items, output_path=None):
+    """Derive and persist image_serial_map directly from catalog items."""
+    if output_path is None:
+        output_path = SCRIPT_DIR / "data" / "image_serial_map.json"
+    image_map = {}
+    for item in items:
+        ref = (item.get('image_ref') or '').strip()
+        if ref:
+            image_map.setdefault(ref, [])
+            if item['sr_number'] not in image_map[ref]:
+                image_map[ref].append(item['sr_number'])
+    if IMAGES_DIR.exists():
+        for p in IMAGES_DIR.glob('*.*'):
+            if p.is_file() and p.stem not in image_map:
+                image_map[p.stem] = []
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(image_map, f, indent=2, sort_keys=True)
+    return image_map
 
 
 def find_image(image_ref, images_dir):
@@ -520,20 +532,11 @@ def build_search_catalog(config, categories, items, env):
     catalog_version = compute_catalog_version()
 
     client_data = []
-    client_xlsx = Path('data/client_data.xlsx')
-    if client_xlsx.is_file():
-        import openpyxl
-        cwb = openpyxl.load_workbook(client_xlsx, data_only=True)
-        cws = cwb.active
-        crows = list(cws.iter_rows(values_only=True))
-        if crows:
-            cfields = [str(c).strip() for c in crows[0] if c is not None]
-            for cr in crows[1:]:
-                if any(v is not None and str(v).strip() for v in cr):
-                    client_data.append({
-                        cfields[idx]: str(cr[idx]).strip() if idx < len(cr) and cr[idx] is not None else ''
-                        for idx in range(len(cfields))
-                    })
+    client_csv = Path('data/client_data.csv')
+    if client_csv.is_file():
+        with open(client_csv, 'r', encoding='utf-8') as cf:
+            reader = csv.DictReader(cf)
+            client_data = list(reader)
 
     saved_bills = load_saved_bills()
 
@@ -683,6 +686,7 @@ def main():
     # Load data
     print("\n2. Loading product data...")
     items = load_csv_data(DATA_FILE)
+    sync_image_serial_map(items)
     active_items = visible_catalog_items(items)
     print(f"   Loaded {len(items)} items ({len(active_items)} visible; {len(items) - len(active_items)} hidden)")
     

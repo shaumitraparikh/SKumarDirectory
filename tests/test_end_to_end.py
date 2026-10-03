@@ -55,15 +55,19 @@ class CatalogEndToEndTests(unittest.TestCase):
         import openpyxl
         wb = openpyxl.load_workbook(CATALOG_ROOT / "data" / "catalog_data.xlsx", data_only=True)
         ws = wb.active
-        all_rows = list(ws.iter_rows(values_only=True))
-        cls.csv_fields = [str(c).strip() for c in all_rows[0] if c is not None]
+        headers = [str(c.value).strip() if c.value is not None else "" for c in ws[1]]
+        cls.csv_fields = headers
         cls.csv_rows = []
-        for r in all_rows[1:]:
-            if any(v is not None and str(v).strip() for v in r):
-                cls.csv_rows.append({
-                    cls.csv_fields[i]: str(r[i]).strip() if i < len(r) and r[i] is not None else ""
-                    for i in range(len(cls.csv_fields))
-                })
+        for row in ws.iter_rows(min_row=2, values_only=True):
+            if not any(row):
+                continue
+            item = {}
+            for col_idx, h in enumerate(headers):
+                if not h:
+                    continue
+                val = row[col_idx] if col_idx < len(row) else ""
+                item[h] = "" if val is None else str(val).strip()
+            cls.csv_rows.append(item)
         cls.products_by_serial = {row["sr_number"]: row for row in cls.csv_rows}
 
     def test_full_catalog_build_runs_from_outside_repository(self):
@@ -121,8 +125,8 @@ class CatalogEndToEndTests(unittest.TestCase):
         self.assertIn('id="billArchiveDialog"', search_html)
         self.assertIn('id="openBillsButton"', search_html)
         self.assertIn("window.INJECTED_CLIENT_DATA =", search_html)
-        self.assertNotIn('src="data/client_data.xlsx"', search_html)
-        self.assertNotIn("href=\"data/client_data.xlsx\"", search_html)
+        self.assertNotIn('src="data/client_data', search_html)
+        self.assertNotIn('href="data/client_data', search_html)
     def test_hidden_catalog_items_are_excluded_from_customer_output(self):
         self.assertIn("hidden", self.csv_fields)
         rows = [

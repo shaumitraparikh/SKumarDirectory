@@ -100,16 +100,19 @@ def _make_order(
 # ── fixtures ──────────────────────────────────────────────────────────────────
 @pytest.fixture()
 def isolated_bills_dir(tmp_path, monkeypatch):
-    """Redirect BILLS_DIR and ESTIMATES_DIR inside local_seller to tmp_path."""
+    """Redirect BILLS_DIR, ESTIMATES_DIR, and GENERATED_BILLS_DIR inside local_seller to tmp_path."""
     bills_dir     = tmp_path / "data" / "bills"
     estimates_dir = tmp_path / "data" / "estimates"
+    gen_dir       = tmp_path / "data" / "generated_bills"
     bills_dir.mkdir(parents=True)
     estimates_dir.mkdir(parents=True)
+    gen_dir.mkdir(parents=True)
 
     import src.seller.local_seller as ls
-    monkeypatch.setattr(ls, "BILLS_DIR",     bills_dir)
-    monkeypatch.setattr(ls, "ESTIMATES_DIR", estimates_dir)
-    return {"bills": bills_dir, "estimates": estimates_dir}
+    monkeypatch.setattr(ls, "BILLS_DIR",           bills_dir)
+    monkeypatch.setattr(ls, "ESTIMATES_DIR",       estimates_dir)
+    monkeypatch.setattr(ls, "GENERATED_BILLS_DIR", gen_dir)
+    return {"bills": bills_dir, "estimates": estimates_dir, "generated_bills": gen_dir}
 
 
 @pytest.fixture()
@@ -117,8 +120,8 @@ def one_saved_bill(isolated_bills_dir):
     """Append one normal (non-estimate) bill and return the dirs + order."""
     import src.seller.local_seller as ls
     order = _make_order()
-    ls.append_bill(order)
-    return {**isolated_bills_dir, "order": order}
+    saved = ls.append_bill(order)
+    return {**isolated_bills_dir, "order": order, "saved": saved}
 
 
 def _read_xlsx_rows(path):
@@ -139,14 +142,23 @@ def _read_xlsx_rows(path):
     return rows
 
 
-# ── Component 1: bill is persisted to XLSX ──────────────────────────────────────
-class TestBillSavedToCSV:
-    def test_append_bill_creates_monthly_csv(self, one_saved_bill):
+# ── Component 1: bill is persisted to XLSX and generated_bills ────────────────
+class TestBillSaved:
+    def test_append_bill_creates_monthly_xlsx(self, one_saved_bill):
         month = "2026-10"
         xlsx_file = one_saved_bill["bills"] / f"{month}.xlsx"
         assert xlsx_file.exists(), f"Expected {xlsx_file} to exist after append_bill()"
 
-    def test_csv_has_correct_fields(self, one_saved_bill):
+    def test_append_bill_creates_generated_html_bill(self, one_saved_bill):
+        month = "2026-10"
+        bill_id = one_saved_bill["saved"]["id"]
+        html_file = one_saved_bill["generated_bills"] / month / f"{bill_id}.html"
+        assert html_file.exists(), f"Expected {html_file} to exist after append_bill()"
+        content = html_file.read_text(encoding="utf-8")
+        assert bill_id in content
+        assert "Test Customer" in content
+
+    def test_xlsx_has_correct_fields(self, one_saved_bill):
         xlsx_file = one_saved_bill["bills"] / "2026-10.xlsx"
         rows = _read_xlsx_rows(xlsx_file)
         assert len(rows) == 1
@@ -156,7 +168,7 @@ class TestBillSavedToCSV:
         assert row["buyer_name"] == "Test Customer"
         assert float(row["subTotal"]) == pytest.approx(1000.0)
 
-    def test_csv_embeds_full_order_json(self, one_saved_bill):
+    def test_xlsx_embeds_full_order_json(self, one_saved_bill):
         xlsx_file = one_saved_bill["bills"] / "2026-10.xlsx"
         rows = _read_xlsx_rows(xlsx_file)
         order_json = json.loads(rows[0]["order_json"])
@@ -173,7 +185,7 @@ class TestBillSavedToCSV:
         assert est_file.exists(), "Estimate must land in estimates/"
         assert not bill_file.exists(), "Estimate must NOT appear in bills/"
 
-    def test_duplicate_bill_id_is_appended_twice(self, isolated_bills_dir):
+    def test_duplicate_bill_id_is_deduplicated(self, isolated_bills_dir):
         """Server deduplicates bills by ID — same order saved twice produces 1 row."""
         import src.seller.local_seller as ls
         order = _make_order()
@@ -181,11 +193,7 @@ class TestBillSavedToCSV:
         ls.append_bill(order)  # second save of same order
         xlsx_file = isolated_bills_dir["bills"] / "2026-10.xlsx"
         rows = _read_xlsx_rows(xlsx_file)
-        # Server assigns sequential IDs; same order saved twice gets same auto-ID
-        # and the second write updates the existing row (dedup by ID)
-        assert len(rows) in (1, 2), (
-            f"Expected 1 or 2 rows, got {len(rows)}"
-        )
+        assert len(rows) == 1, f"Expected 1 row after deduplication, got {len(rows)}"
 
 
 # ── Component 2: prepare_tally_files generates correct DayBook ────────────────
