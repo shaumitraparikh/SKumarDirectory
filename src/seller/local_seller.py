@@ -89,11 +89,13 @@ def append_client(new_client):
     ws.title = "Clients"
     for c_idx, field in enumerate(fieldnames, 1):
         cell = ws.cell(row=1, column=c_idx, value=field)
+        cell.data_type = 's'
         cell.number_format = '@'
     for r_idx, c in enumerate(clients, 2):
         for c_idx, field in enumerate(fieldnames, 1):
             val = str(c.get(field, '') or '').strip()
             cell = ws.cell(row=r_idx, column=c_idx, value=val)
+            cell.data_type = 's'
             cell.number_format = '@'
 
     temp_xlsx = CLIENT_FILE.parent / f".client_data-{os.getpid()}.tmp.xlsx"
@@ -198,11 +200,13 @@ def append_bill(order):
     ws.title = month[:31]
     for c_idx, field in enumerate(fieldnames, 1):
         cell = ws.cell(row=1, column=c_idx, value=field)
+        cell.data_type = 's'
         cell.number_format = '@'
     for r_idx, r_data in enumerate(existing_rows, 2):
         for c_idx, field in enumerate(fieldnames, 1):
             val = str(r_data.get(field, '') or '').strip()
             cell = ws.cell(row=r_idx, column=c_idx, value=val)
+            cell.data_type = 's'
             cell.number_format = '@'
     
     temp_xlsx = target_dir / f".{month}-{os.getpid()}.tmp.xlsx"
@@ -347,11 +351,13 @@ def write_catalog(fields, rows):
         ws.title = "Catalog"
         for c_idx, field in enumerate(fields, 1):
             cell = ws.cell(row=1, column=c_idx, value=field)
+            cell.data_type = 's'
             cell.number_format = '@'
         for r_idx, row in enumerate(rows, 2):
             for c_idx, field in enumerate(fields, 1):
                 val = str(row.get(field, "") or "").strip()
                 cell = ws.cell(row=r_idx, column=c_idx, value=val)
+                cell.data_type = 's'
                 cell.number_format = '@'
 
         temp_xlsx = DATA_FILE.parent / f".catalog_data-{os.getpid()}.tmp.xlsx"
