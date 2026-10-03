@@ -2068,6 +2068,13 @@ function archiveCurrentBill(date) {
                 body: JSON.stringify(order)
             }).then(r => r.json()).then(res => {
                 if (res.success) {
+                    // Automatically trigger Tally/GST preparation in the background
+                    fetch("/api/gst/prepare", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ month: res.added.createdAt.substring(0, 7) })
+                    }).catch(e => console.warn("Background GST prep failed:", e));
+                    
                     return { storage: "server", entry: { fileName: res.added.id + ".html", month: res.added.createdAt.substring(0, 7) } };
                 }
                 return billArchive.saveBill({ date, reference, html });
@@ -2385,7 +2392,26 @@ function applyViewModeCart() {
   const quoteBtn = document.getElementById("printQuoteBtn");
   if (quoteBtn) quoteBtn.style.marginTop = "0";
   const note = document.getElementById("viewModeCartNote");
-  if (note) note.hidden = false;
+  if (note) {
+    note.hidden = false;
+    note.innerHTML = 'ℹ️ <strong>View mode:</strong> This creates a temporary inquiry list. It is not an official bill and is not sent to the shop automatically.';
+  }
+
+  // Remove seller-only and extra elements so the customer only sees items and Print to PDF
+  const removeIds = [
+    "saveBillBtnWrap", 
+    "shareWhatsAppBtn", 
+    "clearCartButton", 
+    "savedBillsSection",
+    "buyerDetailsCard"
+  ];
+  removeIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const pubBox = document.getElementById("publicNameBox");
+  if (pubBox) pubBox.style.display = "block";
 }
 
 // Read initial URL params

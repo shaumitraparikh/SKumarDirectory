@@ -147,16 +147,25 @@ def append_bill(order):
     }
     
     
-    # Read existing to prevent duplicates
-    for existing_row in existing_rows:
+    # Update if exists, else append
+    found = False
+    for i, existing_row in enumerate(existing_rows):
         if existing_row.get('id') == row['id']:
-            return row  # Already exists
+            existing_rows[i] = row
+            found = True
+            break
             
-    with csv_file.open(mode="a", encoding="utf-8-sig", newline="") as dest:
-        writer = csv.DictWriter(dest, fieldnames=fieldnames)
-        if not file_exists:
+    if found:
+        with csv_file.open(mode="w", encoding="utf-8-sig", newline="") as dest:
+            writer = csv.DictWriter(dest, fieldnames=fieldnames)
             writer.writeheader()
-        writer.writerow(row)
+            writer.writerows(existing_rows)
+    else:
+        with csv_file.open(mode="a", encoding="utf-8-sig", newline="") as dest:
+            writer = csv.DictWriter(dest, fieldnames=fieldnames)
+            if not file_exists:
+                writer.writeheader()
+            writer.writerow(row)
         
     html_payload = order.get('html')
     if html_payload:
