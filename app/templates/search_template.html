@@ -45,8 +45,8 @@
               "#buyerDetailsCard," +
               /* Tax rate inputs row */
               ".tax-settings-card," +
-              "/* Hide tax rows and clear cart from public */
-              \".tax-row, #clearCartButton { display: none !important; }" +
+              /* Hide tax rows and clear cart from public */
+              ".tax-row, #clearCartButton," +
               /* Saved bills archive */
               "#savedBillsSection" +
               " { display: none !important; }" +
@@ -867,24 +867,8 @@
             </div>
 
             <div class="checkout-actions-group">
-              <span id="saveBillBtnWrap">
-                <button
-                  class="print-btn"
-                  type="button"
-                  onclick="saveBillRequest()"
-                >
-                  <span>💾 Save Proforma Bill</span>
-                </button>
-              </span>
-              <button
-                class="print-btn"
-                id="shareWhatsAppBtn"
-                type="button"
-                onclick="shareOrderMobile()"
-                style="margin-top: 8px; background: #25d366; border-color: #128c7e; color: #fff;"
-              >
-                <span>💬 Send via WhatsApp</span>
-              </button>
+              
+              
               <button
                 class="print-btn"
                 id="printQuoteBtn"
