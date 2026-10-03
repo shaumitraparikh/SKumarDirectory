@@ -45,6 +45,8 @@
               "#buyerDetailsCard," +
               /* Tax rate inputs row */
               ".tax-settings-card," +
+              "/* Hide tax rows and clear cart from public */
+              \".tax-row, #clearCartButton { display: none !important; }" +
               /* Saved bills archive */
               "#savedBillsSection" +
               " { display: none !important; }" +
@@ -72,7 +74,7 @@
     />
     <link rel="apple-touch-icon" href="app/assets/icons/apple-touch-icon.png" />
     <link rel="manifest" href="app/site.webmanifest" />
-    <link rel="stylesheet" href="app/assets/css/search_catalog.css" />
+    <link rel="stylesheet" href="app/assets/css/search_catalog.css?v=5b026d1787" />
     <link
       rel="stylesheet"
       href="src/seller/seller_editor.css"
@@ -81,7 +83,7 @@
     />
   </head>
   <body data-catalog-version="5b026d1787">
-    <div class="super-sticky-wrapper" style="position: sticky; top: 0; display: flex; flex-direction: column; background: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+    <div class="super-sticky-wrapper" style="position: sticky; top: 0; z-index: 1000; display: flex; flex-direction: column; background: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
     <section
       class="seller-tools"
       id="sellerTools"

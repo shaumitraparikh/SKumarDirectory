@@ -281,8 +281,8 @@ def validate_rows(fields, rows):
     allowed_fields = set(fields)
     cleaned = []
     for row in rows:
-        if set(row) != allowed_fields:
-            raise ValueError("Each product must contain exactly the catalog's current fields.")
+        # We allow extra frontend-only fields (like display_image_path) to be present,
+        # but we only save the fields that belong in the catalog CSV.
         item = {field: str(row.get(field, "")).strip() for field in fields}
         if item.get("hidden", "").lower() not in {"", "0", "1", "true", "false", "yes", "no"}:
             raise ValueError(f"Invalid hidden flag for sr_number {item.get('sr_number', '')}.")
