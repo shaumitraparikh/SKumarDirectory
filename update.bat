@@ -119,8 +119,8 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8766 ^| findstr LISTENING') 
     taskkill /F /PID %%a >nul 2>&1
 )
 
-REM Start new server in background and record output to server.log
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$psi = New-Object System.Diagnostics.ProcessStartInfo; $psi.FileName = 'cmd.exe'; $psi.Arguments = '/c """%PYTHON_EXE%"" -u src\seller\local_seller.py > server.log 2>&1'; $psi.WindowStyle = 'Hidden'; $psi.CreateNoWindow = $true; $null = [System.Diagnostics.Process]::Start($psi)"
+REM Start new server minimized in background and record output
+start "SKumar Local Seller" /min cmd /c ""%PYTHON_EXE%" src\seller\local_seller.py > server.log 2>&1"
 
 REM Allow brief startup time to initialize socket (portable delay)
 ping 127.0.0.1 -n 3 >nul
