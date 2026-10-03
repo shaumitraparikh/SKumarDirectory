@@ -45,6 +45,8 @@
               "#buyerDetailsCard," +
               /* Tax rate inputs row */
               ".tax-settings-card," +
+              "/* Hide tax rows and clear cart from public */
+              \".tax-row, #clearCartButton { display: none !important; }" +
               /* Saved bills archive */
               "#savedBillsSection" +
               " { display: none !important; }" +
@@ -72,7 +74,7 @@
     />
     <link rel="apple-touch-icon" href="app/assets/icons/apple-touch-icon.png" />
     <link rel="manifest" href="app/site.webmanifest" />
-    <link rel="stylesheet" href="app/assets/css/search_catalog.css" />
+    <link rel="stylesheet" href="app/assets/css/search_catalog.css?v=46744d4f4a" />
     <link
       rel="stylesheet"
       href="src/seller/seller_editor.css"
@@ -2070,7 +2072,6 @@
           <img
             id="lightboxImg"
             class="product-zoom-img"
-            src=""
             alt="Product image"
           />
           <div

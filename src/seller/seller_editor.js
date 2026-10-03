@@ -118,7 +118,7 @@
                 image.alt = row.image_is_representative ? 'Representative image for ' + row.category : row.item_name;
                 image.loading = 'lazy';
                 image.style.cursor = 'zoom-in';
-                image.onclick = function() { window.openLightbox && window.openLightbox(image.src); };
+                image.onclick = function() { window.openLightbox && window.openLightbox(row.sr_number); };
                 imageContainer.appendChild(image);
             } else {
                 textElement(imageContainer, 'span', '', 'No image');
@@ -277,7 +277,7 @@
                 }
             });
             // Clear cached image if the explicit image ID changed, or if it was a category default and they changed categories
-            if (updated.image !== oldRow.image || (oldRow.image_is_representative && updated.category !== oldRow.category)) {
+            if ((updated.image || "") !== (oldRow.image || "") || (oldRow.image_is_representative && (updated.category || "") !== (oldRow.category || ""))) {
                 updated.display_image_path = '';
             }
             rows[index] = updated;
