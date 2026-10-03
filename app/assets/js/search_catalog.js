@@ -2318,12 +2318,16 @@ function generateBill(options = {}) {
   try {
     archiveCurrentBill(now)
       .then((result) => {
-        const message =
-          result.storage === "folder"
-            ? `Saved ${result.entry.fileName} in generated_bills/${result.entry.month}/.`
-            : result.storage === "browser"
-              ? `Saved ${result.entry.fileName} in this browser and downloaded a copy.`
-              : `Downloaded ${result.entry.fileName}; browser storage is unavailable.`;
+        let message;
+        if (result.storage === "server") {
+          message = `Saved ${result.entry.fileName} locally in data/generated_bills/${result.entry.month}/.`;
+        } else if (result.storage === "folder") {
+          message = `Saved ${result.entry.fileName} in generated_bills/${result.entry.month}/.`;
+        } else if (result.storage === "browser") {
+          message = `Saved ${result.entry.fileName} in this browser and downloaded a copy.`;
+        } else {
+          message = `Downloaded ${result.entry.fileName}; browser storage is unavailable.`;
+        }
         document.getElementById("billArchiveStatus").textContent = message;
         showToast(message);
         finishWithoutPrint();
