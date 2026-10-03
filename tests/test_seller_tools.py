@@ -73,6 +73,17 @@ class SellerEditorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "non-negative"):
             seller.update_catalog(rows, revision)
 
+    def test_file_watcher_snapshot_and_status(self):
+        snapshot = seller.get_watched_snapshot()
+        self.assertIsInstance(snapshot, dict)
+        self.assertTrue(len(snapshot) > 0)
+        self.assertIn(str(seller.ROOT / "data" / "catalog_data.xlsx"), snapshot)
+
+        # Verify notify_api_save updates timestamp
+        before = seller._last_api_save_time
+        seller.notify_api_save()
+        self.assertGreaterEqual(seller._last_api_save_time, before)
+
     def test_local_service_is_loopback_only(self):
         self.assertEqual(seller.HOST, "127.0.0.1")
         source = (ROOT / "src" / "seller" / "local_seller.py").read_text(encoding="utf-8")

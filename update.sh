@@ -45,7 +45,10 @@ echo ""
 
 if [ "$LOCAL_ONLY" = false ]; then
     echo "Pulling latest changes..."
-    git pull origin main
+    git restore index.html photo_catalog.html print_catalog.html 2>/dev/null || true
+    if ! git pull origin main; then
+        echo "WARNING: Git pull encountered an issue. Proceeding with local rebuild..."
+    fi
 fi
 
 echo "Rebuilding the catalogs from the current Excel data, templates, and images..."
@@ -79,8 +82,16 @@ python3 src/seller/local_seller.py > server.log 2>&1 &
 echo $! > server.pid
 echo "Server started (PID $(cat server.pid))."
 
+# Open browser if desktop environment has 'open' (macOS) or 'xdg-open' (Linux)
+if command -v open >/dev/null 2>&1; then
+    open "http://127.0.0.1:8766/?edit=true" 2>/dev/null || true
+elif command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "http://127.0.0.1:8766/?edit=true" 2>/dev/null || true
+fi
+
 echo ""
 echo "======================================================="
 echo "  UPDATE COMPLETE!"
 echo "  The app is running at: http://127.0.0.1:8766/?edit=true"
+echo "  File watcher active: autoruns rebuilds on data changes"
 echo "======================================================="

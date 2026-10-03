@@ -9,6 +9,8 @@ import os
 import subprocess
 import sys
 import tempfile
+import threading
+import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -437,8 +439,8 @@ def validate_rows(fields, rows):
     cleaned = []
     for row in rows:
         # We allow extra frontend-only fields (like display_image_path) to be present,
-        # but we only save the fields that belong in the catalog.
-        item = {field: "" if row.get(field) is None else str(row.get(field)).strip() for field in fields}
+        # but we only save the fields that belong in the catalog CSV.
+        item = {field: str(row.get(field, "")).strip() for field in fields}
         if item.get("hidden", "").lower() not in {"", "0", "1", "true", "false", "yes", "no"}:
             raise ValueError(f"Invalid hidden flag for sr_number {item.get('sr_number', '')}.")
         item["hidden"] = "true" if item["hidden"].lower() in {"1", "true", "yes"} else ""
@@ -480,24 +482,130 @@ def undo_catalog(expected_revision):
     return new_fields, new_rows, new_revision
 
 
+_updater_lock = threading.Lock()
+_last_api_save_time = 0.0
+_last_rebuild_time = time.time()
+_watcher_running = False
+
+
+def notify_api_save():
+    global _last_api_save_time, _last_rebuild_time
+    _last_api_save_time = time.time()
+    _last_rebuild_time = time.time()
+
+
+def get_watched_snapshot():
+    """Collect modification timestamps of watched data, template, and asset paths."""
+    snapshot = {}
+    paths_to_check = [
+        ROOT / "data" / "catalog_data.xlsx",
+        ROOT / "data" / "catalog_data.csv",
+        ROOT / "data" / "client_data.xlsx",
+        ROOT / "data" / "client_data.csv",
+        ROOT / "data" / "config.json",
+        ROOT / "data" / "catalog_data_notes.json",
+    ]
+    for p in paths_to_check:
+        try:
+            if p.exists():
+                snapshot[str(p)] = p.stat().st_mtime_ns
+        except OSError:
+            pass
+
+    templates_dir = ROOT / "app" / "templates"
+    if templates_dir.is_dir():
+        try:
+            for item in templates_dir.iterdir():
+                if item.is_file() and item.suffix in (".html", ".j2"):
+                    snapshot[str(item)] = item.stat().st_mtime_ns
+        except OSError:
+            pass
+
+    assets_dir = ROOT / "app" / "assets"
+    if assets_dir.is_dir():
+        try:
+            for sub in ("css", "js"):
+                d = assets_dir / sub
+                if d.is_dir():
+                    for item in d.iterdir():
+                        if item.is_file():
+                            snapshot[str(item)] = item.stat().st_mtime_ns
+        except OSError:
+            pass
+
+    images_dir = ROOT / "images"
+    if images_dir.is_dir():
+        try:
+            snapshot["images_count"] = len(list(images_dir.glob("*.*")))
+        except OSError:
+            pass
+
+    return snapshot
+
+
+def start_file_watcher(interval_seconds=1.5):
+    """Background thread that monitors watched data files and rebuilds when changed."""
+    global _watcher_running
+    if _watcher_running:
+        return
+    _watcher_running = True
+
+    def _watch_loop():
+        global _last_rebuild_time
+        last_snapshot = get_watched_snapshot()
+        while _watcher_running:
+            time.sleep(interval_seconds)
+            try:
+                # If recently saved via API, update snapshot and avoid double-building
+                if time.time() - _last_api_save_time < 3.0:
+                    last_snapshot = get_watched_snapshot()
+                    continue
+
+                current_snapshot = get_watched_snapshot()
+                if current_snapshot != last_snapshot:
+                    # Changes detected! Debounce briefly for Excel file lock / flush to complete
+                    time.sleep(1.0)
+                    current_snapshot = get_watched_snapshot()
+                    last_snapshot = current_snapshot
+
+                    # Don't trigger if API save happened during debounce
+                    if time.time() - _last_api_save_time < 3.0:
+                        continue
+
+                    print("[Watcher] Detected data file changes. Autorunning catalog update...")
+                    try:
+                        run_updater()
+                        _last_rebuild_time = time.time()
+                        print("[Watcher] Auto-rebuild complete: catalog regenerated and all tests passed.")
+                    except Exception as err:
+                        print(f"[Watcher] Auto-rebuild error: {err}")
+            except Exception:
+                pass
+
+    t = threading.Thread(target=_watch_loop, name="DataFileWatcher", daemon=True)
+    t.start()
+    print("[Watcher] Background file watcher active (watching catalog, clients, config, and templates for changes).")
+
+
 def run_updater():
     """Rebuild the pages and run the full suite after a catalog save.
 
     Cross-platform: update.sh is the documented entry point, but the seller
     server must not depend on a shell script that Windows cannot run.
     """
-    subprocess.run(
-        [sys.executable, str(ROOT / "src" / "build_catalog.py")],
-        cwd=ROOT,
-        check=True,
-    )
-    subprocess.run(
-        [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"],
-        cwd=ROOT,
-        check=True,
-    )
-    for test_file in ("order_core.test.js", "client_directory.test.js", "bill_archive.test.js"):
-        subprocess.run(["node", f"tests/{test_file}"], cwd=ROOT, check=True)
+    with _updater_lock:
+        subprocess.run(
+            [sys.executable, str(ROOT / "src" / "build_catalog.py")],
+            cwd=ROOT,
+            check=True,
+        )
+        subprocess.run(
+            [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"],
+            cwd=ROOT,
+            check=True,
+        )
+        for test_file in ("order_core.test.js", "client_directory.test.js", "bill_archive.test.js"):
+            subprocess.run(["node", f"tests/{test_file}"], cwd=ROOT, check=True)
 
 
 class SellerHandler(SimpleHTTPRequestHandler):
@@ -588,6 +696,12 @@ class SellerHandler(SimpleHTTPRequestHandler):
         if self.path == "/api/undo/status":
             self.send_json(200, {"can_undo": bool(read_history())})
             return
+        if self.path == "/api/watcher/status":
+            self.send_json(200, {
+                "watcher_active": _watcher_running,
+                "last_rebuild": _last_rebuild_time,
+            })
+            return
         if self.path == "/":
             self.path = "/index.html"
         super().do_GET()
@@ -605,10 +719,12 @@ class SellerHandler(SimpleHTTPRequestHandler):
                 raise ValueError("Request body must be between 1 byte and 10 MB.")
             payload = json.loads(self.rfile.read(content_length))
             if self.path == "/api/clients/add":
+                notify_api_save()
                 added = append_client(payload)
                 self.send_json(200, {"success": True, "added": added})
                 return
             if self.path == "/api/bills/add":
+                notify_api_save()
                 added = append_bill(payload)
                 self.send_json(200, {"success": True, "added": added})
                 return
@@ -642,6 +758,7 @@ class SellerHandler(SimpleHTTPRequestHandler):
                 return
 
             if self.path == "/api/catalog/save":
+                notify_api_save()
                 fields, rows, revision = update_catalog(payload["rows"], payload["revision"])
                 try:
                     run_updater()
@@ -661,6 +778,7 @@ class SellerHandler(SimpleHTTPRequestHandler):
                 })
                 return
             if self.path == "/api/catalog/undo":
+                notify_api_save()
                 fields, rows, revision = undo_catalog(payload["revision"])
                 try:
                     run_updater()
@@ -691,6 +809,7 @@ def main():
     server.daemon_threads = True
     print(f"Seller editor available only on this computer: http://{HOST}:{PORT}/index.html")
     print("Do not change the bind address or expose this local seller service to the network.")
+    start_file_watcher()
     try:
         server.serve_forever()
     except KeyboardInterrupt:

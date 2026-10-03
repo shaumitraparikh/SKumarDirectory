@@ -145,6 +145,7 @@ echo.
 echo =======================================================
 echo   UPDATE COMPLETE!
 echo   Opening http://127.0.0.1:8766/?edit=true in browser...
+echo   File watcher active: autoruns rebuilds on data changes
 echo =======================================================
 start "" "http://127.0.0.1:8766/?edit=true"
 echo.
